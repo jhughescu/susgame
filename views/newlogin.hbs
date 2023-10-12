@@ -1,0 +1,33 @@
+<div id='login'>
+    <p>If you have a session ID you can enter it here to join the session</p>
+    <input type='text' id='seshnum' placeholder='enter code...' value='{{value}}' oninput='validate'><button id='enter'>Join session</button>
+</div>
+<script>
+    validate = (inp) => {
+        inp.value = inp.value.replace(/[^0-9]/g, '');
+    };
+    requestSession = () => {
+        let o = {session: txt.val().replace(/ /gm, ''), player: staticID};
+        console.log('request session:');
+        console.log(o);
+        socket.emit('requestSession', o);
+    };
+    butt = $('#enter');
+    txt = $('#seshnum');
+    butt.on('click', () => {
+        requestSession();
+    });
+    txt.on('keydown', (ev) => {
+        if (ev.keyCode === '13') {
+            requestSession();
+        }
+    });
+    txt.focus();
+    if (getInitProps().autoenroll) {
+        console.log('auto enroll this');
+        let d = 1000 + (Math.random() * 2000);
+        d = 100;
+//        setTimeout(requestSession, d);
+        requestSession();
+    }
+</script>

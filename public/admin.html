@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='templates/sustemplates.js'></script>
+<!--    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>-->
+    <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/master.css'>
+</head>
+
+<body>
+    <h1>Master </h1>
+    <h2>session: <span>n/a</span></h2>
+    <p>This is the admin screen</p>
+    <p id='message'></p>
+    <div class='controls' id='controlSettings'>
+        <button id='setMax'>Set max votes</button>
+        <input id='showMax' style='width: 40px;' type='number' value='10'>
+    </div>
+    <div class='controls' id='controlSession'>
+        <button id='startSession'>Start Session</button>
+        <button id='endSession'>End Session</button>
+    </div>
+    <div class='controls' id='controlAssign'>
+        <button id='assignTeams'>Assign Teams</button>
+    </div>
+    <div class='controls' id='controlRounds'>
+        <button class='startRound' id='r1'>Start Round 1</button>
+        <button class='startRound' id='r2'>Start Round 2</button>
+    </div>
+    <br>
+    <div class='controls' id='controlDisplay'>
+        <button id='listPlayers'>List players</button>
+        <button id='showScores'>Show scores</button>
+    </div>
+    <div id='players'></div>
+
+    <div>
+        <div id='controlPanel'>
+
+        </div>
+    </div>
+
+
+    <script>
+        const socket = io();
+        const PINGBTN = `pingbtn-`;
+        const RESETBTN = `resetbtn-`;
+        const STORE_DISPLAY = 'currentDisplay';
+        let clientData = {role: 'admin'};
+        let storedGame = null;
+        let allEnrolled = null;
+        let env = null;
+        //
+        const buttonSetup = () => {
+            let b = document.getElementsByClassName('pingBtn');
+            [...b].forEach((bu) => {
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(PINGBTN, '');
+                    socket.emit('playerPing', id);
+                    console.log('playerPing', id);
+                });
+            });
+            b = document.getElementsByClassName('resetBtn');
+            [...b].forEach((bu) => {
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(RESETBTN, '');
+                    socket.emit('playerReset', id);
+                });
+            });
+        };
+        //
+        const buttonSetMax = $('#setMax');
+        const buttonStartSesh = $('#startSession');
+        const buttonEndSesh = $('#endSession');
+        const buttonsStartRound = $('.startRound');
+        const buttonAssignTeams = $('#assignTeams');
+        const buttonShowScores = $('#showScores');
+        const buttonListPlayers = $('#listPlayers');
+        //
+        const inputMax = $(`#showMax`);
+        //
+        const enableButton = (b, boo) => {
+//            console.log(b);
+            if (typeof(b) === 'string') {
+                document.querySelector(`#${b}`).disabled = !boo;
+            } else {
+                b.prop('disabled', !boo);
+//                console.log(b.attr('id'), boo);
+            }
+
+        };
+        const updateDisplay = (f) => {
+            localStorage.setItem(STORE_DISPLAY, f);
+        }
+        const setSessionButtons = (start) => {
+//            console.log(`setup session buttons, has a session started? ${start ? 'yes' : 'no'}`);
+            enableButton('endSession', start);
+            enableButton('startSession', !start);
+        };
+        const setMaxVotes = () => {
+            console.log(inputMax.val());
+            socket.emit('setMaxVotes', inputMax.val())
+        };
+        const startNewSession = () => {
+            setSessionButtons(true);
+            socket.emit('startNewSession', function (s) {
+                getGameToStore();
+            });
+        };
+        const showTeams = (t) => {
+            if (t) {
+                renderTemplate('teamview', 'controlPanel', {team: Object.values(t)});
+            }
+        };
+        const assignTeamsFunk = () => {
+            enableButton('assignTeams', false);
+//            getGameToStore();
+            socket.emit('assignTeams', (t) => {
+//                showTeams(t);
+//                console.log(`returned teams:`);
+//                console.log(t);
+                listPlayers();
+                enableRoundStart(1);
+                getGameToStore();
+            });
+        }
+        const assignTeams = () => {
+            if (allEnrolled) {
+                assignTeamsFunk();
+            } else {
+                let c = confirm('Some active players are not yet enrolled, are you sure you want to continue? (Players who enroll later will go into the Public Voices teams)');
+                if (c) {
+                    assignTeamsFunk();
+                }
+            }
+        };
+        const previewTeams = () => {
+            console.log('previewTeams');
+//            alert('previewTeams not implemented');
+            socket.emit('previewTeams', (t) => {
+                console.log(t);
+                showTeams(t);
+//                renderTemplate('teamview', 'controlPanel', {team: Object.values(t)})
+            });
+        };
+        const newSessionStarted = (o) => {
+//            let s = o.s;
+//            let s = Object.assign(o.s, {});
+            let s = o.hasOwnProperty('s') ? o.s : o;
+//            console.log('newSessionStarted');
+//            console.log(o);
+//            console.log(s);
+
+            let str = `${s.sid.substr(0, 3)} ${s.sid.substr(3, 3)} ${s.sid.substr(6)}`;
+//            console.log(str);
+            $('h2').find('span').html(str);
+            setSessionButtons(true);
+            enableButton(buttonAssignTeams, true);
+        }
+        const playerDisplay = (p, i) => {
+            var e = document.getElementById('players');
+            var s = '';
+            s += `<div class='${p.active ? 'active' : 'inactive'}'>${p.id} <button class="pingBtn" id="${PINGBTN}${p.id}">Ping</button>`;
+            s += `<button class="resetBtn" id="${RESETBTN}${p.id}">Reset</button></div>`;
+            e.innerHTML += s;
+        };
+        const clearPlayers = () => {
+            document.getElementById('players').innerHTML = ``;
+        };
+        const onPlayerConnect = (msg) => {
+            document.getElementById('message').innerHTML += `<p>player ${msg} has connected</p>`;
+            console.log('YES IT DOES');
+        };
+        const onGetPlayers = (arr) => {
+//            console.log('onGetPlayers');
+//            console.log(arr);
+            clearPlayers();
+            document.getElementById('players').innerHTML = '<b>players:</b>';
+            for (var i = 0; i < arr.length; i++) {
+                playerDisplay(arr[i], i);
+//                console.log(players);
+//                console.log(arr[i]);
+            }
+            buttonSetup();
+        };
+        const onGetPlayerIDsOld = (arr) => {
+            console.log('onGetPlayerIDs');
+            console.log(arr);
+            clearPlayers();
+            document.getElementById('players').innerHTML = '<b>players:</b>';
+            for (var i = 0; i < arr.length; i++) {
+                playerDisplay(arr[i], i);
+//                console.log(players);
+                console.log(arr[i]);
+            }
+            buttonSetup();
+        };
+        const newPlayer = (id) => {
+            socket.emit('getPlayerIDs');
+        };
+        const updateSession = () => {
+            socket.emit('updateSession');
+        };
+        const adminTerminateSession = () => {
+            socket.emit('getPlayersDetail', (d) => {
+//                console.log(d);
+                let p = 0;
+                for (var i in d) {
+//                    console.log(d[i]);
+                    p += (d[i].enrolled ? 1 : 0);
+                }
+                if (p > 0) {
+                    let conf = confirm(`Are you sure you want to end this session? There are currently ${p} enrolled players.`);
+                    if (conf) {
+                        socket.emit('adminTerminateSession');
+                    }
+//                    if (conf) {
+//                        conf = confirm('Are you REALLY sure?');
+//                        if (conf) {
+//                            socket.emit('adminTerminateSession');
+//                        }
+//                    }
+                } else {
+                    socket.emit('adminTerminateSession');
+                }
+            });
+        };
+        const terminateSession = () => {
+//            console.log('terminate the session, kill the localStorage');
+            localStorage.removeItem('susgame');
+            localStorage.clear();
+            setSessionButtons(false);
+            $('h2').find('span').html(`ended`);
+        };
+        const enableRoundStart = (n) => {
+            // Allow a given round to be triggered
+            // n is round 1, 2 etc, hence subtract one to address the array of buttons
+            enableButton($(buttonsStartRound[(n - 1)]), true);
+        };
+        const startRound = function () {
+            // NOTE do not alter this to an arrow function!
+            let id = $(this).attr('id');
+            let r = parseInt(id.replace(/[^0-9]/g, ''));
+            socket.emit('startRound', r);
+            enableButton(id, false);
+        };
+        const buttonSetupNONEED = () => {
+            let b = document.getElementsByClassName('pingBtn');
+            [...b].forEach((bu) => {
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(PINGBTN, '');
+                    socket.emit('playerPing', id);
+                    console.log('playerPing', id);
+                });
+            });
+        };
+        const updatePlayersView = (p) => {
+            renderTemplate('playerList', 'controlPanel', {players: p});
+            buttonSetup();
+        }
+        const listPlayers = () => {
+            socket.emit('getPlayersDetail', (d) => {
+                let p = Object.values(d);
+                p.forEach((pn) => {
+                    pn.stakeholderID = pn.stakeholder;
+                    pn.assigned = pn.stakeholder > -1;
+                    pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
+                });
+                updatePlayersView(p);
+                updateDisplay('listPlayers');
+            });
+        };
+        const getScoreObject = (o) => {
+            let oo = {
+                hasPV: false,
+                hasSt: false,
+                teams: []
+            };
+//            console.log(o);
+            let t = JSON.parse(JSON.stringify(env.gamedata.mainTeams));
+            if (o.round) {
+                if (o.round > 0) {
+                    let sc = o.scores[`round${o.round}`];
+                    let scPV = sc.pvVotes;
+                    let scSt = sc.stakeholderVotes;
+                    let summ = null;
+                    oo.hasPV = Boolean(scPV);
+                    oo.hasSt = Boolean(scSt);
+                    console.clear();
+                    t.forEach((v, id) => {
+                        let ot = {
+                            title: v.title,
+                            pv1: {l: '', m: 0},
+                            pv2: {l: '', m: 0},
+                            pvTotal: 0,
+                            stVote: 0,
+                            mult: 0
+                        };
+                        // PV votes
+                        if (scPV) {
+                            summ = scPV.summary;
+                            let ts = summ[`t-${id}`];
+                            if (ts.hasOwnProperty('v-5')) {
+                                // PV1
+                                ts['v-5'].l = ts['v-5'].a.toString();
+                                ot.pv1 = Object.assign(ot.pv1, ts['v-5']);
+                                ot.pvTotal += ot.pv1.m;
+                            }
+                            if (ts.hasOwnProperty('v-6')) {
+                                // PV2
+                                ts['v-6'].l = ts['v-6'].a.toString();
+                                ot.pv2 = Object.assign(ot.pv2, ts['v-6']);
+                                ot.pvTotal += ot.pv2.m;
+                            }
+
+                        }
+                        // Stakeholder votes
+                        if (scSt) {
+                            summ = scSt.summary;
+                            summ = Object.values(summ)[id];
+                            let tot = 0;
+                            Object.values(summ).forEach((v, id) => {
+                                tot += v.t;
+                            });
+                            ot.stVote = tot;
+                        }
+                        ot.mult = ot.pvTotal * ot.stVote;
+                        oo.teams.push(ot);
+                    });
+                }
+            }
+            return oo;
+        };
+        const getScoreObjectV1 = (o) => {
+            let oo = {
+                hasPV: false,
+                hasSt: false,
+                teams: []
+            };
+            let t = JSON.parse(JSON.stringify(env.gamedata.mainTeams));
+            if (o.round) {
+                if (o.round > 0) {
+                    let sc = o.scores[`round${o.round}`];
+                    let scPV = sc.pvVotes;
+                    if (scPV) {
+                        let summ = scPV.summary;
+                        oo.hasPV = true;
+                        t.forEach((v, id) => {
+                            let ot = {
+                                title: v.title,
+                                pv1: {l: '', m: 0},
+                                pv2: {l: '', m: 0}
+                            };
+                            let ts = summ[`t-${id}`];
+                            if (ts.hasOwnProperty('v-5')) {
+                                ts['v-5'].l = ts['v-5'].a.toString();
+                                ot.pv1 = Object.assign(ot.pv1, ts['v-5']);
+                            }
+                            if (ts.hasOwnProperty('v-6')) {
+                                ts['v-6'].l = ts['v-6'].a.toString();
+                                ot.pv2 = Object.assign(ot.pv2, ts['v-6']);
+                            }
+                            oo.teams.push(ot);
+                        });
+                    }
+                    let scSt = sc.stakeholderVotes;
+                    if (scSt) {
+                        let summ = scSt.summary;
+                        oo.hasSt = true;
+                        Object.values(summ).forEach((v, id) => {
+                            let tot = 0;
+                            Object.values(v).forEach((t) => {
+                                console.log(` - ${t.t}`);
+                                tot += t.t;
+                            });
+//                            oo.teams[id][`stVote`] = tot;
+                        });
+                    }
+                }
+            }
+            return oo;
+        };
+        const updateScores = (s) => {
+            console.log('HUP');
+            console.log($('#controlPanel').find('#scoreSummary'));
+            if ($('#controlPanel').find('#scoreSummary').length > 0) {
+                showScores();
+            }
+            return;
+            /*
+            console.log('hup');
+            console.log(s);
+            console.log($('#controlPanel').find('.scorePV'));
+            if ($('#controlPanel').find('.scorePV').length > 0) {
+                let o = getScoreObject(s);
+                if (o.hasPV) {
+                    renderTemplate('scores', 'controlPanel', o);
+                }
+            }
+            */
+        };
+        const showScores = () => {
+            socket.emit('getSession', (s) => {
+                if (s) {
+                    let o = getScoreObject(s);
+                    console.log('theScoreObject');
+                    console.log(o);
+                    if (o.hasPV || o.hasSt) {
+                        renderTemplate('scores', 'controlPanel', o);
+                    } else {
+                        $('#controlPanel').html('no scores found');
+                    }
+                } else {
+                    $('#controlPanel').html('no session found');
+                }
+            });
+            updateDisplay('showScores');
+        };
+        //
+        // Methods that could potentially be made universal
+        const renderTemplate = (temp, targ, o) => {
+            targ = '#' + targ;
+            let ob = Object.assign({}, o);
+            const compiledTemplate = Handlebars.templates[temp];
+            const renderedHtml = compiledTemplate(ob);
+//            console.log(renderedHtml)
+//            console.log($(targ))
+            $(targ).html('');
+            $(targ).html(renderedHtml);
+        };
+        //
+        //
+        const getStoredGame = () => {
+            storedGame = localStorage.getItem('susgame');
+            if (storedGame) {
+                storedGame = JSON.parse(storedGame);
+            }
+            return storedGame;
+        };
+        const storeGame = (g) => {
+            let sg = JSON.stringify(g);
+//            console.log(`game stored now: ${sg}`);
+            localStorage.setItem('susgame', sg);
+            console.log(`storeGame emits storedGameUpdated`);
+            socket.emit('storedGameUpdated', g);
+            listPlayers();
+        };
+        const getGameToStore = () => {
+//            console.log('storegame');
+            socket.emit('getGameMin', (g) => {
+//                console.log(`this is the only way to get the game data from the server`);
+//                console.log(`the callback, setItem susgame: ${JSON.stringify(g)} (${Object.keys(g.p).length} elements)`);
+                console.log('I got game min');
+                console.log(g);
+                console.log(g.s);
+                storeGame(g);
+            })
+        };
+        const hasStoredSession = (o) => {
+            // looks for a stored session ID in an object, return it if it exists or false if it does not
+            let hss = false;
+            if (o.hasOwnProperty('s')) {
+                if (o.s.hasOwnProperty('sid')) {
+                    // if sid exists it could either be a number/string or null
+                    if (o.s.sid) {
+                        hss = true;
+                    }
+                }
+            }
+            return hss;
+        };
+        const hasStoredSessionV1 = (o) => {
+            // looks for a stored session ID in an object, return it if it exists or false if it does not
+            let hss = false;
+            if (o.hasOwnProperty('sid')) {
+                // if sid exists it could either be a number/string or null
+                if (o.sid) {
+                    hss = true;
+                }
+            }
+            return hss;
+        };
+        const enrollmentUpdate = (o) => {
+//            console.log(`enrollmentUpdate: ${o.allIn}`)
+//            atb.disabled = !o.allIn;
+//            atb.disabled = false;
+            enableButton(buttonAssignTeams, true);
+            allEnrolled = o.allIn;
+            if (o.allIn) {
+                setTimeout(() => {
+//                    alert('all players enrolled');
+                }, 500);
+            }
+        };
+        const onRequestSession = (o) => {
+            if (o.success) {
+                getGameToStore();
+            }
+        };
+        const onServerShutdown = () => {
+            console.log('SERVER SHUTTIING DOWN');
+            getGameToStore();
+        };
+        const onServerStartup = () => {
+            console.log('SERVER STARTED');
+        };
+
+        const getPlayerIDs = () => {
+            socket.emit('getPlayerIDs', (ids) => {
+                let o = {ids: Object.keys(ids)};
+                console.log(o);
+                renderTemplate('playersBasic', 'controlPanel', o);
+            });
+        };
+        const getGameData = () => {
+            socket.emit('requestGameData', (d) => {
+                console.log(d)
+;            })
+        };
+        //
+        const initDisplay = (s) => {
+            let sd = localStorage.getItem(STORE_DISPLAY);
+            if (sd) {
+                switch (sd) {
+                    case 'listPlayers':
+                        listPlayers();
+                        break;
+                    case 'showScores':
+                        showScores();
+                        break;
+                    default:
+                        console.log('no initial display function specified');
+                }
+            }
+        };
+        const init = () => {
+//            console.log('init')
+            setSessionButtons(false);
+            enableButton(buttonEndSesh, false);
+            enableButton(buttonsStartRound, false);
+            enableButton(buttonAssignTeams, false);
+
+        };
+        //
+        buttonSetMax.on('click', setMaxVotes);
+        buttonStartSesh.on('click', startNewSession);
+        buttonEndSesh.on('click', adminTerminateSession);
+        buttonsStartRound.on('click', startRound);
+        buttonAssignTeams.on('click', assignTeams);
+        buttonListPlayers.on('click', listPlayers);
+        buttonShowScores.on('click', showScores);
+        //
+
+        socket.on('connect', () => {
+//            console.log('admin connect');
+            enableButton('endSession', false);
+            enableButton('startSession', false);
+            storedGame = getStoredGame();
+//            console.log('storedGame');
+//            console.log(storedGame);
+            if (storedGame) {
+//                console.log(`storedGame found of type ${typeof(storedGame)}: ${JSON.stringify(storedGame)} (${Object.keys(storedGame.p).length} elements)`);
+
+                storedGame.version = 2;
+                storedGame.elements = Object.keys(storedGame.p).length;
+//                console.log('on connect emits stored game found');
+                socket.emit('storedGameFound', storedGame);
+                let s = hasStoredSession(storedGame);
+//                console.log(s)
+//                console.log(storedGame.sid)
+//                setSessionButtons(Boolean(s.sid));
+                setSessionButtons(Boolean(storedGame.sid));
+                if (s) {
+                    newSessionStarted(storedGame);
+                }
+            } else {
+                setSessionButtons(false);
+            }
+            socket.emit('customDataEvent', clientData);
+            socket.emit('getPlayerPack', (p) => {
+                isDev = p.isDev;
+                env = Object.assign({}, p);
+                initDisplay();
+            });
+        });
+        socket.on('onPlayerConnect', (msg) => {
+            onPlayerConnect(msg);
+        });
+        socket.on('onGetPlayers', (msg) => {
+//            console.log('I hear onGetPlayers')
+            onGetPlayers(msg);
+        });
+        socket.on('onGetPlayerIDs', (msg) => {
+//            console.log('I hear onGetPlayerIDs')
+            onGetPlayerIDs(msg);
+        });
+        socket.on('updatePlayers', (arr) => {
+//            console.log('I hear updatePlayers')
+            onGetPlayerIDs(arr);
+        });
+        socket.on('playersUpdate', (pd) => {
+//            console.log(pd);
+            updatePlayersView(pd);
+//            listPlayers();
+        });
+        socket.on('newPlayer', (players) => {
+            newPlayer(players);
+        });
+        socket.on('onAddNewPlayer', () => {
+//            console.log('onAddNewPlayer');
+            getGameToStore();
+        });
+        socket.on('serverShutdown', onServerShutdown);
+        socket.on('serverStartup', onServerStartup);
+        socket.on('updateFull', (o) => {
+//            console.log('full update');
+//            console.log(o);
+//            console.log({p: o.playersBasic});
+//            console.log(storedGame);
+        });
+        socket.on('terminateSession', terminateSession);
+        socket.on('newSession', newSessionStarted);
+        socket.on('enrollmentUpdate', enrollmentUpdate);
+        socket.on('onRequestSession', (o) => {
+            onRequestSession(o);
+        });
+        //
+        socket.on('scoreUpdateNoooooo', updateScores);
+        socket.on('scoreUpdate', (o) => {
+            updateScores(o);
+        });
+
+        storedGame = getStoredGame();
+
+        init();
+
+        window.updateSession = updateSession;
+        window.previewTeams = previewTeams;
+        window.getPlayerIDs = getPlayerIDs;
+        window.getGameData = getGameData;
+
+//        socket.emit('getPlayers');
+
+    </script>
+</body>
+
+</html>

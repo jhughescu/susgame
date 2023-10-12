@@ -1,0 +1,59 @@
+{
+    "teams": {
+        "t0": {
+            "id": 0,
+            "title": "Government"
+        },
+        "t1": {
+            "id": 1,
+            "title": "Individual Change Maker"
+        },
+        "t2": {
+            "id": 2,
+            "title": "Well-established Business"
+        },
+        "t3": {
+            "id": 3,
+            "title": "Civil Society Organisation"
+        },
+        "t4": {
+            "id": 4,
+            "title": "Small Enterprise"
+        },
+        "t5": {
+            "id": 5,
+            "title": "Public Voices 1",
+            "active": -1,
+            "likes": true,
+            "weight": 3,
+            "hasMax": false,
+            "hasLead": false
+        },
+        "t6": {
+            "id": 6,
+            "title": "Public Voices 2",
+            "active": -1,
+            "likes": true,
+            "weight": 3,
+            "hasMax": false,
+            "hasLead": false
+        }
+    },
+    "settings": {
+        "teamMax": 6
+    },
+    "defaults": {
+        "active": 1,
+        "votes": 10,
+        "likes": false,
+        "weight": 2,
+        "hasMax": true,
+        "hasLead": true
+    },
+    "prefixes": {
+        "player": "player-"
+    },
+    "definitions": {
+        "teams": "stakeholders"
+    }
+}

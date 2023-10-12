@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>player</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!--    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>-->
+    <link rel='stylesheet' href='css/player.css'>
+</head>
+
+<body>
+    <h1>Player</h1>
+    <h2></h2>
+    <!--    <p>This is the player client, it requires a master before it can init</p>    -->
+    <p id='stakeholder'></p>
+    <p id='active'></p>
+    <p id='message'></p>
+    <p id='votesRemaining'></p>
+    <p id='votesReceived'></p>
+    <p id='status' style='display: none;'></p>
+    <div id='voting' style='display: none;'>
+        voting booth:
+
+    </div>
+    <div>
+    </div>
+    <script>
+        const socket = io();
+        let isDev = false;
+        let storageID = null;
+        const setStatus = (m, w) => {
+            let s = $('#status');
+            let d = 300;
+            s.text(m);
+            if (w) {
+                s.addClass('animate-flicker');
+            } else {
+                s.removeClass('animate-flicker');
+            }
+        }
+        const getStorageID = () => {
+            return `player${getHash()}ID`
+        };
+        const getHash = () => {
+            let h = '';
+            if (window.location.hash  && isDev) {
+                if (window.location.hash.substr(0, 1) === '#') {
+                    h = window.location.hash.replace('#', '');
+                }
+            }
+//            console.log(`hash is ${h}`);
+            return h;
+        };
+        const generateID = () => {
+            let id = 'player-' + Math.round(Math.random() * 1000);
+//            console.log(`socket.emit('testing')`);
+//            console.log(socket.emit('testing'));
+            if (window.location.hash) {
+                if (window.location.hash.substr(0, 1) === '#') {
+                    id = id.replace('-', '-' + window.location.hash.replace('#', '') + '-');
+                }
+            }
+            return id;;
+        }
+        const getID = () => {
+            let id = localStorage.getItem(getStorageID());
+            if (!id) {
+                id = generateID();
+                localStorage.setItem(getStorageID(), id);
+            }
+            return id;
+        };
+        const resetPlayer = () => {
+            localStorage.removeItem(getStorageID());
+            socket.emit('remove');
+            newPlayer();
+        };
+        const newPlayer = () => {
+            let id = getID();
+            storageID = getStorageID();
+            document.title = id;
+            $('h2').html(`id: ${id}`);
+            socket.emit('addNewPlayer', id, (response) => {
+//                console.log('newPlayer callback, response:');
+//                console.log(response);
+                if (response.master === null) {
+                    setStatus('waiting for master', true);
+                } else {
+                    setStatus(`master is ${response.master}`, false);
+                }
+//                if (response.session) {
+//                    console.log(response.session);
+//                } else {
+//                    console.log('no session');
+//                }
+//                if (response.gamedata) {
+//                    console.log(response.gamedata);
+//                } else {
+//                    console.log('no gamedata');
+//                }
+                if (response.gamedata && response.session && response.players) {
+                    joinSession({gamedata: response.gamedata, session: response.session, players: response.players});
+                } else {
+                    console.log('no gamedata OR no session OR no players');
+                }
+            });
+        };
+        const castVote = (s, src) => {
+//            console.log(s);
+            socket.emit('castVote', s, src);
+        };
+        const renderVoter = (sesh, s) => {
+            let vb = $('#voting');
+            vb.show();
+            vb.html('');
+            Object.entries(sesh.stakeholders).forEach(([k, v]) => {
+                if (k !== s.stub) {
+                    vb.append(`<div>${voteButtonTemplate(v.stub, v.title)}<div>`);
+                }
+            });
+            vb = $('.voteButton');
+            vb.on('click', function () {
+                if (sesh.stakeholders[s.stub].votes > 0) {
+//                console.log(s);
+                    castVote($(this).attr('id').split('_')[1], getID());
+                }
+            });
+            if (sesh.stakeholders[s.stub].votes < 1) {
+                vb.attr('disabled', true);
+            }
+        };
+        const prepareModel = (gamepack) => {
+            let s = gamepack.session;
+            let st = gamepack.session.stakeholders;
+            let d = gamepack.gamedata;
+            let k = null;
+            for (var i in st) {
+                st[d.map[i]] = st[i];
+                for (k in st[i]) {
+                    if (d.map.hasOwnProperty(k)) {
+                        st[i][d.map[k]] = st[i][k];
+                        delete st[i][k];
+                    }
+                    if (typeof(st[i][k]) === 'object' && st[i][k].hasOwnProperty('length')) {
+                        for (var m = 0; m < st[i][k].length; m++) {
+                            st[i][k][m] = 'player-' + st[i][k][m];
+                        }
+                    }
+                }
+            }
+            console.log(s);
+            return s;
+        };
+        const joinSession = (gamepack) => {
+//            console.log(gamepack.session);
+//            console.log(gamepack.gamedata);
+//            let sesh = gamepack.session;
+            let sesh = prepareModel(gamepack);
+            let id = getID();
+            let s = sesh.players[getID()].stakeholder;
+            let active = s.active[0] === id || s.active.length === s.team.length;
+            $('#stakeholder').html(`stakeholder: <b>${s.title}</b> (team of ${s.team.length})`);
+            $('#votesRemaining').html(`votes remaining: <b>${s.votes}</b>`);
+            $('#votesReceived').html(`votes received: <b>${s.voteObj.total}</b>`);
+            $('#active').html(`active player: <b>${active ? 'yes' : 'no'}</b>`);
+            document.title = s.title;
+            if (active) {
+                renderVoter(sesh, s);
+                document.title = '*' + document.title;
+
+            }
+        };
+        const voteButtonTemplate = (id, title) => {
+            return `<button class='voteButton' id='voteButton_${id}'>vote for ${title}</button>`;
+        };
+        socket.emit('init', 'player');
+        socket.on('connect', () => {
+//            console.log('connect the socket');
+            socket.emit('areWeDev', (m) => {
+                isDev = m;
+//                console.log(`isDev ${isDev}`);
+                newPlayer();
+            });
+        });
+        socket.on('masterConnected', (m) => {
+//            console.log(`master connected: ${m}`, false);
+            setStatus(`master connected: ${m}`, false);
+        });
+        socket.on('ping', () => {
+            let d = 200;
+//            $('h1').fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d);
+            $('body').fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d);
+        });
+        socket.on('reset', () => {
+//            let d = 100;
+//            $('h1').fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d).fadeOut(d).fadeIn(d);
+            resetPlayer();
+        });
+        socket.on('onNewSession', (gamePack) => {
+            joinSession(gamePack);
+        });
+    </script>
+</body>
+
+</html>

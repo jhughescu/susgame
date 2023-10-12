@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Game</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='templates/sustemplates.js'></script>
+    <script src='templates/suspartials.js'></script>
+    <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/player.css'>
+</head>
+
+<body>
+    <h1>Sustainability Game</h1>
+    <div id='overlay'>
+
+
+    </div>
+    <div id='insertion'></div>
+
+    <script>
+        const socket = io();
+        let butt = null;
+        let txt = null;
+        let staticID = null;
+        let env = null;
+        let clientData = {role: 'player'};
+        let player = null;
+        let suspend = false; /* suspend is true when the server connection is down */
+
+        Handlebars.registerHelper('playerPartial', function(partialName, context) {
+            const partial = Handlebars.partials[partialName];
+            if (typeof partial === 'function') {
+                return new Handlebars.SafeString(partial(this));
+            }
+            return '';
+        });
+
+        const log = (msg) => {
+            let i = 'log_' + Object.keys(logList).length;
+            logList[i] = msg;
+//            console.log(i, msg);
+        };
+        const getLogs = () => {
+            for (var i in logList) {
+//                console.log(`${i}: ${logList[i]}`);
+            }
+        };
+        const onRequestSession = (o) => {
+            if (o.player === staticID) {
+                if (o.success) {
+                    refreshView();
+                } else {
+                    alert(`no session with ID ${txt.value} exists`);
+                }
+            }
+        };
+        let requestSession = null;
+        // requestSession is defined in the newlogin template
+        const getHash = () => {
+            let h = '';
+            if (window.location.hash && isDev) {
+                if (window.location.hash.substr(0, 1) === '#') {
+                    h = window.location.hash.replace('#', '');
+                    if (h.indexOf('?', 0) > -1) {
+                        h = h.split('?')[0];
+                    }
+                }
+            }
+//            console.log(`getHash: ${h}, isDev: ${isDev}`);
+//            console.log(JSON.parse(JSON.stringify(window.location)))
+            return h;
+        };
+        const getStorageID = () => {
+            let sid = `player${getHash()}ID`;
+//            console.log(`sid set to ${sid}`);
+            return sid;
+        };
+        const generateID = () => {
+//            console.log(`gen id`);
+            let id = 'player-' + Math.round(Math.random() * 1000);
+            if (window.location.hash) {
+                if (window.location.hash.substr(0, 1) === '#') {
+                    id = id.replace('-', '-' + window.location.hash.replace('#', '') + '-');
+                    if (id.indexOf('?', 0) > -1) {
+                        id = id.split('?')[0];
+                    }
+                }
+            }
+            if (id) {
+                staticID = id;
+                localStorage.setItem(getStorageID(), JSON.stringify({id: staticID}));
+            }
+            return id;
+        };
+        const getID = () => {
+            let id = localStorage.getItem(getStorageID());
+//            console.log(`getID; retrieve id from localStorage: ${id}`);
+//            console.log(`storedID: ${id}`);
+//            console.log(`staticID: ${staticID}`);
+            if (!id) {
+                id = generateID();
+            } else {
+                // we have the local storage object, now we must extract the id from it:
+//                console.log('id:');
+//                console.log(id);
+                id = JSON.parse(id).id;
+                staticID = id;
+//                console.log(`ID retrieved from localStorage: ${id}`);
+            }
+//            staticID = id;
+            return id;
+        };
+        const getMinID = () => {
+            let id = getID().replace(env.gamedata.prefixes.player, '');
+//            console.log(`getID call; getMinID method: ${id}`);
+            return id;
+        };
+        const prepPlayer = (p) => {
+            // Output a player object based on a retrieved object
+            let s = p.stakeholder;
+            p.stakeholderID = s;
+            if (s < 0) {
+                p.stakeholder = 'unassigned';
+            } else {
+                p.stakeholder = Object.values(env.gamedata.teams)[s].title;
+            }
+            return p;
+        };
+        const finalisePlayer = (p) => {
+            // Make any final tweaks to the player object before it is sent to the templates for rendering
+            if (p.mainTeams && p.teamObj) {
+                p.mainTeams.forEach((t) => {
+                     t.isMyTeam = t.id === p.teamObj.id;
+                });
+            }
+//            console.log(p);
+            return p;
+        };
+        const newPlayer = () => {
+//            log(`newPlayer called, id: ${id}`);
+//            storageID = getStorageID();
+//            document.title = id;
+            player.enrolled = true;
+//            $('h2').html(`id: ${id}`);
+//            socket.emit('addNewPlayer', {id: id}, (response) => {
+//                gameInit();
+//            });
+//            console.log(`newPlayer calls refreshView`);
+            refreshView('newPlayer');
+            gameInit();
+        };
+        const gameInit = () => {
+            // this code is open to abuse, replace it with insertion of template HTML
+            let sessionID = txt.value;
+            renderGameScreen();
+        };
+        const kickout = () => {
+            renderTemplate('outtro', 'insertion');
+//            socket.emit('areWeDev', function (dev) {
+//                if (dev) {
+//                    console.log('kick me out & NOT reload');
+                    // handle this via admin (localStorage.clear() removes all localStorage items)
+//                    localStorage.removeItem(getStorageID());
+//                    location.reload();
+//                    renderTemplate('intro', 'insertion');
+//                    renderTemplate('outtro', 'insertion');
+//                }
+//            });
+        };
+        const renderTemplate = (temp, targ, o) => {
+            targ = '#' + targ;
+            let ob = Object.assign({}, o);
+            const compiledTemplate = Handlebars.templates[temp];
+            const renderedHtml = compiledTemplate(ob);
+            $(targ).html('');
+//            console.log('re-render');
+            $(targ).html(renderedHtml);
+        };
+        const renderGameScreen = () => {
+            let o = {
+                playerID: staticID
+            };
+            socket.emit('getPlayerPack', (o) => {
+//                player = Object.assign(env.gamedata, player);
+                player = prepPlayer(o.playersDetail[getMinID()]);
+                if (o.session.assigned) {
+                    if (player.stakeholderID > -1) {
+                        player.partialName = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax ? 'stakeholder' : 'publicvoices';
+                    } else{
+                        console.log(`no team defined for the player`);
+                    }
+                } else {
+                    console.log(`no session.assigned`);
+                }
+                player = Object.assign(env.gamedata, player);
+                player = finalisePlayer(player);
+                renderTemplate('game', 'insertion', player);
+            });
+        };
+        const onNewSession = () => {
+            // Reload the page rather than refresh view - this enables script to run successfully on rendered page
+            // Note: prior call to 'onStoredGameFound' causes a refresh, hence the flicker. Consider a way to remove this in future.
+            window.location.reload();
+//            refreshView('onNewSession');
+        };
+        const updateMaxVotes = (m) => {
+            max = m;
+            $('#votes').html(m);
+            console.log(`set max to ${m}`);
+        };
+        const connectionWarning = (boo) => {
+//            console.log(`connectionWarning: ${boo}`);
+            if (boo) {
+                $('#overlay').html('');
+            } else {
+                renderTemplate('serverlost', 'overlay');
+            }
+//            clearTimeout(cInt);
+//            cInt = setTimeout(() => {
+//                if (boo) {
+//                    $('#overlay').html('');
+//                } else {
+//                    renderTemplate('serverlost', 'overlay');
+//                }
+//            }, 2000);
+        };
+        const serverShutdown = () => {
+//            $('body').fadeOut(2000);
+            connectionWarning(false);
+            suspend = true;
+//            clearTimeout(cInt);
+//            cInt = setTimeout(() => {
+//                connectionWarning(false);
+//            }, 2000);
+        };
+        const onPinged = () => {
+//            $('H1').delay(10).fadeOut(50).fadeIn();
+            let t = document.title;
+            let n = 7;
+            document.title = `*${t}`;
+            let i = setInterval(() => {
+
+                $('H1').css('opacity', `${n%2 === 0 ? 1 : 0.3}`);
+                if (n-- === 0) {
+                    clearInterval(i);
+                    document.title = t;
+                }
+            }, 200);
+
+        };
+        const init = () => {
+//            console.log('this is init ');
+//            storageID = getStorageID();
+//            console.log(`storageID: ${storageID}`)
+//            console.log(`init, id: ${id}`)
+        };
+        let currentState = null;
+        const refreshViewCallback = (p) => {
+            let id = getMinID();
+            let newPlayer = !p.playersBasic.hasOwnProperty(id);
+            let enrolled = false;
+            if (currentState) {
+                let c = currentState !== JSON.stringify(p);
+            }
+            currentState = JSON.stringify(p);
+            if (p.hasOwnProperty('playersDetail')) {
+                if (p.playersDetail.hasOwnProperty(id)) {
+                    enrolled = p.playersDetail[id].enrolled;
+                } else {
+//                    console.log(`%cno player with id ${id} found`, `color: red;`);
+                }
+            }
+            if (p.sessionID) {
+                if (enrolled) {
+                    renderGameScreen();
+                } else {
+                    renderTemplate('newlogin', 'insertion', {
+                        value: p.isDev ? p.sessionID : ''
+                    });
+                }
+            } else {
+                renderTemplate('intro', 'insertion');
+            }
+        };
+        let refreshing = false;
+        const refreshView = () => {
+//            console.log(`refreshView`);
+//            console.log(`are we already refreshing? ${refreshing}`);
+//            console.log(`refreshView, suspend? %c${suspend}`, `color: ${suspend ? 'green' : 'red'}`);
+            // Do not run if suspend = true, i.e. server has shit down and is not yet ready to restart
+            if (!suspend) {
+                // cut out unecessary calls by not calling if a refresh is already in progress
+                refreshing = false;
+                if (!refreshing) {
+                    refreshing = true;
+                    socket.emit('getPlayerPack', (p) => {
+                        //
+                        // can we use the storedData in the playerPack to assess whether the player is enrolled?
+                        //
+                        refreshing = false;
+                        refreshViewCallback(p);
+                    });
+                }
+            } else {
+//                console.log(`suspend is true, refreshing is not possible at this time`);
+            }
+        };
+        const getInitProps = () => {
+            let o = {};
+            let p = window.location.hash;
+//            console.log(p);
+            if (p && p.indexOf('?', 0) > -1) {
+                p = p.split('?');
+//                    console.log(p);
+                if (p.length > 0) {
+//                    console.log(p);
+                    p = p[1].split('&');
+                    p.forEach((s) => {
+                        let ps = s.split('=');
+                        o[ps[0]] = ps[1];
+                    });
+                }
+            }
+//            console.log(o);
+            return o;
+        };
+        const onConnect = () => {
+            connectionWarning(true);
+            socket.emit('getPlayerPack', (p) => {
+                isDev = p.isDev;
+                env = Object.assign({}, p);
+                let id = getMinID();
+                clientData.id = id;
+                socket.emit('customDataEvent', clientData);
+                id = getID();
+                storageID = getStorageID();
+                document.title = id;
+                $('h2').html(`id: ${id}`);
+                socket.emit('addNewPlayer', {id: id}, (o) => {
+                    player = o.player;
+                });
+                let sid = false;
+                if (p.storedData) {
+                    if (p.storedData.hasOwnProperty('sid')) {
+                        sid = p.storedData.sid;
+                    }
+                }
+//                console.log(` a) no session exists (${!Boolean(sid)}, ${sid})`);
+//                console.log(` b) a session exists which I am not enrolled in`);
+//                console.log(` c) a session exists and I am enrolled on it`);
+
+            });
+        };
+
+        let isDev = false;
+        let logList = {};
+
+
+        // Type-specific code:
+
+        // Public Voices
+        let vb = $('.buttonVote');
+        let vv = $('.voteVal');
+        let max = 10;
+        console.log('get the max')
+        console.log(player)
+        let ls = [];
+//        let lid = `pv-${getID().split('?')[0]}-vote`;
+        let lid = null;
+        const validateVote = (inp) => {
+            const value = parseFloat(inp.value);
+            if (value > max) {
+                inp.value = max;
+            }
+            if (value < (-1 * max)) {
+                inp.value = (-1 * max);
+            }
+        };
+        const submitVote = function (src, toEmit) {
+            const vi = src.parent().find('.voteVal');
+            let o = {
+                src: player.id,
+                team: player.stakeholderID,
+                targ: parseInt(vi.attr('id').split('_')[1]),
+                v: parseInt(vi.val())
+            };
+//            console.log(o);
+            ls[o.targ] = o.v;
+            localStorage.setItem(lid, ls);
+            src.attr('disabled', true);
+            vi.attr('disabled', true);
+            socket.emit(toEmit, o);
+        };
+        vv = $('.voteVal');
+        const getRemain = () => {
+            let m = max;
+            if (vv) {
+                vv.each(function () {
+                    let v = Math.abs(parseInt($(this).val()));
+                    m -= v;
+//                    console.log(v, m)
+                });
+            }
+            return m;
+        };
+        const viewUpdate = () => {
+            socket.emit('getPlayerPack', (pp) => {
+                console.log(pp.session);
+                enableScorePV(pp.session.round > 0);
+                let s = localStorage.getItem(lid);
+                if (s) {
+                    s = s.split(',');
+                    max = 10;
+                    s.forEach((v, i) => {
+                        console.log(i, v)
+                        if (!isNaN(parseInt(v))) {
+                            max -= parseInt(v);
+                            ls[i] = v;
+                            vv[i].value = v;
+                            $(vv[i]).attr('disabled', true);
+                            $(vb[i]).attr('disabled', true);
+                        }
+                    });
+                }
+
+            });
+        };
+        const onSessionUpdate = () => {
+            viewUpdate();
+            console.log('session update calls viewUpdate');
+        };
+        const initpv = () => {
+            lid = `pv-${getID().split('?')[0]}-vote`;
+            vb = $('.buttonVote');
+            vv = $('.voteVal');
+            vb.on('click', function () {
+                submitVote($(this), 'pvStakeholderScore');
+            });
+            viewUpdate();
+            scoreUpdate(getMinID());
+        };
+        const renderVotes = (p) => {
+            let v = p.teamObj.votes;
+            $('#votes').html(v);
+            max = v;
+            vv.each((i, el) => {
+                if (!$(el).prop('disabled')) {
+                    validateVote(el);
+                }
+            })
+            if (v <= 0) {
+                $('#votes').addClass('false');
+                vb.attr('disabled', true);
+                vv.attr('disabled', true);
+            }
+        };
+        const scoreUpdate = (o) => {
+            if (o.src === getMinID()) {
+//                console.log(`OK, we can go`);
+                socket.emit('getPlayer', o.src, (p) => {
+                    renderVotes(p)
+                });
+            }
+        };
+        const enableScorePV = (boo) => {
+            vb.prop('disabled', !boo);
+            vv.prop('disabled', !boo);
+        };
+        $('.buttonVote').on('click', submitVote);
+
+        const setupPV = () => {
+            initpv();
+        };
+        socket.on('scoreUpdate', (o) => {
+            scoreUpdate(o);
+        });
+        // End Public Voices
+
+        // Stakeholder
+        const initst = () => {
+            console.log('get the max')
+            console.log(player)
+            lid = `st-${getID().split('?')[0]}-vote`;
+            vb = $('.buttonVote');
+            vv = $('.voteVal');
+            vb.on('click', function () {
+                submitVote($(this), 'stStakeholderScore');
+            });
+            viewUpdate();
+            scoreUpdate(getMinID());
+        };
+        const setupStakeholder = () => {
+            initst();
+        };
+        // End stakeholder
+
+        // End type-specific code
+
+
+
+
+        socket.on('onRequestSession', (boo) => {
+            onRequestSession(boo);
+        });
+        socket.on('connect', () => {
+//            console.log(`connect calls onConnect: ${socket.id}`);
+            onConnect();
+        });
+        socket.on('onStoredGameFound', () => {
+//            console.log('onStoredGameFound calls refreshView');
+//            suspend = false;
+            refreshView(`onStoredGameFound`);
+        });
+        socket.on('onUpdateTimer', (t) => {
+            let p = $('#gameTimer');
+            p.html(t);
+        });
+        socket.on('terminateSession', kickout);
+        socket.on('sessionUpdate', onSessionUpdate);
+        socket.on('newSession', onNewSession);
+        socket.on('serverShutdown', serverShutdown);
+        socket.on('ping', () => {
+            onPinged();
+            console.log(`i got pinged`);
+        });
+        socket.on('onAssignTeams', (id) => {
+            return;
+            console.log(`I have a Team: ${id}`);
+            console.log(env.gamedata.teams[id]);
+            console.log(env.gamedata.teams);
+            $('#team').find('span').html(env.gamedata.teams[id].title);
+//            debugger;
+        });
+        socket.on('upateMaxVotes', (m) => {
+            console.log('i heard the emission')
+            updateMaxVotes(m)
+        })
+        window.showLog = getLogs;
+        window.getRemain = getRemain;
+        //
+        //        init();
+
+    </script>
+</body>
+
+</html>
