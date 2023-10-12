@@ -103,6 +103,7 @@ class Stakeholder {
 
 
 const writeLogFile = (id, c, msg) => {
+    return;
     let f = `../logs/log.${logCount++}.${id}.json`;
     if (msg) {
         c = Object.assign({msg: msg}, c);
@@ -112,6 +113,7 @@ const writeLogFile = (id, c, msg) => {
     })
 };
 const updateLogFile = (id, c, msg) => {
+    return;
     let f = `../logs/log.${id}.json`;
     if (msg) {
         c = Object.assign({msg: msg}, c);
