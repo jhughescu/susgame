@@ -131,6 +131,7 @@ const consoleLog = (m) => {
     io.emit('logoutput', `Line ${l}: ${m}`);
 }
 const clearLogs = (cb) => {
+    return;
     let p = '../logs';
     fs.readdir(p, (err, files) => {
         let l = files.length
