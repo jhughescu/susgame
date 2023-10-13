@@ -31,6 +31,7 @@ let playersMap = new Map();
 let session = null;
 let storedData = null;
 let sessionArchive = [];
+let admin = null;
 
 class Player {
     constructor(id, socket) {
@@ -466,6 +467,7 @@ const getPlayerPack = (cb, sock) => {
     // return all available initial stuff to a newly connected player client
     let d = new Date();
     let o = {
+        admin: admin,
         timer: `${rNum(d.getHours())}:${rNum(d.getMinutes())}:${rNum(d.getSeconds())}`,
         isDev: isDev,
         sessionID: isDev ? getSessionID() : Boolean(getSessionID()),
@@ -475,13 +477,7 @@ const getPlayerPack = (cb, sock) => {
         storedData: storedData,
         gamedata: gamedata
     }
-//    writeLogFile('getPlayerPack', {
-//        id: sock.id,
-//        pid: sock.customData,
-//        detail: o.playersDetail
-//    });
     if (cb) {
-//        console.log(`getPlayerPack callback:`)
         cb(o);
     }
 };
@@ -702,7 +698,11 @@ const startNewSession = (cb) => {
 //        console.log(`and the callback`);
         cb();
     }
-}
+};
+const setAdmin = (boo) => {
+    console.log(`set admin to ${boo}`);
+    admin = boo;
+};
 const processStoredGame = (d) => {
     storedData = d;
 //    console.log('PROCESS-STORED-GAME');
@@ -742,6 +742,7 @@ const pageTypeAdded = (t) => {
 //    console.log(`pageTypeAdded :${t}`);
     if (t === 'admin') {
 //        addFakePlayers();
+//        admin = true;
     }
 };
 const getGameData = (cb) => {
@@ -1085,21 +1086,17 @@ io.on('connection', (socket) => {
         // Find the player with the corresponding socket.id in the 'players' map
         let disconnectedPlayer = null;
         for (const [playerId, player] of playersMap.entries()) {
-//            console.log(player.id, socket.id);
             if (player.id === socket.id) {
                 disconnectedPlayer = player;
                 break;
             }
         }
-//        console.log(`disconnect event`);
-//        console.log(disconnectedPlayer);
         if (disconnectedPlayer) {
             if (disconnectedPlayer.hasOwnProperty('customData')) {
                 if (disconnectedPlayer.customData.hasOwnProperty('id')) {
                     // Perform any actions required for the disconnected player
                     playersDetail[disconnectedPlayer.customData.id].handleDisconnect();
                     onPlayersUpdate();
-//                    console.log(`disconnect!!!!!!!!!!`);
                 } else {
 //                    console.log('customData found but has no ID property');
                 }
@@ -1110,6 +1107,19 @@ io.on('connection', (socket) => {
 //            console.log('no player found for disconnect');
         }
 //        console.log(`disconnect: ${disconnectedPlayer}`);
+
+        // if the disconnect comes from an admin screen, set admin to false
+        if (socket.customData) {
+            let cd = socket.customData;
+//            console.log(cd);
+            if (cd.role) {
+                if (cd.role === 'admin') {
+                    if (cd.activeAdmin) {
+                        setAdmin(false);
+                    }
+                }
+            }
+        }
     });
     socket.on('requestGameData', (cb) => {
         getGameData(cb);
@@ -1122,6 +1132,9 @@ io.on('connection', (socket) => {
     });
     socket.on('testEvent', (msg) => {
         console.log(`testEvent: ${msg}`);
+    });
+    socket.on('setAdmin', (boo) => {
+        setAdmin(boo);
     });
     //
     socket.on('pvStakeholderScore', (o) => {

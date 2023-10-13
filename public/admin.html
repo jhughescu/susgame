@@ -19,6 +19,7 @@
     <h2>session: <span>n/a</span></h2>
     <p>This is the admin screen</p>
     <p id='message'></p>
+    <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
     <div class='controls' id='controlSettings'>
         <button id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
         <button id='setMax'>Set max votes</button>
@@ -58,6 +59,7 @@
         let storedGame = null;
         let allEnrolled = null;
         let env = null;
+        let activeAdmin = null;
         //
         const buttonSetup = () => {
             let b = document.getElementsByClassName('pingBtn');
@@ -85,6 +87,7 @@
         const buttonAssignTeams = $('#assignTeams');
         const buttonShowScores = $('#showScores');
         const buttonListPlayers = $('#listPlayers');
+        const buttonCloseWarning = $('#warning').find('.closer');
         //
         const inputMax = $(`#showMax`);
         //
@@ -128,6 +131,13 @@
             if (t) {
                 renderTemplate('teamview', 'controlPanel', {team: Object.values(t)});
             }
+        };
+        const showWarning = (w) => {
+            $('#warning_message').html(w);
+            $('#warning').show();
+        };
+        const closeWarning = () => {
+            $('#warning').hide();
         };
         const assignTeamsFunk = () => {
             enableButton('assignTeams', false);
@@ -536,6 +546,7 @@
         };
         //
         const initDisplay = (s) => {
+
             let sd = localStorage.getItem(STORE_DISPLAY);
             if (sd) {
                 switch (sd) {
@@ -569,26 +580,19 @@
         buttonAssignTeams.on('click', assignTeams);
         buttonListPlayers.on('click', listPlayers);
         buttonShowScores.on('click', showScores);
+        buttonCloseWarning.on('click', closeWarning);
         //
 
         socket.on('connect', () => {
-//            console.log('admin connect');
+            console.log(`admin connect`);
             enableButton('endSession', false);
             enableButton('startSession', false);
             storedGame = getStoredGame();
-//            console.log('storedGame');
-//            console.log(storedGame);
             if (storedGame) {
-//                console.log(`storedGame found of type ${typeof(storedGame)}: ${JSON.stringify(storedGame)} (${Object.keys(storedGame.p).length} elements)`);
-
                 storedGame.version = 2;
                 storedGame.elements = Object.keys(storedGame.p).length;
-//                console.log('on connect emits stored game found');
                 socket.emit('storedGameFound', storedGame);
                 let s = hasStoredSession(storedGame);
-//                console.log(s)
-//                console.log(storedGame.sid)
-//                setSessionButtons(Boolean(s.sid));
                 setSessionButtons(Boolean(storedGame.sid));
                 if (s) {
                     newSessionStarted(storedGame);
@@ -600,7 +604,16 @@
             socket.emit('getPlayerPack', (p) => {
                 isDev = p.isDev;
                 env = Object.assign({}, p);
-                initDisplay();
+                activeAdmin = !env.admin;
+                clientData.activeAdmin = activeAdmin;
+                socket.emit('customDataEvent', clientData);
+                if (activeAdmin) {
+                    initDisplay();
+                    socket.emit('setAdmin', true);
+                } else {
+                    showWarning('An active admin window is alredy open elsewhere, this page has been locked');
+                    $(":enabled").prop("disabled", true);
+                }
             });
         });
         socket.on('onPlayerConnect', (msg) => {
