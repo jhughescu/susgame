@@ -54,6 +54,7 @@
         const socket = io();
         const PINGBTN = `pingbtn-`;
         const RESETBTN = `resetbtn-`;
+        const REMOVEBTN = `removebtn-`;
         const STORE_DISPLAY = 'currentDisplay';
         let clientData = {role: 'admin'};
         let storedGame = null;
@@ -62,14 +63,30 @@
         let activeAdmin = null;
         //
         const buttonSetup = () => {
+            // Ping buttons
             let b = document.getElementsByClassName('pingBtn');
             [...b].forEach((bu) => {
+//                console.log('get clciked');
                 bu.addEventListener('click', (evt) => {
                     let id = evt.target.id.replace(PINGBTN, '');
                     socket.emit('playerPing', id);
-                    console.log('playerPing', id);
+//                    console.log('playerPing', id);
                 });
             });
+            // Remove buttons
+            b = document.getElementsByClassName('removeBtn');
+            [...b].forEach((bu) => {
+                console.log('get clicked');
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(REMOVEBTN, '');
+                    let r = confirm(`are you sure you want to remove player ${id}?`);
+                    if (r) {
+                        console.log('removePlayer', id);
+                        socket.emit('removePlayer', id);
+                    }
+                });
+            });
+            // Reset buttons (removed)
             b = document.getElementsByClassName('resetBtn');
             [...b].forEach((bu) => {
                 bu.addEventListener('click', (evt) => {

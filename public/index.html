@@ -161,16 +161,9 @@
         };
         const kickout = () => {
             renderTemplate('outtro', 'insertion');
-//            socket.emit('areWeDev', function (dev) {
-//                if (dev) {
-//                    console.log('kick me out & NOT reload');
-                    // handle this via admin (localStorage.clear() removes all localStorage items)
-//                    localStorage.removeItem(getStorageID());
-//                    location.reload();
-//                    renderTemplate('intro', 'insertion');
-//                    renderTemplate('outtro', 'insertion');
-//                }
-//            });
+        };
+        const evicted = () => {
+            renderTemplate('kickedout', 'insertion');
         };
         const renderTemplate = (temp, targ, o) => {
             targ = '#' + targ;
@@ -367,8 +360,8 @@
         let vb = $('.buttonVote');
         let vv = $('.voteVal');
         let max = 10;
-        console.log('get the max')
-        console.log(player)
+//        console.log('get the max')
+//        console.log(player)
         let ls = [];
 //        let lid = `pv-${getID().split('?')[0]}-vote`;
         let lid = null;
@@ -528,11 +521,14 @@
             onPinged();
             console.log(`i got pinged`);
         });
+        socket.on('evict', () => {
+            evicted();
+        });
         socket.on('onAssignTeams', (id) => {
             return;
-            console.log(`I have a Team: ${id}`);
-            console.log(env.gamedata.teams[id]);
-            console.log(env.gamedata.teams);
+//            console.log(`I have a Team: ${id}`);
+//            console.log(env.gamedata.teams[id]);
+//            console.log(env.gamedata.teams);
             $('#team').find('span').html(env.gamedata.teams[id].title);
 //            debugger;
         });

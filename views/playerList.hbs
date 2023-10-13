@@ -4,7 +4,14 @@
     <tbody>
         <tr><th>player</th><th>connected</th><th>enrolled</th><th>team</th><th></th></tr>
         {{#each players}}
-        <tr><td>{{id}}</td><td class='{{connected}}'>{{connected}}</td><td class='{{enrolled}}'>{{enrolled}}</td><td class='{{assigned}}'>{{stakeholder}}</td><td><button class='pingBtn' id='pingbtn-{{id}}'>ping</button></td></tr>
+        <tr>
+        <td>{{id}}</td>
+        <td class='{{connected}}'>{{connected}}</td>
+        <td class='{{enrolled}}'>{{enrolled}}</td>
+        <td class='{{assigned}}'>{{stakeholder}}</td>
+        <td><button class='pingBtn' id='pingbtn-{{id}}'>ping</button></td>
+        <td><button class='removeBtn' id='removebtn-{{id}}'>remove</button></td>
+        </tr>
         {{/each}}
     </tbody>
 </table>

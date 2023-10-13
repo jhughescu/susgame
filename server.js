@@ -599,6 +599,29 @@ const pingPlayer = (id) => {
 //        console.log(`no player with id ${id} in the playersDetail object`);
     }
 };
+const removePlayer = (id) => {
+    let pl = playersDetail[id];
+    if (pl) {
+        if (playersMap.has(pl.socketID)) {
+            playersMap.get(pl.socketID).emit('evict');
+            playersMap.delete(pl.socketID);
+            console.log('removal');
+            console.log(pl.socketID);
+//            console.log(playersDetail[id]);
+//            console.log(playersBasic[id]);
+            if (playersDetail.hasOwnProperty(id)) {
+                delete playersDetail[id];
+            }
+            if (playersBasic.hasOwnProperty(id)) {
+                playersBasic[id]
+            }
+        } else {
+//            console.log(`playersMap has no element with key ${pl.socketID}`);
+        }
+    } else {
+//        console.log(`no player with id ${id} in the playersDetail object`);
+    }
+};
 const addNewPlayer = (o, socket, callback) => {
     let id = o.id;
     id = id.replace(gamedata.prefixes.player, '');
@@ -700,7 +723,7 @@ const startNewSession = (cb) => {
     }
 };
 const setAdmin = (boo) => {
-    console.log(`set admin to ${boo}`);
+//    console.log(`set admin to ${boo}`);
     admin = boo;
 };
 const processStoredGame = (d) => {
@@ -1081,6 +1104,9 @@ io.on('connection', (socket) => {
     });
     socket.on('playerPing', (id) => {
         pingPlayer(id);
+    });
+    socket.on('removePlayer', (id) => {
+        removePlayer(id);
     });
     socket.on('disconnect', () => {
         // Find the player with the corresponding socket.id in the 'players' map
