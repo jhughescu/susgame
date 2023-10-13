@@ -11,8 +11,8 @@ const port = 3000;
 const server = http.createServer(app);
 const io = socketIO(server);
 
-const isDev = true;
-//const isDev = false;
+//const isDev = true;
+const isDev = false;
 
 //app.engine('handlebars', exphbs.engine({defaultLayout: 'backup'}));
 app.engine('hbs', exphbs.engine({extname: '.hbs', defaultLayout: ''}));
