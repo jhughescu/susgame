@@ -605,8 +605,8 @@ const removePlayer = (id) => {
         if (playersMap.has(pl.socketID)) {
             playersMap.get(pl.socketID).emit('evict');
             playersMap.delete(pl.socketID);
-            console.log('removal');
-            console.log(pl.socketID);
+//            console.log('removal');
+//            console.log(pl.socketID);
 //            console.log(playersDetail[id]);
 //            console.log(playersBasic[id]);
             if (playersDetail.hasOwnProperty(id)) {
@@ -615,6 +615,7 @@ const removePlayer = (id) => {
             if (playersBasic.hasOwnProperty(id)) {
                 playersBasic[id]
             }
+            io.emit('playersUpdate', playersDetail);
         } else {
 //            console.log(`playersMap has no element with key ${pl.socketID}`);
         }
