@@ -20,6 +20,7 @@
     <p>This is the admin screen</p>
     <p id='message'></p>
     <div class='controls' id='controlSettings'>
+        <button id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
         <button id='setMax'>Set max votes</button>
         <input id='showMax' style='width: 40px;' type='number' value='10'>
     </div>
@@ -77,6 +78,7 @@
         };
         //
         const buttonSetMax = $('#setMax');
+        const buttonToggleDev = $('#toggleDev');
         const buttonStartSesh = $('#startSession');
         const buttonEndSesh = $('#endSession');
         const buttonsStartRound = $('.startRound');
@@ -107,6 +109,14 @@
         const setMaxVotes = () => {
             console.log(inputMax.val());
             socket.emit('setMaxVotes', inputMax.val())
+        };
+        const showDevMode = (d) => {
+            $('#devModeBoo').html(d ? 'true' : 'false');
+        };
+        const toggleDev = () => {
+            socket.emit('toggleDevMode', (d) => {
+                showDevMode(d);
+            });
         };
         const startNewSession = () => {
             setSessionButtons(true);
@@ -546,10 +556,13 @@
             enableButton(buttonEndSesh, false);
             enableButton(buttonsStartRound, false);
             enableButton(buttonAssignTeams, false);
-
+            socket.emit('areWeDev', (d) => {
+                showDevMode(d);
+            });
         };
         //
         buttonSetMax.on('click', setMaxVotes);
+        buttonToggleDev.on('click', toggleDev);
         buttonStartSesh.on('click', startNewSession);
         buttonEndSesh.on('click', adminTerminateSession);
         buttonsStartRound.on('click', startRound);

@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 //const isDev = true;
-const isDev = false;
+let isDev = false;
 
 //app.engine('handlebars', exphbs.engine({defaultLayout: 'backup'}));
 app.engine('hbs', exphbs.engine({extname: '.hbs', defaultLayout: ''}));
@@ -1035,6 +1035,10 @@ io.on('connection', (socket) => {
 //        io.emit('onNewSession', {session: s, gamedata: gamedata, players: playersObj});
     });
     socket.on('areWeDev', (cb) => {
+        cb(isDev);
+    });
+    socket.on('toggleDevMode', (cb) => {
+        isDev = !isDev;
         cb(isDev);
     });
     socket.on('getPlayerPack', (cb) => {
