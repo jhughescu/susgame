@@ -1179,10 +1179,6 @@ io.on('connection', (socket) => {
         }
     });
     //
-    socket.on('debugRender', (o) => {
-        console.log(`rendered template: ${o.template}, object passed:`);
-//        console.log(o.obj);
-    });
     socket.on('clientDebug', (str) => {
         console.log(`client: ${str}`);
 //        console.log(o.obj);
