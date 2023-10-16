@@ -207,6 +207,7 @@
         const onNewSession = () => {
             // Reload the page rather than refresh view - this enables script to run successfully on rendered page
             // Note: prior call to 'onStoredGameFound' causes a refresh, hence the flicker. Consider a way to remove this in future.
+            clearPersistence();
             window.location.reload();
 //            refreshView('onNewSession');
         };
@@ -440,6 +441,8 @@
         const initpv = () => {
             debugServer('initialise a Public Voice');
             lid = `pv-${getID().split('?')[0]}-vote`;
+            console.log('initpv');
+//            clearPersistence();
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
