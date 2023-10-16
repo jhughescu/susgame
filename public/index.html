@@ -51,7 +51,8 @@
             }
         };
         const debugServer = (str) => {
-            socket.emit('clientDebug', str);
+            // De-comment the below line with care, it results in heavy server load if many clients are connected
+//            socket.emit('clientDebug', str);
         };
         //
         const onRequestSession = (o) => {
@@ -183,7 +184,8 @@
             $(targ).html(renderedHtml);
             let debugObj = {template: temp, obj: ob};
 //            console.log(debugObj);
-            socket.emit('debugRender', debugObj);
+            // De-comment the below line with care, it results in heavy server load if many clients are connected
+//            socket.emit('debugRender', debugObj);
         };
         const renderGameScreen = () => {
             let o = {
