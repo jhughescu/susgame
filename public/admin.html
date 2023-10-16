@@ -61,6 +61,7 @@
         let allEnrolled = null;
         let env = null;
         let activeAdmin = null;
+        let currentDisplay = null;
         //
         const buttonSetup = () => {
             // Ping buttons
@@ -119,6 +120,8 @@
 
         };
         const updateDisplay = (f) => {
+            console.log(`updateDisplay: ${f}`);
+            currentDisplay = f;
             localStorage.setItem(STORE_DISPLAY, f);
         }
         const setSessionButtons = (start) => {
@@ -298,11 +301,18 @@
                 });
             });
         };
+        const showPlayersView = () => {
+            updateDisplay('listPlayers');
+            listPlayers();
+        };
         const updatePlayersView = (p) => {
-            renderTemplate('playerList', 'controlPanel', {players: p});
-            buttonSetup();
+            if (currentDisplay === 'listPlayers') {
+                renderTemplate('playerList', 'controlPanel', {players: p});
+                buttonSetup();
+            }
         }
         const listPlayers = () => {
+//            console.log(`listPlayers`);
             socket.emit('getPlayersDetail', (d) => {
                 let p = Object.values(d);
                 p.forEach((pn) => {
@@ -311,7 +321,7 @@
                     pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
                 });
                 updatePlayersView(p);
-                updateDisplay('listPlayers');
+//                updateDisplay('listPlayers');
             });
         };
         const getScoreObject = (o) => {
@@ -595,7 +605,8 @@
         buttonEndSesh.on('click', adminTerminateSession);
         buttonsStartRound.on('click', startRound);
         buttonAssignTeams.on('click', assignTeams);
-        buttonListPlayers.on('click', listPlayers);
+//        buttonListPlayers.on('click', listPlayers);
+        buttonListPlayers.on('click', showPlayersView);
         buttonShowScores.on('click', showScores);
         buttonCloseWarning.on('click', closeWarning);
         //
