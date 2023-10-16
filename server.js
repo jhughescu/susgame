@@ -980,19 +980,19 @@ const assignTeams = (cb) => {
     }
     console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
     Object.entries(gamedata.teams).forEach(([k, v]) => {
-//        console.log(k);
-//        console.log(v.hasLead);
         v.team.forEach((p, i) => {
-//            console.log(p, i);
             let pl = playersDetail[p];
             if (pl) {
-                if (v.hasLead) {
-                    pl.isLead = i === 0;
+                console.log(pl);
+                if (pl.active && pl.enrolled) {
+                    if (v.hasLead) {
+                        pl.isLead = i === 0;
+                    }
+                    pl.stakeholder = v.id;
+                    pl.teamObj = Object.assign(copyObj(v), {});
+                    let sock = playersMap.get(pl.socketID);
+                    sock.emit('onAssignTeams', k);
                 }
-                pl.stakeholder = v.id;
-                pl.teamObj = Object.assign(copyObj(v), {});
-                let sock = playersMap.get(pl.socketID);
-                sock.emit('onAssignTeams', k);
             } else {
                 console.log(`${p} not defined in playersDetail`);
             }

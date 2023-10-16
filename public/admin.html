@@ -495,7 +495,7 @@
             let sg = JSON.stringify(g);
 //            console.log(`game stored now: ${sg}`);
             localStorage.setItem('susgame', sg);
-            console.log(`storeGame emits storedGameUpdated`);
+//            console.log(`storeGame emits storedGameUpdated`);
             socket.emit('storedGameUpdated', g);
             listPlayers();
         };
