@@ -50,6 +50,10 @@
 //                console.log(`${i}: ${logList[i]}`);
             }
         };
+        const debugServer = (str) => {
+            socket.emit('clientDebug', str);
+        };
+        //
         const onRequestSession = (o) => {
             if (o.player === staticID) {
                 if (o.success) {
@@ -173,6 +177,9 @@
             $(targ).html('');
 //            console.log('re-render');
             $(targ).html(renderedHtml);
+            let debugObj = {template: temp, obj: ob};
+//            console.log(debugObj);
+            socket.emit('debugRender', debugObj);
         };
         const renderGameScreen = () => {
             let o = {
@@ -439,6 +446,7 @@
         };
         const renderVotes = (p) => {
             let v = p.teamObj.votes;
+            debugServer(`renderVotes called`);
             $('#votes').html(v);
             max = v;
             vv.each((i, el) => {
@@ -533,7 +541,7 @@
 //            debugger;
         });
         socket.on('upateMaxVotes', (m) => {
-            console.log('i heard the emission')
+//            console.log('i heard the emission')
             updateMaxVotes(m)
         })
         window.showLog = getLogs;

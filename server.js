@@ -13,6 +13,7 @@ const io = socketIO(server);
 
 //const isDev = true;
 let isDev = false;
+let debug = true;
 
 //app.engine('handlebars', exphbs.engine({defaultLayout: 'backup'}));
 app.engine('hbs', exphbs.engine({extname: '.hbs', defaultLayout: ''}));
@@ -978,12 +979,12 @@ const assignTeams = (cb) => {
             }
         });
     }
-    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+//    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
     Object.entries(gamedata.teams).forEach(([k, v]) => {
         v.team.forEach((p, i) => {
             let pl = playersDetail[p];
             if (pl) {
-                console.log(pl);
+//                console.log(pl);
                 if (pl.active && pl.enrolled) {
                     if (v.hasLead) {
                         pl.isLead = i === 0;
@@ -1177,7 +1178,15 @@ io.on('connection', (socket) => {
             io.emit('sessionUpdate');
         }
     });
-
+    //
+    socket.on('debugRender', (o) => {
+        console.log(`rendered template: ${o.template}, object passed:`);
+//        console.log(o.obj);
+    });
+    socket.on('clientDebug', (str) => {
+        console.log(`client: ${str}`);
+//        console.log(o.obj);
+    });
 });
 
 
