@@ -163,8 +163,12 @@
             let sessionID = txt.value;
             renderGameScreen();
         };
+        const clearPersistence = () => {
+            localStorage.clear();
+        };
         const kickout = () => {
             renderTemplate('outtro', 'insertion');
+            clearPersistence();
         };
         const evicted = () => {
             renderTemplate('kickedout', 'insertion');
