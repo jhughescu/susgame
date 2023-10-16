@@ -414,6 +414,7 @@
                 enableScorePV(pp.session.round > 0);
                 let s = localStorage.getItem(lid);
                 if (s) {
+                    debugServer(`stored data: ${s}`);
                     s = s.split(',');
                     max = 10;
                     s.forEach((v, i) => {
@@ -435,6 +436,7 @@
             console.log('session update calls viewUpdate');
         };
         const initpv = () => {
+            debugServer('initialise a Public Voice');
             lid = `pv-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');
@@ -484,8 +486,8 @@
 
         // Stakeholder
         const initst = () => {
-            console.log('get the max')
-            console.log(player)
+            console.log('get the max');
+            console.log(player);
             lid = `st-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');
