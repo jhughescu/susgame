@@ -56,13 +56,9 @@
         };
         const regenerate = () => {
             let n = parseInt(localStorage.getItem(storeMake));
-//            let n2 = parseInt(localStorage.getItem('storeMake'));
-//            console.log(n, typeof(n));
-//            console.log(n2, typeof(n2), n2 > 0);
             if (n > 0) {
                 n--;
                 localStorage.setItem(storeMake, n);
-//                setTimeout(regenerate, 200);
                 generate();
             } else {
                 alert('dunne')
@@ -130,10 +126,12 @@
                 launched = [];
 //                console.log();
                 for (var i = 0; i < 10; i ++) {
-                    let id = `${window.location.origin}#${s}-${(Object.values(d).length + i)}?autoenroll=true`;
+                    let id = `${window.location.origin}/player#${s}-${(Object.values(d).length + i)}?autoenroll=true`;
 //                    console.log(window.location)
+//                    console.log(id)
 //                    window.open(id;
                     let t = 1000 + (i * 1000);
+//                    return;
                     setTimeout(() => {
 //                        console.log(id);
                         let w = window.open(id);

@@ -166,13 +166,6 @@
                 renderTemplate('teamview', 'controlPanel', {team: Object.values(t)});
             }
         };
-        const showWarning = (w) => {
-            $('#warning_message').html(w);
-            $('#warning').show();
-        };
-        const closeWarning = () => {
-            $('#warning').hide();
-        };
         const assignTeamsFunk = () => {
             enableButton('assignTeams', false);
 //            getGameToStore();
@@ -496,6 +489,14 @@
             $(targ).html('');
             $(targ).html(renderedHtml);
         };
+        const showWarning = (w) => {
+            $('#warning_message').html(w);
+            $('#warning').show();
+        };
+        const closeWarning = () => {
+            $('#warning').hide();
+        };
+
         //
         //
         const getStoredGame = () => {

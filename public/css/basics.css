@@ -40,3 +40,20 @@ table.scorePV {
     font-size: 18px;
     text-align: center;
 }
+
+#warning {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    width: 400px;
+    float: right;
+    background-color: black;
+    padding: 5px;
+    display: none;
+    user-select: none;
+    padding-right: 30px;
+/*    text-align: right;*/
+}
+#warning_message {
+    background-color: inherit;
+}

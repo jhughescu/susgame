@@ -16,6 +16,7 @@
 
 <body>
     <h1>Sustainability Game</h1>
+    <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
     <div id='overlay'>
 
 
@@ -60,7 +61,9 @@
                 if (o.success) {
                     refreshView();
                 } else {
-                    alert(`no session with ID ${txt.value} exists`);
+//                    alert(`no session with ID ${txt.value} exists`);
+                    showWarning(`no session with ID ${txt.value} exists`);
+                    showWarning(`no session with ID ${$('#seshnum').val()} exists`);
                 }
             }
         };
@@ -175,7 +178,7 @@
             renderTemplate('kickedout', 'insertion');
         };
         const refreshMe = () => {
-            console.log(`I want refreshment`);
+//            console.log(`I want refreshment`);
             window.location.reload()
         };
         const renderTemplate = (temp, targ, o) => {
@@ -366,6 +369,19 @@
 
         let isDev = false;
         let logList = {};
+
+        // Potential univeral code:
+
+
+        const showWarning = (w) => {
+            $('#warning_message').html(w);
+            $('#warning').show();
+        };
+        const closeWarning = () => {
+            $('#warning').hide();
+        };
+
+        // end potential universal code
 
 
         // Type-specific code:

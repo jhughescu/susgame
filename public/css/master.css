@@ -13,19 +13,3 @@
 .controls {
     padding: 5px 0px;
 }
-#warning {
-    position: fixed;
-    right: 10px;
-    top: 10px;
-    width: 400px;
-    float: right;
-    background-color: black;
-    padding: 5px;
-    display: none;
-    user-select: none;
-    padding-right: 30px;
-/*    text-align: right;*/
-}
-#warning_message {
-    background-color: inherit;
-}
