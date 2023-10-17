@@ -54,6 +54,7 @@
         const socket = io();
         const PINGBTN = `pingbtn-`;
         const RESETBTN = `resetbtn-`;
+        const REFRESHBTN = `refreshbtn-`;
         const REMOVEBTN = `removebtn-`;
         const STORE_DISPLAY = 'currentDisplay';
         let clientData = {role: 'admin'};
@@ -72,6 +73,19 @@
                     let id = evt.target.id.replace(PINGBTN, '');
                     socket.emit('playerPing', id);
 //                    console.log('playerPing', id);
+                });
+            });
+            // Refresh buttons
+            b = document.getElementsByClassName('refreshBtn');
+            [...b].forEach((bu) => {
+                console.log('get clicked');
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(REFRESHBTN, '');
+                    let r = confirm(`are you sure you want to refresh player ${id}?`);
+                    if (r) {
+                        console.log('refreshPlayer', id);
+                        socket.emit('refreshPlayer', id);
+                    }
                 });
             });
             // Remove buttons

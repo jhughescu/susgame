@@ -600,16 +600,25 @@ const pingPlayer = (id) => {
 //        console.log(`no player with id ${id} in the playersDetail object`);
     }
 };
+const refreshPlayer = (id) => {
+    let pl = playersDetail[id];
+    if (pl) {
+        if (playersMap.has(pl.socketID)) {
+            playersMap.get(pl.socketID).emit('refresh');
+//            io.emit('playersUpdate', playersDetail);
+        } else {
+//            console.log(`playersMap has no element with key ${pl.socketID}`);
+        }
+    } else {
+//        console.log(`no player with id ${id} in the playersDetail object`);
+    }
+};
 const removePlayer = (id) => {
     let pl = playersDetail[id];
     if (pl) {
         if (playersMap.has(pl.socketID)) {
             playersMap.get(pl.socketID).emit('evict');
             playersMap.delete(pl.socketID);
-//            console.log('removal');
-//            console.log(pl.socketID);
-//            console.log(playersDetail[id]);
-//            console.log(playersBasic[id]);
             if (playersDetail.hasOwnProperty(id)) {
                 delete playersDetail[id];
             }
@@ -1106,6 +1115,10 @@ io.on('connection', (socket) => {
     });
     socket.on('playerPing', (id) => {
         pingPlayer(id);
+    });
+    socket.on('refreshPlayer', (id) => {
+        console.log(`I want to refresh stuff`);
+        refreshPlayer(id);
     });
     socket.on('removePlayer', (id) => {
         removePlayer(id);

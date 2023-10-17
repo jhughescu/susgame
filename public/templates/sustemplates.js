@@ -43,7 +43,7 @@ templates['intro'] = template({"compiler":[8,">= 4.3.0"],"main":function(contain
     return "Welcome to the sustainability game. There is currently no active session, please wait here.\n";
 },"useData":true});
 templates['kickedout'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "Sorry, you have been removed from the player list. But don't worry, you can rejoin by refreshing the page.";
+    return "Sorry, you have been removed from the player list. But don't worry, you can rejoin by refreshing the page.\n";
 },"useData":true});
 templates['newlogin'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -84,8 +84,10 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
     + alias4(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":11,"column":33},"end":{"line":11,"column":48}}}) : helper)))
     + "</td>\n        <td><button class='pingBtn' id='pingbtn-"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":12,"column":48},"end":{"line":12,"column":54}}}) : helper)))
-    + "'>ping</button></td>\n        <td><button class='removeBtn' id='removebtn-"
-    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":52},"end":{"line":13,"column":58}}}) : helper)))
+    + "'>ping</button></td>\n        <td><button class='refreshBtn' id='refreshbtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":54},"end":{"line":13,"column":60}}}) : helper)))
+    + "'>refresh</button></td>\n        <td><button class='removeBtn' id='removebtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":52},"end":{"line":14,"column":58}}}) : helper)))
     + "'>remove</button></td>\n        </tr>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -96,7 +98,7 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
     };
 
   return "\n\n<table style='width: 500px;'>\n    <tbody>\n        <tr><th>player</th><th>connected</th><th>enrolled</th><th>team</th><th></th></tr>\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"players") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":15,"column":17}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"players") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":16,"column":17}}})) != null ? stack1 : "")
     + "    </tbody>\n</table>\n";
 },"useData":true});
 templates['playersBasic'] = template({"1":function(container,depth0,helpers,partials,data) {
@@ -244,7 +246,7 @@ templates['partials/publicvoices'] = template({"1":function(container,depth0,hel
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n<table>\n    <tbody>\n        <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n        "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":6,"column":269}}})) != null ? stack1 : "")
-    + "\n    </tbody>\n</table>\n\n<script>\n    setupPV();\n//    let vb = $('.buttonVote');\n//    let vv = $('.voteVal');\n//    let max = 10;\n//    let ls = [];\n//    let lid = `pv-${getID()}-vote`;\n//    const validateVote = (inp) => {\n//        const value = parseFloat(inp.value);\n//        if (value > max) {\n//            inp.value = max;\n//        }\n//        if (value < (-1 * max)) {\n//            inp.value = (-1 * max);\n//        }\n//    };\n//    const submitVote = function (evt) {\n//        const vi = $(this).parent().find('.voteVal');\n//        let o = {\n//            src: player.id,\n//            team: player.stakeholderID,\n//            targ: parseInt(vi.attr('id').split('_')[1]),\n//            v: parseInt(vi.val())\n//        };\n////        console.log(o);\n//        ls[o.targ] = o.v;\n//        console.log(ls);\n//        localStorage.setItem(lid, ls);\n//        $(this).attr('disabled', true);\n//        vi.attr('disabled', true);\n//        socket.emit('pvStakeholderScore', o);\n//    };\n//    const initpv = () => {\n//        let s = localStorage.getItem(lid);\n//        if (s) {\n//            s = s.split(',');\n//            console.log(typeof(s));\n//            s.forEach((v, i) => {\n//                console.log(i, v);\n//                if (v !== undefined) {\n//                    vv[i].value = v;\n//                    $(vv[i]).attr('disabled', true);\n//                    $(vb[i]).attr('disabled', true);\n//                }\n//            });\n//        }\n//    };\n//    $('.buttonVote').on('click', submitVote);\n//    socket.on('scoreUpdate', (o) => {\n//        socket.emit('getPlayer', o.src, (p) => {\n//            let v = p.teamObj.votes;\n//            $('#votes').html(v);\n//            max = v;\n//            vv.each((i, el) => {\n//                if (!$(el).prop('disabled')) {\n//                    validateVote(el);\n//                }\n//            })\n//            if (v <= 0) {\n//                $('#votes').addClass('false');\n//                vb.attr('disabled', true);\n//                vv.attr('disabled', true);\n//            }\n//        });\n//    });\n//    console.log('can we get started?: ' + localStorage.getItem(lid));\n//    initpv();\n</script>\n";
+    + "\n    </tbody>\n</table>\n\n<script>\n    setupPV();\n</script>\n";
 },"useData":true});
 templates['partials/stakeholder'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "I am the leader";
