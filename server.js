@@ -1201,9 +1201,9 @@ process.on('SIGTERM', () => {
 // Serve the static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// All other routes will serve the 'index.html' file
+// All other routes will serve the 'default.html' file
 app.get('', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'default.html'));
 });
 //app.get('/player', (req, res) => {
 //    res.sendFile(path.join(__dirname, 'public', 'player.html'));
@@ -1214,6 +1214,9 @@ app.get('', (req, res) => {
 app.get('/admin', (req, res) => {
 //    res.render('admin');
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+app.get('/player', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'player.html'));
 });
 app.get('/playersBasic', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'playersBasic.html'));
@@ -1290,7 +1293,12 @@ app.get('/game', (req, res) => {
 });
 app.get('/fakes', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'fakeplayers.html'));
-})
+});
+
+
+app.get('*', (req, res) => {
+    res.status('404').sendFile(path.join(__dirname, 'public', 'default.html'));
+});
 
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
