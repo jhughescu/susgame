@@ -150,7 +150,7 @@
             return p;
         };
         const newPlayer = () => {
-//            log(`newPlayer called, id: ${id}`);
+            console.log(`newPlayer called, id: ${id}`);
 //            storageID = getStorageID();
 //            document.title = id;
             player.enrolled = true;
@@ -163,6 +163,7 @@
             gameInit();
         };
         const gameInit = () => {
+            console.log(`gameInit`);
             // this code is open to abuse, replace it with insertion of template HTML
             let sessionID = txt.value;
             renderGameScreen();
@@ -188,6 +189,7 @@
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');
 //            console.log('re-render');
+//            console.log(`renderTemplate ${temp} ${targ}`);
             $(targ).html(renderedHtml);
         };
         const renderGameScreen = () => {
@@ -195,20 +197,29 @@
                 playerID: staticID
             };
             socket.emit('getPlayerPack', (o) => {
-//                player = Object.assign(env.gamedata, player);
+                let steak = player.stakeholderID;
+//                console.log(`PLAYER BEFORE`);
+//                console.log(JSON.parse(JSON.stringify(player)));
+//                console.log(player.stakeholderID);
                 player = prepPlayer(o.playersDetail[getMinID()]);
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
                         player.partialName = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax ? 'stakeholder' : 'publicvoices';
                     } else{
-                        console.log(`no team defined for the player`);
+//                        console.log(`no team defined for the player`);
                     }
                 } else {
-                    console.log(`no session.assigned`);
+//                    console.log(`no session.assigned`);
                 }
                 player = Object.assign(env.gamedata, player);
                 player = finalisePlayer(player);
-                renderTemplate('game', 'insertion', player);
+//                console.log('render the game screen');
+//                console.log(`PLAYER AFTER`);
+//                console.log(JSON.parse(JSON.stringify(player)));
+                if (steak !== player.stakeholderID) {
+                    // Only render if the stakeholder has changed -  may need to add other conditions later
+                    renderTemplate('game', 'insertion', player);
+                }
             });
         };
         const onNewSession = () => {
@@ -287,6 +298,10 @@
             }
             if (p.sessionID) {
                 if (enrolled) {
+//                    console.log('call the renderGameScreen method');
+//                    console.log(`id: ${id}`);
+//                    console.log(p);
+//                    console.log('########################################');
                     renderGameScreen();
                 } else {
                     renderTemplate('newlogin', 'insertion', {
@@ -433,7 +448,7 @@
         };
         const viewUpdate = () => {
             socket.emit('getPlayerPack', (pp) => {
-                console.log(pp.session);
+//                console.log(pp.session);
                 enableScorePV(pp.session.round > 0);
                 let s = localStorage.getItem(lid);
                 if (s) {
@@ -441,7 +456,7 @@
                     s = s.split(',');
                     max = 10;
                     s.forEach((v, i) => {
-                        console.log(i, v)
+//                        console.log(i, v)
                         if (!isNaN(parseInt(v))) {
                             max -= parseInt(v);
                             ls[i] = v;
@@ -461,7 +476,7 @@
         const initpv = () => {
             debugServer('initialise a Public Voice');
             lid = `pv-${getID().split('?')[0]}-vote`;
-            console.log('initpv');
+//            console.log('initpv');
 //            clearPersistence();
             vb = $('.buttonVote');
             vv = $('.voteVal');
@@ -511,8 +526,8 @@
 
         // Stakeholder
         const initst = () => {
-            console.log('get the max');
-            console.log(player);
+//            console.log('get the max');
+//            console.log(player);
             lid = `st-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');

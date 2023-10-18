@@ -1121,9 +1121,11 @@ io.on('connection', (socket) => {
         getGameMin(cb);
     });
     socket.on('storedGameFound', (d) => {
+        console.log('storedGame FOUND');
         processStoredGame(d);
     });
     socket.on('storedGameUpdated', (d) => {
+        console.log('storedGame UPDATED');
         processStoredGame(d);
 
     });

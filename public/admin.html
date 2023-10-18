@@ -134,7 +134,7 @@
 
         };
         const updateDisplay = (f) => {
-            console.log(`updateDisplay: ${f}`);
+//            console.log(`updateDisplay: ${f}`);
             currentDisplay = f;
             localStorage.setItem(STORE_DISPLAY, f);
         }
@@ -198,7 +198,7 @@
 //            let s = o.s;
 //            let s = Object.assign(o.s, {});
             let s = o.hasOwnProperty('s') ? o.s : o;
-            console.log('newSessionStarted');
+//            console.log('newSessionStarted');
 //            console.log(o);
 //            console.log(s);
 
@@ -659,6 +659,7 @@
             if (storedGame) {
                 storedGame.version = 2;
                 storedGame.elements = Object.keys(storedGame.p).length;
+//                console.log();
                 socket.emit('storedGameFound', storedGame);
                 let s = hasStoredSession(storedGame);
                 setSessionButtons(Boolean(storedGame.sid));
