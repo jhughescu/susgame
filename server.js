@@ -1,6 +1,8 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const http = require('http');
+const os = require('os');
+const ditenv = require('dotenv').config();
 const socketIO = require('socket.io');
 const fs = require('fs');
 const path = require('path');
@@ -22,6 +24,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 const gameDataOut = 'gamedata.csv';
 const playerPrefix = 'player-';
+//const logPath = `../logs`;
+const logPath = `logs`;
 
 let logCount = 0;
 let gamedata = null;
@@ -42,7 +46,7 @@ class Player {
         this.socketID = socket.id;
         this.enrolled = false;
         this.active = true;
-        this.stakeholder = -19;
+        this.stakeholder = -1;
 //        writeLogFile(`playerinstance`, this);
     }
     getWebSocket () {
@@ -104,9 +108,13 @@ class Stakeholder {
 };
 
 
+const isLocal = () => {
+    return process.env.NODE_ENV === 'development';
+};
+console.log(`isLocal ${isLocal()}`);
 const writeLogFile = (id, c, msg) => {
     return;
-    let f = `../logs/log.${logCount++}.${id}.json`;
+    let f = `${logPath}/log.${logCount++}.${id}.json`;
     if (msg) {
         c = Object.assign({msg: msg}, c);
     }
@@ -116,7 +124,7 @@ const writeLogFile = (id, c, msg) => {
 };
 const updateLogFile = (id, c, msg) => {
     return;
-    let f = `../logs/log.${id}.json`;
+    let f = `${logPath}/log.${id}.json`;
     if (msg) {
         c = Object.assign({msg: msg}, c);
     }
@@ -134,8 +142,7 @@ const consoleLog = (m) => {
 }
 const clearLogs = (cb) => {
     return;
-    let p = '../logs';
-    fs.readdir(p, (err, files) => {
+    fs.readdir(logPath, (err, files) => {
         let l = files.length
         if (l === 0) {
             if (cb) {
@@ -396,7 +403,7 @@ const pvStakeholderScore = (o) => {
         }
     }
 };
-
+//
 const stStakeholderScoreFunk = (o) => {
     let sc = session.getCurrentScores();
     if (!sc.hasOwnProperty('stakeholderVotes')) {
@@ -443,7 +450,6 @@ const stStakeholderScoreFunk = (o) => {
     session.getCurrentScores().stakeholderVotes = ob;
     return ob;
 }
-
 const stStakeholderScore = (o) => {
 //    console.log('first score!!');
 //    console.log(o);
@@ -459,7 +465,7 @@ const stStakeholderScore = (o) => {
         }
     }
 };
-
+//
 const rNum = (i) => {
     if (i < 10) {i = '0' + i};
     return i;
@@ -988,12 +994,10 @@ const assignTeams = (cb) => {
             }
         });
     }
-//    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
     Object.entries(gamedata.teams).forEach(([k, v]) => {
         v.team.forEach((p, i) => {
             let pl = playersDetail[p];
             if (pl) {
-//                console.log(pl);
                 if (pl.active && pl.enrolled) {
                     if (v.hasLead) {
                         pl.isLead = i === 0;
@@ -1117,7 +1121,7 @@ io.on('connection', (socket) => {
         pingPlayer(id);
     });
     socket.on('refreshPlayer', (id) => {
-        console.log(`I want to refresh stuff`);
+//        console.log(`I want to refresh stuff`);
         refreshPlayer(id);
     });
     socket.on('removePlayer', (id) => {

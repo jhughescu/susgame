@@ -78,12 +78,12 @@
             // Refresh buttons
             b = document.getElementsByClassName('refreshBtn');
             [...b].forEach((bu) => {
-                console.log('get clicked');
+//                console.log('get clicked');
                 bu.addEventListener('click', (evt) => {
                     let id = evt.target.id.replace(REFRESHBTN, '');
                     let r = confirm(`are you sure you want to refresh player ${id}?`);
                     if (r) {
-                        console.log('refreshPlayer', id);
+//                        console.log('refreshPlayer', id);
                         socket.emit('refreshPlayer', id);
                     }
                 });
@@ -91,12 +91,12 @@
             // Remove buttons
             b = document.getElementsByClassName('removeBtn');
             [...b].forEach((bu) => {
-                console.log('get clicked');
+//                console.log('get clicked');
                 bu.addEventListener('click', (evt) => {
                     let id = evt.target.id.replace(REMOVEBTN, '');
                     let r = confirm(`are you sure you want to remove player ${id}?`);
                     if (r) {
-                        console.log('removePlayer', id);
+//                        console.log('removePlayer', id);
                         socket.emit('removePlayer', id);
                     }
                 });
@@ -167,12 +167,9 @@
             }
         };
         const assignTeamsFunk = () => {
-            enableButton('assignTeams', false);
+            setupEnrolButton(false);
 //            getGameToStore();
             socket.emit('assignTeams', (t) => {
-//                showTeams(t);
-//                console.log(`returned teams:`);
-//                console.log(t);
                 listPlayers();
                 enableRoundStart(1);
                 getGameToStore();
@@ -201,7 +198,7 @@
 //            let s = o.s;
 //            let s = Object.assign(o.s, {});
             let s = o.hasOwnProperty('s') ? o.s : o;
-//            console.log('newSessionStarted');
+            console.log('newSessionStarted');
 //            console.log(o);
 //            console.log(s);
 
@@ -209,7 +206,9 @@
 //            console.log(str);
             $('h2').find('span').html(str);
             setSessionButtons(true);
-            enableButton(buttonAssignTeams, true);
+//            enableButton(buttonAssignTeams, true);
+            setupEnrolButton(true);
+            showPlayersView();
         }
         const playerDisplay = (p, i) => {
             var e = document.getElementById('players');
@@ -310,6 +309,7 @@
         };
         const showPlayersView = () => {
             updateDisplay('listPlayers');
+//            console.log(`showPlayersView called`);
             listPlayers();
         };
         const updatePlayersView = (p) => {
@@ -321,14 +321,21 @@
         const listPlayers = () => {
 //            console.log(`listPlayers`);
             socket.emit('getPlayersDetail', (d) => {
-                let p = Object.values(d);
-                p.forEach((pn) => {
-                    pn.stakeholderID = pn.stakeholder;
-                    pn.assigned = pn.stakeholder > -1;
-                    pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
-                });
-                updatePlayersView(p);
-//                updateDisplay('listPlayers');
+                if (env) {
+                    let p = Object.values(d);
+//                    console.log(`I need env now please`);
+//                    console.log(env);
+                    p.forEach((pn) => {
+                        pn.stakeholderID = pn.stakeholder;
+                        pn.assigned = pn.stakeholder > -1;
+                        pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
+                    });
+                    updatePlayersView(p);
+    //                updateDisplay('listPlayers');
+//                    console.log(`listPlayers completed`);
+                } else {
+//                    console.log(`can't list players at this time? env not set)`);
+                }
             });
         };
         const getScoreObject = (o) => {
@@ -443,7 +450,8 @@
         };
         const updateScores = (s) => {
             console.log('HUP');
-            console.log($('#controlPanel').find('#scoreSummary'));
+            console.log(s);
+//            console.log($('#controlPanel').find('#scoreSummary'));
             if ($('#controlPanel').find('#scoreSummary').length > 0) {
                 showScores();
             }
@@ -512,6 +520,7 @@
             localStorage.setItem('susgame', sg);
 //            console.log(`storeGame emits storedGameUpdated`);
             socket.emit('storedGameUpdated', g);
+//            console.log(`storedGame called`);
             listPlayers();
         };
         const getGameToStore = () => {
@@ -519,9 +528,9 @@
             socket.emit('getGameMin', (g) => {
 //                console.log(`this is the only way to get the game data from the server`);
 //                console.log(`the callback, setItem susgame: ${JSON.stringify(g)} (${Object.keys(g.p).length} elements)`);
-                console.log('I got game min');
-                console.log(g);
-                console.log(g.s);
+//                console.log('I got game min');
+//                console.log(g);
+//                console.log(g.s);
                 storeGame(g);
             })
         };
@@ -549,11 +558,26 @@
             }
             return hss;
         };
+        const setupEnrolButton = (force) => {
+            socket.emit('getPlayersDetail', (pd) => {
+//                console.log(pd);
+                let boo = true;
+                for (var p in pd) {
+                    if (p.stakeholder < 0) {
+                        boo = false;
+                        break;
+                    }
+                }
+                enableButton(buttonAssignTeams, (force === undefined ? boo : force));
+//                console.log(`setupEnrolButton: ${boo}`);
+            });
+        };
         const enrollmentUpdate = (o) => {
 //            console.log(`enrollmentUpdate: ${o.allIn}`)
 //            atb.disabled = !o.allIn;
 //            atb.disabled = false;
-            enableButton(buttonAssignTeams, true);
+//            enableButton(buttonAssignTeams, true);
+//            setupEnrolButton();
             allEnrolled = o.allIn;
             if (o.allIn) {
                 setTimeout(() => {
@@ -593,6 +617,7 @@
             if (sd) {
                 switch (sd) {
                     case 'listPlayers':
+//                        console.log(`initDisplay called`);
                         listPlayers();
                         break;
                     case 'showScores':
@@ -647,6 +672,8 @@
             socket.emit('getPlayerPack', (p) => {
                 isDev = p.isDev;
                 env = Object.assign({}, p);
+//                console.log(`should have env now`);
+//                console.log(env);
                 activeAdmin = !env.admin;
                 clientData.activeAdmin = activeAdmin;
                 socket.emit('customDataEvent', clientData);
