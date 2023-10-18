@@ -734,7 +734,7 @@ const startSession = () => {
             console.log(`Hey, it's a new session, that's awesome`);
             session = new Session(sid);
             session.active = true;
-            setInterval(updateTimer, 1000);
+//            setInterval(updateTimer, 1000);
 //        }
     } else {
 //        console.log(`session already in progress, can't start another`);
@@ -1121,11 +1121,11 @@ io.on('connection', (socket) => {
         getGameMin(cb);
     });
     socket.on('storedGameFound', (d) => {
-        console.log('storedGame FOUND');
+//        console.log('storedGame FOUND');
         processStoredGame(d);
     });
     socket.on('storedGameUpdated', (d) => {
-        console.log('storedGame UPDATED');
+//        console.log('storedGame UPDATED');
         processStoredGame(d);
 
     });

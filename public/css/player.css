@@ -40,3 +40,6 @@
     align-items: center;
     z-index: 3; /* Ensure the overlay is on top of other content */
 }
+#gameTimer {
+    display: none;
+}
