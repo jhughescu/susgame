@@ -26,6 +26,7 @@ const gameDataOut = 'gamedata.csv';
 const playerPrefix = 'player-';
 //const logPath = `../logs`;
 const logPath = `logs`;
+const logging = false;
 
 let logCount = 0;
 let gamedata = null;
@@ -111,26 +112,34 @@ class Stakeholder {
 const isLocal = () => {
     return process.env.NODE_ENV === 'development';
 };
-console.log(`isLocal ${isLocal()}`);
+const isLogging = () => {
+    return Boolean(process.env.LOGGING === 'true');
+};
+console.log(`isLocal: ${isLocal()}`);
+console.log(`isLogging: ${isLogging()}`);
 const writeLogFile = (id, c, msg) => {
-    return;
-    let f = `${logPath}/log.${logCount++}.${id}.json`;
-    if (msg) {
-        c = Object.assign({msg: msg}, c);
-    }
-    fs.writeFile(f, JSON.stringify(c, null, 4), () => {
+    if (isLocal() && isLogging()) {
+        let f = `${logPath}/log.${logCount++}.${id}.json`;
+//        let f = `${logPath}/log_${logCount++}_${id}.json`;
+        if (msg) {
+            c = Object.assign({msg: msg}, c);
+        }
+        fs.writeFile(f, JSON.stringify(c, null, 4), () => {
         console.log(`log written: ${f}`)
     })
+    }
 };
 const updateLogFile = (id, c, msg) => {
-    return;
-    let f = `${logPath}/log.${id}.json`;
-    if (msg) {
-        c = Object.assign({msg: msg}, c);
-    }
-    fs.writeFile(f, JSON.stringify(c, null, 4), () => {
+    if (isLocal() && isLogging()) {
+        let f = `${logPath}/log.${id}.json`;
+//        let f = `${logPath}/log_${id}.json`;
+        if (msg) {
+            c = Object.assign({msg: msg}, c);
+        }
+        fs.writeFile(f, JSON.stringify(c, null, 4), () => {
         console.log(`log written: ${f}`);
     })
+    }
 };
 const consoleLog = (m) => {
     const stack = new Error().stack;
@@ -141,28 +150,29 @@ const consoleLog = (m) => {
     io.emit('logoutput', `Line ${l}: ${m}`);
 }
 const clearLogs = (cb) => {
-    return;
-    fs.readdir(logPath, (err, files) => {
-        let l = files.length
-        if (l === 0) {
-            if (cb) {
-                cb();
-            }
-        }
-        if (err) throw err;
-        for (const f of files) {
-            let d = `${p}/${f}`;
-            fs.copyFileSync(d, d.replace('logs/', 'logscopy/'));
-            fs.unlink(d, (e) => {
-                if (l-- === 1) {
-                    if (cb) {
-                        cb();
-                    }
+    if (isLocal() && isLogging()) {
+        fs.readdir(logPath, (err, files) => {
+            let l = files.length
+            if (l === 0) {
+                if (cb) {
+                    cb();
                 }
-                if (e) throw e;
-            })
-        }
-    });
+            }
+            if (err) throw err;
+            for (const f of files) {
+                let d = `${logPath}/${f}`;
+                fs.copyFileSync(d, d.replace('logs/', 'logscopy/'));
+                fs.unlink(d, (e) => {
+                    if (l-- === 1) {
+                        if (cb) {
+                            cb();
+                        }
+                    }
+                    if (e) throw e;
+                })
+            }
+        });
+    }
 };
 const processData = (d) => {
 //    let s = d.stakeholders;
