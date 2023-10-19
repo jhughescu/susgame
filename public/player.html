@@ -152,7 +152,7 @@
                     p.actions = env.gamedata.actions;
                 }
             }
-            console.log(p);
+//            console.log(p);
             return p;
         };
         const newPlayer = () => {
@@ -207,7 +207,8 @@
                 player = prepPlayer(o.playersDetail[getMinID()]);
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
-                        player.partialName = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax ? 'stakeholder' : 'publicvoices';
+                        let mainTeam = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax;
+                        player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
                     } else{
 //                        console.log(`no team defined for the player`);
                     }
@@ -405,10 +406,7 @@
         let vb = $('.buttonVote');
         let vv = $('.voteVal');
         let max = 10;
-//        console.log('get the max')
-//        console.log(player)
         let ls = [];
-//        let lid = `pv-${getID().split('?')[0]}-vote`;
         let lid = null;
         const validateVote = (inp) => {
             const value = parseFloat(inp.value);
@@ -447,32 +445,27 @@
         };
         const viewUpdate = () => {
             socket.emit('getPlayerPack', (pp) => {
-//                console.log(pp.session);
                 enableScorePV(pp.session.round > 0);
-                let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
-//                console.log('can we switch rounds?');
-//                console.log(pp.session.round);
-//                console.log(env.gamedata.rounds);
-//                console.log(theDiv);
-                $('.round').hide();
-                $(`#${theDiv}`).show();
-                let s = localStorage.getItem(lid);
-                if (s) {
-                    debugServer(`stored data: ${s}`);
-                    s = s.split(',');
-                    max = 10;
-                    s.forEach((v, i) => {
-//                        console.log(i, v)
-                        if (!isNaN(parseInt(v))) {
-                            max -= parseInt(v);
-                            ls[i] = v;
-                            vv[i].value = v;
-                            $(vv[i]).attr('disabled', true);
-                            $(vb[i]).attr('disabled', true);
-                        }
-                    });
+                if (pp.session.round > 0) {
+                    let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
+                    $('.round').hide();
+                    $(`#${theDiv}`).show();
+                    let s = localStorage.getItem(lid);
+                    if (s) {
+                        debugServer(`stored data: ${s}`);
+                        s = s.split(',');
+                        max = 10;
+                        s.forEach((v, i) => {
+                            if (!isNaN(parseInt(v))) {
+                                max -= parseInt(v);
+                                ls[i] = v;
+                                vv[i].value = v;
+                                $(vv[i]).attr('disabled', true);
+                                $(vb[i]).attr('disabled', true);
+                            }
+                        });
+                    }
                 }
-
             });
         };
         const onSessionUpdate = () => {
@@ -482,8 +475,6 @@
         const initpv = () => {
             debugServer('initialise a Public Voice');
             lid = `pv-${getID().split('?')[0]}-vote`;
-//            console.log('initpv');
-//            clearPersistence();
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
@@ -541,9 +532,13 @@
             });
             //
             // Allocation - non-collaborative self-allocation of resources
+//            console.log('set up the actions');
             let ab = $('#buttonAllocate');
             let av = $('#allocateVal');
             let as = $('#actionSelect');
+//            console.log(ab)
+//            console.log(av)
+//            console.log(as)
             ab.on('click', function () {
                 console.log(`let's see what the button does`);
                 console.log(as.val());

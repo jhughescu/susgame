@@ -713,8 +713,8 @@
             enableButton('endSession', false);
             enableButton('startSession', false);
             storedGame = getStoredGame();
-            console.log(`getStoredGame: ${storedGame}`);
-            console.log(storedGame);
+//            console.log(`getStoredGame: ${storedGame}`);
+//            console.log(storedGame);
             if (storedGame) {
                 storedGame.version = 2;
                 storedGame.elements = Object.keys(storedGame.p).length;
@@ -730,6 +730,12 @@
             }
             socket.emit('customDataEvent', clientData);
             socket.emit('getPlayerPack', (p) => {
+//                console.log(`this house is clean? ${p.clean}`);
+                if (p.clean) {
+                    console.log(`looks like a new run, wipe everything`);
+                    socket.emit('setClean', false);
+                    adminTerminateSession();
+                }
                 isDev = p.isDev;
                 env = Object.assign({}, p);
 //                console.log(`should have env now`);
@@ -776,6 +782,7 @@
             getGameToStore();
         });
         socket.on('serverShutdown', onServerShutdown);
+        socket.on('serverStartup', onServerStartup);
         socket.on('serverStartup', onServerStartup);
         socket.on('updateFull', (o) => {
 //            console.log('full update');

@@ -28,6 +28,7 @@ const playerPrefix = 'player-';
 const logPath = `logs`;
 const logging = false;
 
+let clean = true; /* clean means no activity has taken place, it can only be set to false when an admin screen connects*/
 let logCount = 0;
 let gamedata = null;
 let sessionID = null;
@@ -485,6 +486,7 @@ const getPlayerPack = (cb, sock) => {
     let d = new Date();
     let o = {
         admin: admin,
+        clean: clean,
         timer: `${rNum(d.getHours())}:${rNum(d.getMinutes())}:${rNum(d.getSeconds())}`,
         isDev: isDev,
         sessionID: isDev ? getSessionID() : Boolean(getSessionID()),
@@ -791,6 +793,7 @@ const processStoredGame = (d) => {
 const pageTypeAdded = (t) => {
 //    console.log(`pageTypeAdded :${t}`);
     if (t === 'admin') {
+//        clean = false;
 //        addFakePlayers();
 //        admin = true;
     }
@@ -1033,8 +1036,6 @@ const assignTeams = (cb) => {
 const initApp = () => {
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
-    consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
-    consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~ initApp');
     gamedata = processData(require('./data/gamedata.json'));
     clearLogs();
@@ -1208,6 +1209,9 @@ io.on('connection', (socket) => {
             io.emit('sessionUpdate');
         }
     });
+    socket.on('setClean', (boo) => {
+        clean = boo;
+    })
     //
     socket.on('clientDebug', (str) => {
         console.log(`client: ${str}`);
@@ -1227,8 +1231,10 @@ process.on('SIGTERM', () => {
     exitApp();
 });
 process.on('SIGUSR2', () => {
+    // should be called on restart, but doesn't seem to work
     console.log('RESYTARTRRTRRTRTSRT');
 });
+
 
 // Serve the static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
