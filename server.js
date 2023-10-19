@@ -1247,6 +1247,9 @@ app.get('/admin', (req, res) => {
 app.get('/player', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'player.html'));
 });
+app.get('/godmode', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'godmode.html'));
+});
 app.get('/playersBasic', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'playersBasic.html'));
 });
