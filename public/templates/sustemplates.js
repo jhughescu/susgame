@@ -84,10 +84,10 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
     + alias4(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":11,"column":33},"end":{"line":11,"column":48}}}) : helper)))
     + "</td>\n        <td><button class='pingBtn' id='pingbtn-"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":12,"column":48},"end":{"line":12,"column":54}}}) : helper)))
-    + "'>ping</button></td>\n        <td><button class='refreshBtn' id='refreshbtn-"
-    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":54},"end":{"line":13,"column":60}}}) : helper)))
-    + "'>refresh</button></td>\n        <td><button class='removeBtn' id='removebtn-"
-    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":52},"end":{"line":14,"column":58}}}) : helper)))
+    + "'>ping</button>\n        <button class='refreshBtn' id='refreshbtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":50},"end":{"line":13,"column":56}}}) : helper)))
+    + "'>refresh</button>\n        <button class='removeBtn' id='removebtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":48},"end":{"line":14,"column":54}}}) : helper)))
     + "'>remove</button></td>\n        </tr>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -147,7 +147,7 @@ templates['scores'] = template({"1":function(container,depth0,helpers,partials,d
 
   return "<div id='scoreSummary'>\n    <div>Score summary:</div>\n    <table><tbody>\n        <tr><th>Stakeholder</th><th>Player<br>resources</th><th>PV 1<br>mean</th><th>PV 2<br>mean</th><th>PV total</th><th>PR x PV</th></tr>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"teams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":8},"end":{"line":7,"column":17}}})) != null ? stack1 : "")
-    + "    </tbody></table>\n</div>";
+    + "    </tbody></table>\n</div>\n";
 },"useData":true});
 templates['serverlost'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<div id='wrapper'>\n    server connection lost, please wait\n</div>\n";

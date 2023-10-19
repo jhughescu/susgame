@@ -1043,6 +1043,7 @@ const initApp = () => {
 };
 const exitApp = () => {
     // This is called when the server shuts down & should not be explicitly called from within the app
+    console.log('SHUTDOWNSHUTDOWNSHUTDOWNSHUTDOWNSHUTDOWN');
     io.emit('serverShutdown');
     getPlayerPack(function (o) {
         io.emit('updateFull', o);
@@ -1225,7 +1226,9 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
     exitApp();
 });
-
+process.on('SIGUSR2', () => {
+    console.log('RESYTARTRRTRRTRTSRT');
+});
 
 // Serve the static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));

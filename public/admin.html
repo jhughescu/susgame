@@ -301,7 +301,7 @@
             });
         };
         const terminateSession = () => {
-//            console.log('terminate the session, kill the localStorage');
+            console.log('terminate the session, kill the localStorage');
             localStorage.removeItem('susgame');
             localStorage.clear();
             setSessionButtons(false);
@@ -634,6 +634,7 @@
         const onServerShutdown = () => {
             console.log('SERVER SHUTTIING DOWN');
             getGameToStore();
+            localStorage.clear();
         };
         const onServerStartup = () => {
             console.log('SERVER STARTED');
@@ -712,6 +713,8 @@
             enableButton('endSession', false);
             enableButton('startSession', false);
             storedGame = getStoredGame();
+            console.log(`getStoredGame: ${storedGame}`);
+            console.log(storedGame);
             if (storedGame) {
                 storedGame.version = 2;
                 storedGame.elements = Object.keys(storedGame.p).length;
