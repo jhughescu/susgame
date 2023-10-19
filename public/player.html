@@ -208,7 +208,12 @@
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
                         let mainTeam = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax;
-                        player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
+                        console.log(o.session.round);
+                        console.log(o.session.round > 0);
+//                        if (o.session.round > 0) {
+                            console.log('partial name ready')
+                            player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
+//                        }
                     } else{
 //                        console.log(`no team defined for the player`);
                     }
@@ -283,6 +288,7 @@
         };
         let currentState = null;
         const refreshViewCallback = (p) => {
+//            console.log('asjdlksajlkdjlkdjlk');
             let id = getMinID();
             let newPlayer = !p.playersBasic.hasOwnProperty(id);
             let enrolled = false;
@@ -299,15 +305,15 @@
             }
             if (p.sessionID) {
                 if (enrolled) {
-//                    console.log('call the renderGameScreen method');
-//                    console.log(`id: ${id}`);
-//                    console.log(p);
-//                    console.log('########################################');
                     renderGameScreen();
                 } else {
-                    renderTemplate('newlogin', 'insertion', {
-                        value: p.isDev ? p.sessionID : ''
-                    });
+                    if ($('#insertion').find('#login').length === 0) {
+                        console.log('render the login');
+                        // only render the login if it isn't already there
+                        renderTemplate('newlogin', 'insertion', {
+                            value: p.isDev ? p.sessionID : ''
+                        });
+                    }
                 }
             } else {
                 renderTemplate('intro', 'insertion');
@@ -376,10 +382,6 @@
                         sid = p.storedData.sid;
                     }
                 }
-//                console.log(` a) no session exists (${!Boolean(sid)}, ${sid})`);
-//                console.log(` b) a session exists which I am not enrolled in`);
-//                console.log(` c) a session exists and I am enrolled on it`);
-
             });
         };
 
