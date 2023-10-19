@@ -21,8 +21,8 @@
     <p id='message'></p>
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
     <div class='controls' id='controlSettings'>
-        <button id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
-        <button id='setMax'>Set max votes</button>
+        <button class='caution' id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
+        <button class='caution' id='setMax'>Set max votes</button>
         <input id='showMax' style='width: 40px;' type='number' value='10'>
     </div>
     <div class='controls' id='controlSession'>
@@ -60,9 +60,11 @@
         let clientData = {role: 'admin'};
         let storedGame = null;
         let allEnrolled = null;
+        let allAssigned = null;
         let env = null;
         let activeAdmin = null;
         let currentDisplay = null;
+        let plTime = null;
         //
         const buttonSetup = () => {
             // Ping buttons
@@ -172,6 +174,7 @@
             socket.emit('assignTeams', (t) => {
                 listPlayers();
                 enableRoundStart(1);
+                enableRoundStart(2);
                 getGameToStore();
             });
         }
@@ -185,11 +188,26 @@
                 }
             }
         };
+        const checkAssigned = (cb) => {
+            socket.emit('getPlayersDetail', (pd) => {
+                let ass = Object.keys(pd).length === 0 ? null : true;
+//                console.log(`checkAssigned: ${Object.keys(pd).length}`);
+                for (var i in pd) {
+                    if (pd[i].stakeholder < 0) {
+                        ass = false;
+                        break
+                    }
+                }
+                if (cb) {
+                    cb(ass);
+                }
+            })
+        }
         const previewTeams = () => {
-            console.log('previewTeams');
+//            console.log('previewTeams');
 //            alert('previewTeams not implemented');
             socket.emit('previewTeams', (t) => {
-                console.log(t);
+//                console.log(t);
                 showTeams(t);
 //                renderTemplate('teamview', 'controlPanel', {team: Object.values(t)})
             });
@@ -208,6 +226,7 @@
             setSessionButtons(true);
 //            enableButton(buttonAssignTeams, true);
             setupEnrolButton(true);
+            setupSessionControls();
             showPlayersView();
         }
         const playerDisplay = (p, i) => {
@@ -223,6 +242,7 @@
         const onPlayerConnect = (msg) => {
             document.getElementById('message').innerHTML += `<p>player ${msg} has connected</p>`;
             console.log('YES IT DOES');
+
         };
         const onGetPlayers = (arr) => {
 //            console.log('onGetPlayers');
@@ -250,6 +270,8 @@
         };
         const newPlayer = (id) => {
             socket.emit('getPlayerIDs');
+//            setupSessionControls();
+//            console.log('mooo');
         };
         const updateSession = () => {
             socket.emit('updateSession');
@@ -283,7 +305,9 @@
             localStorage.removeItem('susgame');
             localStorage.clear();
             setSessionButtons(false);
+            setupSessionControls();
             $('h2').find('span').html(`ended`);
+            updatePlayersView();
         };
         const enableRoundStart = (n) => {
             // Allow a given round to be triggered
@@ -294,8 +318,15 @@
             // NOTE do not alter this to an arrow function!
             let id = $(this).attr('id');
             let r = parseInt(id.replace(/[^0-9]/g, ''));
-            socket.emit('startRound', r);
-            enableButton(id, false);
+            let go = true;
+            if (r === 1) {
+                go = confirm('Round 1 is currently in development and may cause unepected issues. Are you sure you want to continue?');
+            }
+            if (go) {
+//                alert('will go');
+                socket.emit('startRound', r);
+            }
+//            enableButton(id, false);
         };
         const buttonSetupNONEED = () => {
             let b = document.getElementsByClassName('pingBtn');
@@ -313,6 +344,7 @@
             listPlayers();
         };
         const updatePlayersView = (p) => {
+//            console.log(`updatePlayersView: ${currentDisplay}`);
             if (currentDisplay === 'listPlayers') {
                 renderTemplate('playerList', 'controlPanel', {players: p});
                 buttonSetup();
@@ -320,8 +352,11 @@
         }
         const listPlayers = () => {
 //            console.log(`listPlayers`);
+
             socket.emit('getPlayersDetail', (d) => {
+//                console.log(' I have my answer')
                 if (env) {
+//                    console.log('env, yes')
                     let p = Object.values(d);
 //                    console.log(`I need env now please`);
 //                    console.log(env);
@@ -333,6 +368,9 @@
                     updatePlayersView(p);
     //                updateDisplay('listPlayers');
 //                    console.log(`listPlayers completed`);
+                    clearTimeout(plTime)
+                    plTime = setTimeout(setupSessionControls, 500);
+
                 } else {
 //                    console.log(`can't list players at this time? env not set)`);
                 }
@@ -496,6 +534,7 @@
 //            console.log($(targ))
             $(targ).html('');
             $(targ).html(renderedHtml);
+//            console.log(`render template ${temp} ${targ} `);
         };
         const showWarning = (w) => {
             $('#warning_message').html(w);
@@ -559,6 +598,8 @@
             return hss;
         };
         const setupEnrolButton = (force) => {
+            return;
+            // replaced with the setupSessionButtons method
             socket.emit('getPlayersDetail', (pd) => {
 //                console.log(pd);
                 let boo = true;
@@ -601,7 +642,7 @@
         const getPlayerIDs = () => {
             socket.emit('getPlayerIDs', (ids) => {
                 let o = {ids: Object.keys(ids)};
-                console.log(o);
+//                console.log(o);
                 renderTemplate('playersBasic', 'controlPanel', o);
             });
         };
@@ -612,12 +653,13 @@
         };
         //
         const initDisplay = (s) => {
-
             let sd = localStorage.getItem(STORE_DISPLAY);
+//            console.log(`initDisplay called: ${sd}`);
             if (sd) {
+                currentDisplay = sd;
                 switch (sd) {
                     case 'listPlayers':
-//                        console.log(`initDisplay called`);
+                        updatePlayersView();
                         listPlayers();
                         break;
                     case 'showScores':
@@ -628,15 +670,29 @@
                 }
             }
         };
+        const setupSessionControls = () => {
+//            console.log(`setupSessionControls`);
+            enableButton(buttonsStartRound, false);
+            enableButton(buttonAssignTeams, false);
+            checkAssigned((ass) => {
+//                console.log(`ass is ${ass}, ${typeof(ass)}`);
+                if (typeof(ass) === 'boolean') {
+                    enableButton(buttonsStartRound, ass);
+                    enableButton(buttonAssignTeams, !ass);
+                }
+            });
+        }
         const init = () => {
 //            console.log('init')
             setSessionButtons(false);
             enableButton(buttonEndSesh, false);
-            enableButton(buttonsStartRound, false);
-            enableButton(buttonAssignTeams, false);
+            setupSessionControls();
             socket.emit('areWeDev', (d) => {
                 showDevMode(d);
             });
+            if (window.location.host.indexOf('-dev', 0) > -1) {
+                $('H1').append(' - dev');
+            }
         };
         //
         buttonSetMax.on('click', setMaxVotes);
@@ -678,7 +734,9 @@
                 activeAdmin = !env.admin;
                 clientData.activeAdmin = activeAdmin;
                 socket.emit('customDataEvent', clientData);
+
                 if (activeAdmin) {
+//                    console.log('env is ready, call the init')
                     initDisplay();
                     socket.emit('setAdmin', true);
                 } else {

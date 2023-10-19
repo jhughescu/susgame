@@ -137,6 +137,7 @@
             } else {
                 p.stakeholder = Object.values(env.gamedata.teams)[s].title;
             }
+//            console.log(p);
             return p;
         };
         const finalisePlayer = (p) => {
@@ -146,7 +147,12 @@
                      t.isMyTeam = t.id === p.teamObj.id;
                 });
             }
-//            console.log(p);
+            if (p.teamObj) {
+                if (p.teamObj.hasLead) {
+                    p.actions = env.gamedata.actions;
+                }
+            }
+            console.log(p);
             return p;
         };
         const newPlayer = () => {
@@ -198,9 +204,6 @@
             };
             socket.emit('getPlayerPack', (o) => {
                 let steak = player.stakeholderID;
-//                console.log(`PLAYER BEFORE`);
-//                console.log(JSON.parse(JSON.stringify(player)));
-//                console.log(player.stakeholderID);
                 player = prepPlayer(o.playersDetail[getMinID()]);
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
@@ -213,9 +216,6 @@
                 }
                 player = Object.assign(env.gamedata, player);
                 player = finalisePlayer(player);
-//                console.log('render the game screen');
-//                console.log(`PLAYER AFTER`);
-//                console.log(JSON.parse(JSON.stringify(player)));
                 if (steak !== player.stakeholderID) {
                     // Only render if the stakeholder has changed -  may need to add other conditions later
                     renderTemplate('game', 'insertion', player);
@@ -427,7 +427,6 @@
                 targ: parseInt(vi.attr('id').split('_')[1]),
                 v: parseInt(vi.val())
             };
-//            console.log(o);
             ls[o.targ] = o.v;
             localStorage.setItem(lid, ls);
             src.attr('disabled', true);
@@ -450,6 +449,13 @@
             socket.emit('getPlayerPack', (pp) => {
 //                console.log(pp.session);
                 enableScorePV(pp.session.round > 0);
+                let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
+//                console.log('can we switch rounds?');
+//                console.log(pp.session.round);
+//                console.log(env.gamedata.rounds);
+//                console.log(theDiv);
+                $('.round').hide();
+                $(`#${theDiv}`).show();
                 let s = localStorage.getItem(lid);
                 if (s) {
                     debugServer(`stored data: ${s}`);
@@ -511,6 +517,7 @@
             }
         };
         const enableScorePV = (boo) => {
+//            console.log(`enableScorePV`);
             vb.prop('disabled', !boo);
             vv.prop('disabled', !boo);
         };
@@ -526,14 +533,23 @@
 
         // Stakeholder
         const initst = () => {
-//            console.log('get the max');
-//            console.log(player);
             lid = `st-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
                 submitVote($(this), 'stStakeholderScore');
             });
+            //
+            // Allocation - non-collaborative self-allocation of resources
+            let ab = $('#buttonAllocate');
+            let av = $('#allocateVal');
+            let as = $('#actionSelect');
+            ab.on('click', function () {
+                console.log(`let's see what the button does`);
+                console.log(as.val());
+                console.log(av.val());
+            });
+
             viewUpdate();
             scoreUpdate(getMinID());
         };

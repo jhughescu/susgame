@@ -1,6 +1,6 @@
-This is the standard stakeholder template
-<p>{{#if isLead}}I am the leader{{else}}I am just a follower{{/if}}</p>
-{{#if isLead}}<div>
+<p>Role: Stakeholder Team {{#if isLead}}Lead{{else}}Member{{/if}}</p>
+{{#if isLead}}
+<div class='round' id='collaboration'>
     <div>Votes remaining: <span id='votes' class='highlight'>{{teamObj.votes}}</span></div>
     <table><tbody>
         {{#each mainTeams}}
@@ -9,8 +9,21 @@ This is the standard stakeholder template
         {{/if}}
         {{/each}}
     </tbody></table>
+</div>
 
-</div>{{/if}}
+<div class='round' id='allocation'>
+    <select id='actionSelect'>
+    <option value=''>Select an option...</option>
+    {{#each actions}}
+        <option value='{{this}}'>{{this}}</option>
+    {{/each}}
+    </select>
+    <br>
+    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateVote(this)' type='number' value='0'>
+    <button class='buttonAllocate' id='buttonAllocate'>Submit</button>
+</div>
+{{/if}}
+
 <script>
     setupStakeholder();
 </script>

@@ -43,25 +43,34 @@ Handlebars.partials['publicvoices'] = template({"1":function(container,depth0,he
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n<table>\n    <tbody>\n        <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n        "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":6,"column":269}}})) != null ? stack1 : "")
-    + "\n    </tbody>\n</table>\n\n<script>\n    setupPV();\n//    let vb = $('.buttonVote');\n//    let vv = $('.voteVal');\n//    let max = 10;\n//    let ls = [];\n//    let lid = `pv-${getID()}-vote`;\n//    const validateVote = (inp) => {\n//        const value = parseFloat(inp.value);\n//        if (value > max) {\n//            inp.value = max;\n//        }\n//        if (value < (-1 * max)) {\n//            inp.value = (-1 * max);\n//        }\n//    };\n//    const submitVote = function (evt) {\n//        const vi = $(this).parent().find('.voteVal');\n//        let o = {\n//            src: player.id,\n//            team: player.stakeholderID,\n//            targ: parseInt(vi.attr('id').split('_')[1]),\n//            v: parseInt(vi.val())\n//        };\n////        console.log(o);\n//        ls[o.targ] = o.v;\n//        console.log(ls);\n//        localStorage.setItem(lid, ls);\n//        $(this).attr('disabled', true);\n//        vi.attr('disabled', true);\n//        socket.emit('pvStakeholderScore', o);\n//    };\n//    const initpv = () => {\n//        let s = localStorage.getItem(lid);\n//        if (s) {\n//            s = s.split(',');\n//            console.log(typeof(s));\n//            s.forEach((v, i) => {\n//                console.log(i, v);\n//                if (v !== undefined) {\n//                    vv[i].value = v;\n//                    $(vv[i]).attr('disabled', true);\n//                    $(vb[i]).attr('disabled', true);\n//                }\n//            });\n//        }\n//    };\n//    $('.buttonVote').on('click', submitVote);\n//    socket.on('scoreUpdate', (o) => {\n//        socket.emit('getPlayer', o.src, (p) => {\n//            let v = p.teamObj.votes;\n//            $('#votes').html(v);\n//            max = v;\n//            vv.each((i, el) => {\n//                if (!$(el).prop('disabled')) {\n//                    validateVote(el);\n//                }\n//            })\n//            if (v <= 0) {\n//                $('#votes').addClass('false');\n//                vb.attr('disabled', true);\n//                vv.attr('disabled', true);\n//            }\n//        });\n//    });\n//    console.log('can we get started?: ' + localStorage.getItem(lid));\n//    initpv();\n</script>\n";
+    + "\n    </tbody>\n</table>\n\n<script>\n    setupPV();\n</script>\n";
+},"useData":true});
+Handlebars.partials['stactions'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "";
 },"useData":true});
 Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,helpers,partials,data) {
-    return "I am the leader";
+    return "Lead";
 },"3":function(container,depth0,helpers,partials,data) {
-    return "I am just a follower";
+    return "Member";
 },"5":function(container,depth0,helpers,partials,data) {
-    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+    var stack1, helper, alias1=container.escapeExpression, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function", lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
         }
         return undefined
     };
 
-  return "<div>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
-    + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
+  return "<div class='round' id='collaboration'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
+    + alias1(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n    <table><tbody>\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":10,"column":17}}})) != null ? stack1 : "")
-    + "    </tbody></table>\n    \n</div>";
+    + ((stack1 = lookupProperty(helpers,"each").call(alias2,(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":10,"column":17}}})) != null ? stack1 : "")
+    + "    </tbody></table>\n</div>\n\n<div class='round' id='allocation'>\n    <select id='actionSelect'>\n    <option value=''>Select an option...</option>\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(alias2,(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":17,"column":4},"end":{"line":19,"column":13}}})) != null ? stack1 : "")
+    + "    </select>\n    <br>\n    Assign a value: <input class='allocateVal' id='allocateVal_"
+    + alias1(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":22,"column":63},"end":{"line":22,"column":69}}}) : helper)))
+    + "' style='width: 40px;' oninput='validateVote(this)' type='number' value='0'>\n    <button class='buttonAllocate' id='buttonAllocate_"
+    + alias1(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":23,"column":54},"end":{"line":23,"column":60}}}) : helper)))
+    + "'>Submit</button>\n</div>\n";
 },"6":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -91,6 +100,14 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
     + "' style='width: 40px;' oninput='validateVote(this)' type='number' value='0'><button class='buttonVote' id='buttonVote_"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":8,"column":208},"end":{"line":8,"column":214}}}) : helper)))
     + "'>Submit</button></td></tr>\n";
+},"11":function(container,depth0,helpers,partials,data) {
+    var alias1=container.lambda, alias2=container.escapeExpression;
+
+  return "        <option value='"
+    + alias2(alias1(depth0, depth0))
+    + "'>"
+    + alias2(alias1(depth0, depth0))
+    + "</option>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -99,11 +116,11 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
         return undefined
     };
 
-  return "This is the standard stakeholder template\n<p>"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(3, data, 0),"data":data,"loc":{"start":{"line":2,"column":3},"end":{"line":2,"column":67}}})) != null ? stack1 : "")
+  return "<p>Role: Stakeholder Team "
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(3, data, 0),"data":data,"loc":{"start":{"line":1,"column":26},"end":{"line":1,"column":65}}})) != null ? stack1 : "")
     + "</p>\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":13,"column":13}}})) != null ? stack1 : "")
-    + "\n<script>\n    setupStakeholder();\n</script>";
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":25,"column":7}}})) != null ? stack1 : "")
+    + "\n<script>\n    setupStakeholder();\n</script>\n";
 },"useData":true});
 Handlebars.partials['unassigned'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "Oh no, I am NOT ASSIGNED\n";

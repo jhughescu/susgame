@@ -43,3 +43,6 @@
 #gameTimer {
     display: none;
 }
+#allocation, #collaboration {
+    display: none;
+}

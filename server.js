@@ -13,8 +13,8 @@ const port = 3000;
 const server = http.createServer(app);
 const io = socketIO(server);
 
-//const isDev = true;
-let isDev = false;
+const isDev = true;
+//let isDev = false;
 let debug = true;
 
 //app.engine('handlebars', exphbs.engine({defaultLayout: 'backup'}));

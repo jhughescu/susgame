@@ -1,6 +1,9 @@
 .inactive {
     opacity: 0.5;
 }
+#playerList {
+    width: 1000px;
+}
 #scoreSummary table {
     width: 500px;
 }
@@ -12,4 +15,10 @@
 }
 .controls {
     padding: 5px 0px;
+}
+.caution {
+    background-color: #640202;
+}
+.caution span {
+    background-color: inherit;
 }
