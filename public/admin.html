@@ -11,7 +11,7 @@
     <script src='templates/sustemplates.js'></script>
 <!--    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>-->
     <link rel='stylesheet' href='css/basics.css'>
-    <link rel='stylesheet' href='css/master.css'>
+    <link rel='stylesheet' href='css/admin.css'>
 </head>
 
 <body>
@@ -32,6 +32,12 @@
     <div class='controls' id='controlAssign'>
         <button id='assignTeams'>Assign Teams</button>
     </div>
+    <div class='controls' id='controlPresentation'>
+        <button id='togglePlaylist'>Toggle playlist</button>
+        <button id='slidePrevious'>Previous slide</button>
+        <button id='slideNext'>Next slide</button>
+        <button id='slideReload'>Reload slide</button>
+    </div>
     <div class='controls' id='controlRounds'>
         <button class='startRound' id='r1'>Start Round 1</button>
         <button class='startRound' id='r2'>Start Round 2</button>
@@ -41,6 +47,10 @@
         <button id='listPlayers'>List players</button>
         <button id='showScores'>Show scores</button>
     </div>
+    <div>
+        <iframe src='presentation.html'></iframe>
+    </div>
+    <div id='playlist'><div id='slidelist'></div></div>
     <div id='players'></div>
 
     <div>
@@ -57,6 +67,7 @@
         const REFRESHBTN = `refreshbtn-`;
         const REMOVEBTN = `removebtn-`;
         const STORE_DISPLAY = 'currentDisplay';
+        const STORE_ALL = 'currentState';
         let clientData = {role: 'admin'};
         let storedGame = null;
         let allEnrolled = null;
@@ -65,6 +76,9 @@
         let activeAdmin = null;
         let currentDisplay = null;
         let plTime = null;
+        let storeObj = {
+            playlistOpen: false
+        }
         //
         const buttonSetup = () => {
             // Ping buttons
@@ -123,6 +137,11 @@
         const buttonListPlayers = $('#listPlayers');
         const buttonCloseWarning = $('#warning').find('.closer');
         //
+        const buttonTogglePlaylist = $('#togglePlaylist');
+        const buttonSlidePrevious = $('#slidePrevious');
+        const buttonSlideNext = $('#slideNext');
+        const buttonSlideReload = $('#slideReload');
+        //
         const inputMax = $(`#showMax`);
         //
         const enableButton = (b, boo) => {
@@ -139,7 +158,22 @@
 //            console.log(`updateDisplay: ${f}`);
             currentDisplay = f;
             localStorage.setItem(STORE_DISPLAY, f);
-        }
+        };
+        const updateStoreObj = (p, v) => {
+            storeObj[p] = v;
+            localStorage.setItem(STORE_ALL, JSON.stringify(storeObj));
+        };
+        const getStoredVal = (p) => {
+            let r = null;
+            let s = localStorage.getItem(STORE_ALL);
+            if (s) {
+                s = JSON.parse(s);
+                if (s.hasOwnProperty(p)) {
+                    r = s[p];
+                }
+            }
+            return r;
+        };
         const setSessionButtons = (start) => {
 //            console.log(`setup session buttons, has a session started? ${start ? 'yes' : 'no'}`);
             enableButton('endSession', start);
@@ -652,6 +686,39 @@
                 console.log(d)
 ;            })
         };
+        const renderPlaylist = () => {
+            socket.emit('getPresentationPack', (p) => {
+                let cs = localStorage.getItem(env.gamedata.constants.presentation);
+                if (cs) {
+                    cs = JSON.parse(cs);
+                    cs = cs.currentSlide;
+                    for (var i = 0; i < p.slideList.length; i++) {
+                        p.slideList[i].isCurrent = p.slideList[i].index === parseInt(cs);
+                    }
+                }
+                renderTemplate('playlist', 'slidelist', p);
+                $('.slideLink').off('click');
+                $('.slideLink').on('click', function () {
+                    socket.emit('gotoSlide', $(this).attr('id').split('_')[1]);
+                });
+            });
+        };
+        const togglePlaylist = (force) => {
+            let pl = $('#playlist');
+            let viz = force === undefined ? pl.is(':visible') : force;
+//            console.log(force);
+//            console.log(pl);
+//            console.log(viz);
+            if (viz) {
+                pl.hide();
+            } else {
+                pl.show();
+                renderPlaylist();
+
+            }
+            updateStoreObj('playlistOpen', pl.is(':visible'));
+        };
+
         //
         const initDisplay = (s) => {
             let sd = localStorage.getItem(STORE_DISPLAY);
@@ -670,9 +737,11 @@
                         console.log('no initial display function specified');
                 }
             }
+            sd = getStoredVal('playlistOpen');
+//            console.log(sd)
+            togglePlaylist(!sd);
         };
         const setupSessionControls = () => {
-//            console.log(`setupSessionControls`);
             enableButton(buttonsStartRound, false);
             enableButton(buttonAssignTeams, false);
             checkAssigned((ass) => {
@@ -706,6 +775,19 @@
         buttonListPlayers.on('click', showPlayersView);
         buttonShowScores.on('click', showScores);
         buttonCloseWarning.on('click', closeWarning);
+        //
+        buttonTogglePlaylist.on('click', () => {
+            togglePlaylist()
+        });
+        buttonSlideNext.on('click', () => {
+            socket.emit('slideNext');
+        });
+        buttonSlidePrevious.on('click', () => {
+            socket.emit('slidePrevious');
+        });
+        buttonSlideReload.on('click', () => {
+            socket.emit('slideReload');
+        });
         //
 
         socket.on('connect', () => {
@@ -801,6 +883,8 @@
         socket.on('scoreUpdate', (o) => {
             updateScores(o);
         });
+        //
+        socket.on('slideUpdate', renderPlaylist);
 
         storedGame = getStoredGame();
 

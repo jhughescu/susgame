@@ -57,5 +57,8 @@
         "teams": "stakeholders"
     },
     "rounds": [null, "allocation", "collaboration_1"],
-    "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"]
+    "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"],
+    "constants": {
+        "presentation": "suspresstore"
+    }
 }

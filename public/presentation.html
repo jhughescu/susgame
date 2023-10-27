@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Presentation</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='templates/slidetemplates.js'></script>
+    <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/presentation.css'>
+</head>
+
+<body>
+<!--    <h1>Presenation</h1>-->
+<!--    <p>This is the presentation screen</p>-->
+    <div id='content'></div>
+
+
+    <script>
+        const socket = io();
+        let STOREID = null;
+        let gamedata = null;
+        let slideList = null;
+        let currentSlide = null;
+        let clientData = {role: 'presentation'};
+        let presentationData = null;
+        let storeOb = {
+            currentSlide: null
+        };
+        const storeInfo = () => {
+            storeOb.currentSlide = currentSlide.index;
+            localStorage.setItem(STOREID, JSON.stringify(storeOb));
+        };
+        const getInfo = () => {
+            return JSON.parse(localStorage.getItem(STOREID));
+        };
+        const showSlide = (id) => {
+            currentSlide = slideList[id];
+            currentSlide.url = window.location.origin;
+//            console.log(currentSlide);
+//            renderTemplate(currentSlide.id, 'content', currentSlide);
+            renderSlide(currentSlide.id, currentSlide);
+            storeInfo();
+        };
+        const refreshSlide = () => {
+//            console.log(`refreshSlide`);
+//            console.log(JSON.parse(JSON.stringify(currentSlide)));
+            let i = currentSlide.index;
+            currentSlide = presentationData.slideList[i];
+//            console.log(JSON.parse(JSON.stringify(currentSlide)));
+            clearContent();
+//            renderTemplate(currentSlide.id, 'content', currentSlide);
+            renderSlide(currentSlide.id, currentSlide);
+        };
+        const previousSlide = () => {
+            let i = currentSlide.index;
+            if (i > 0) {
+                showSlide(i - 1);
+            }
+        };
+        const nextSlide = () => {
+            let i = currentSlide.index;
+            if (i + 1 < slideList.length) {
+                showSlide(i + 1);
+            }
+        };
+        const repeater = () => {
+            showSlide(0);
+            window.location.reload();
+            setTimeout(repeater, 1000);
+        };
+        // Methods that could potentially be made universal
+        const renderTemplate = (temp, targ, o) => {
+//            console.log(`render template ${temp} ${targ} `);
+//            console.log(o);
+            targ = '#' + targ;
+            let ob = Object.assign({}, o);
+            const compiledTemplate = Handlebars.templates[temp];
+//            console.log(compiledTemplate);
+//            console.log(compiledTemplate());
+            const renderedHtml = compiledTemplate(ob);
+            $(targ).html('');
+            $(targ).html(renderedHtml);
+        };
+        const clearContent = () => {
+            $('#content').html('');
+        };
+
+        const renderSlide = (temp, o) => {
+            let targ = `content`;
+            renderTemplate(temp, targ, o);
+        };
+        const presentationUpdate = (p) => {
+            presentationData = p;
+//            console.log('hup');
+//            console.log(p);
+//            console.log(presentationData);
+            refreshSlide();
+        };
+        const init = () => {
+//            window.location.reload();
+            let i = getInfo();
+            let cs = 0;
+//            console.log(i);
+            if (i) {
+                cs = i.currentSlide ? i.currentSlide : 0;
+            }
+            showSlide(cs);
+//            repeater();
+        };
+
+        socket.on('connect', () => {
+//            console.log(`presentation connect`);
+            socket.emit('customDataEvent', clientData);
+            socket.emit('getPresentationPack', (p) => {
+                presentationData = p;
+                gamedata = p.gamedata;
+                STOREID = gamedata.constants.presentation;
+                console.log(gamedata);
+                slideList = p.slideList;
+                init();
+            });
+        });
+        socket.on('nextSlide', nextSlide);
+        socket.on('previousSlide', previousSlide);
+        socket.on('reloadSlide', refreshSlide);
+        socket.on('gotoSlide', (s) => {
+            showSlide(s);
+        });
+        socket.on('updatePresentationPack', (p) => {presentationUpdate(p)});
+
+    </script>
+</body>
+
+</html>

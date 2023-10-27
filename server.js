@@ -31,6 +31,7 @@ const logging = false;
 let clean = true; /* clean means no activity has taken place, it can only be set to false when an admin screen connects*/
 let logCount = 0;
 let gamedata = null;
+let presentationdata = null;
 let sessionID = null;
 let playersBasic = {};
 let playersDetail = {};
@@ -175,8 +176,10 @@ const clearLogs = (cb) => {
         });
     }
 };
-const processData = (d) => {
-//    let s = d.stakeholders;
+const updateApp = () => {
+    updatePresentationPack();
+};
+const processGameData = (d) => {
     let t = d.teams;
     let f = d.defaults;
     let m = d.map;
@@ -198,22 +201,20 @@ const processData = (d) => {
     writeLogFile('data', d, 'gameData prepared by processData method');
     return d;
 };
-const processDataV1 = (d) => {
-    let s = d.stakeholders;
-    let f = d.defaults;
-    let m = d.map;
-    for (var i in s) {
-        s[i].stub = s[i].title.toLowerCase().replace(/ /gm, '_');
-        for (var j in f) {
-            if (!s[i].hasOwnProperty(j)) {
-                s[i][j] = f[j];
-            }
+const processPresentationData = (d) => {
+    for (var i = 0; i < d.slideList.length; i++) {
+        let s = d.slideList[i];
+        s.index = i;
+        s.hasSession = Boolean(session);
+        if (session) {
+            let id = session.id.toString();
+            s.code = `${id.substr(0, 3)} ${id.substr(3, 3)} ${id.substr(6, 3)}`
+        }
+        if (s.type === 'video') {
+            s.src = d.videoLinks[s.srcRef];
         }
     }
-    for (var i in m) {
-        m[m[i]] = i;
-    }
-    writeLogFile('data', d, 'gameData prepared by processData method');
+    d.gamedata = gamedata;
     return d;
 };
 const roundNum = (n) => {
@@ -352,6 +353,17 @@ const terminateSession = () => {
     sessionID = null;
     session = null;
     io.emit('terminateSession');
+};
+//
+const getPresentationPack = (cb) => {
+    presentationdata = processPresentationData(require('./data/presentationdata.json'));
+    cb(presentationdata);
+};
+const updatePresentationPack = () => {
+    presentationdata = processPresentationData(require('./data/presentationdata.json'));
+//    console.log('UPP');
+//    console.log(presentationdata);
+    io.emit(`updatePresentationPack`, presentationdata);
 };
 //
 
@@ -736,6 +748,7 @@ const startSession = () => {
             console.log(`Hey, it's a new session, that's awesome`);
             session = new Session(sid);
             session.active = true;
+            updateApp();
 //            setInterval(updateTimer, 1000);
 //        }
     } else {
@@ -1033,11 +1046,36 @@ const assignTeams = (cb) => {
     updateLogFile('playersDetail', playersDetail);
     cb(gamedata.teams);
 };
+
+// Presentation code
+const nextSlide = () => {
+//    console.log.('nextSlide');
+    io.emit('nextSlide');
+    io.emit('slideUpdate');
+};
+const previousSlide = () => {
+    io.emit('previousSlide');
+    io.emit('slideUpdate');
+};
+const reloadSlide = () => {
+    io.emit('reloadSlide');
+    io.emit('slideUpdate');
+};
+const gotoSlide = (s) => {
+    console.log(`goto ${s}`);
+    io.emit('gotoSlide', s);
+    io.emit('slideUpdate');
+};
+const setCurrentSlide = (s) => {
+//    let sl =
+};
+
 const initApp = () => {
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~');
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~ initApp');
-    gamedata = processData(require('./data/gamedata.json'));
+    gamedata = processGameData(require('./data/gamedata.json'));
+    presentationdata = processPresentationData(require('./data/presentationdata.json'));
     clearLogs();
     io.emit('serverStartup');
 //    initSession();
@@ -1211,7 +1249,16 @@ io.on('connection', (socket) => {
     });
     socket.on('setClean', (boo) => {
         clean = boo;
-    })
+    });
+    //
+    socket.on('getPresentationPack', (cb) => {
+        getPresentationPack(cb);
+    });
+    socket.on('slideNext', nextSlide);
+    socket.on('slidePrevious', previousSlide);
+    socket.on('slideReload', reloadSlide);
+    socket.on('gotoSlide', gotoSlide);
+    socket.on('setCurrentSlide', setCurrentSlide);
     //
     socket.on('clientDebug', (str) => {
         console.log(`client: ${str}`);
@@ -1258,6 +1305,9 @@ app.get('/player', (req, res) => {
 });
 app.get('/godmode', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'godmode.html'));
+});
+app.get('/presentation', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'presentation.html'));
 });
 app.get('/playersBasic', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'playersBasic.html'));

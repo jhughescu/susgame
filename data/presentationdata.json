@@ -1,0 +1,15 @@
+{
+    "slideList": [
+        {"id": "slide_010_intro", "title": "Introduction/menu", "type": "fullscreen1", "header": "the new title"},
+        {"id": "video", "type": "video", "srcRef": "v1", "title": "first video"},
+        {"id": "slide_020_entry", "title": "Address/session", "type": "fullscreen1", "url": "null", "code": "null"},
+        {"id": "slide_010_intro", "title": "test page", "type": "fullscreen1", "header": "hey, this is new"},
+        {"id": "slide_010_intro", "title": "another test", "type": "fullscreen1", "header": "a load of stuff"},
+        {"id": "slide_010_intro", "title": "not real", "type": "fullscreen1", "header": "I write server code"}
+    ],
+    "videoLinks": {
+        "v1": "https://cranfield.cloud.panopto.eu/Panopto/Pages/Embed.aspx?id=4d35e81e-85e8-4fd3-8394-b0a100e3fbf8&autoplay=true&offerviewer=false&showtitle=false&showbrand=false&captions=true&interactivity=none"
+    }
+}
+
+

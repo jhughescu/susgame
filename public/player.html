@@ -232,6 +232,8 @@
             // Reload the page rather than refresh view - this enables script to run successfully on rendered page
             // Note: prior call to 'onStoredGameFound' causes a refresh, hence the flicker. Consider a way to remove this in future.
             clearPersistence();
+            // Keep the line below in place for now, but work to remove it later.
+            // Move the login code off the template and into the main page - page refreshing sucks.
             window.location.reload();
 //            refreshView('onNewSession');
         };
@@ -288,7 +290,7 @@
         };
         let currentState = null;
         const refreshViewCallback = (p) => {
-//            console.log('asjdlksajlkdjlkdjlk');
+            console.log(`refreshViewCallback`);
             let id = getMinID();
             let newPlayer = !p.playersBasic.hasOwnProperty(id);
             let enrolled = false;
@@ -363,24 +365,32 @@
         };
         const onConnect = () => {
             connectionWarning(true);
+            console.log('onconnect event');
             socket.emit('getPlayerPack', (p) => {
+                console.log('playerPack')
+                console.log(p)
                 isDev = p.isDev;
                 env = Object.assign({}, p);
-                let id = getMinID();
-                clientData.id = id;
-                socket.emit('customDataEvent', clientData);
-                id = getID();
-                storageID = getStorageID();
-                document.title = id;
-                $('h2').html(`id: ${id}`);
-                socket.emit('addNewPlayer', {id: id}, (o) => {
-                    player = o.player;
-                });
-                let sid = false;
-                if (p.storedData) {
-                    if (p.storedData.hasOwnProperty('sid')) {
-                        sid = p.storedData.sid;
+                if (Boolean(p.session)) {
+                    let id = getMinID();
+                    clientData.id = id;
+                    socket.emit('customDataEvent', clientData);
+                    id = getID();
+                    storageID = getStorageID();
+                    document.title = id;
+                    $('h2').html(`id: ${id}`);
+                    socket.emit('addNewPlayer', {id: id}, (o) => {
+                        player = o.player;
+                    });
+                    let sid = false;
+                    if (p.storedData) {
+                        if (p.storedData.hasOwnProperty('sid')) {
+                            sid = p.storedData.sid;
+                        }
                     }
+                } else {
+                    console.log(`no session in progess, don't create a player yet - just show the intro`);
+                    renderTemplate('intro', 'insertion');
                 }
             });
         };
