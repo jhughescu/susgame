@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master</title>
+    <title>Admin</title>
     <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -48,7 +48,7 @@
         <button id='showScores'>Show scores</button>
     </div>
     <div>
-        <iframe src='presentation.html'></iframe>
+        <iframe id='slideshow' src='presentation.html'></iframe>
     </div>
     <div id='playlist'><div id='slidelist'></div></div>
     <div id='players'></div>
@@ -686,14 +686,16 @@
                 console.log(d)
 ;            })
         };
-        const renderPlaylist = () => {
+        const renderPlaylist = (cb) => {
             socket.emit('getPresentationPack', (p) => {
                 let cs = localStorage.getItem(env.gamedata.constants.presentation);
+//                console.log(p);
                 if (cs) {
                     cs = JSON.parse(cs);
                     cs = cs.currentSlide;
                     for (var i = 0; i < p.slideList.length; i++) {
                         p.slideList[i].isCurrent = p.slideList[i].index === parseInt(cs);
+                        p.slideList[i].index === parseInt(cs) ? p.currentSlide = p.slideList[i] : '';
                     }
                 }
                 renderTemplate('playlist', 'slidelist', p);
@@ -701,22 +703,31 @@
                 $('.slideLink').on('click', function () {
                     socket.emit('gotoSlide', $(this).attr('id').split('_')[1]);
                 });
+                if (cb) {
+                    cb(p);
+                }
             });
         };
         const togglePlaylist = (force) => {
             let pl = $('#playlist');
+            let f = $('#slideshow');
             let viz = force === undefined ? pl.is(':visible') : force;
-//            console.log(force);
-//            console.log(pl);
-//            console.log(viz);
             if (viz) {
                 pl.hide();
+                f.hide();
             } else {
                 pl.show();
+                f.show();
                 renderPlaylist();
 
             }
             updateStoreObj('playlistOpen', pl.is(':visible'));
+        };
+        const slideUpdate = () => {
+            renderPlaylist((p) => {
+                buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
+                buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
+            });
         };
 
         //
@@ -738,7 +749,8 @@
                 }
             }
             sd = getStoredVal('playlistOpen');
-//            console.log(sd)
+//            console.log(sd);
+            slideUpdate();
             togglePlaylist(!sd);
         };
         const setupSessionControls = () => {
@@ -884,7 +896,10 @@
             updateScores(o);
         });
         //
-        socket.on('slideUpdate', renderPlaylist);
+        socket.on('slideUpdate', () => {
+            slideUpdate();
+
+        });
 
         storedGame = getStoredGame();
 

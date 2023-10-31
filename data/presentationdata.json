@@ -1,15 +1,37 @@
 {
     "slideList": [
         {"id": "slide_010_intro", "title": "Introduction/menu", "type": "fullscreen1", "header": "the new title"},
-        {"id": "video", "type": "video", "srcRef": "v1", "title": "first video"},
+        {"id": "video", "type": "video", "srcRef": "v1", "title": "Entrance Soundscape"},
+        {"id": "video", "type": "video", "srcRef": "v2", "title": "Welcome"},
+        {"id": "video", "type": "video", "srcRef": "v3", "title": "Resources"},
+        {"id": "video", "type": "video", "srcRef": "v4", "title": "PVPlayers"},
+        {"id": "video", "type": "video", "srcRef": "v5", "title": "Instruction"},
+        {"id": "video", "type": "video", "srcRef": "v6", "title": "Space Travellers"},
+        {"id": "video", "type": "video", "srcRef": "v7", "title": "2023 - 2030 Countup"},
+        {"id": "video", "type": "video", "srcRef": "v8", "title": "2030"},
+        {"id": "video", "type": "video", "srcRef": "v9", "title": "Disruption"},
+        {"id": "video", "type": "video", "srcRef": "v10", "title": "Recalculation"},
+        {"id": "video", "type": "video", "srcRef": "v11", "title": "Collabortaion"},
         {"id": "slide_020_entry", "title": "Address/session", "type": "fullscreen1", "url": "null", "code": "null"},
         {"id": "slide_010_intro", "title": "test page", "type": "fullscreen1", "header": "hey, this is new"},
         {"id": "slide_010_intro", "title": "another test", "type": "fullscreen1", "header": "a load of stuff"},
         {"id": "slide_010_intro", "title": "not real", "type": "fullscreen1", "header": "I write server code"}
     ],
     "videoLinks": {
-        "v1": "https://cranfield.cloud.panopto.eu/Panopto/Pages/Embed.aspx?id=4d35e81e-85e8-4fd3-8394-b0a100e3fbf8&autoplay=true&offerviewer=false&showtitle=false&showbrand=false&captions=true&interactivity=none"
-    }
+        "v1": "4d35e81e-85e8-4fd3-8394-b0a100e3fbf8",
+        "v2": "c437b315-14ac-463e-8804-b0a100e549ca",
+        "v3": "63f204fc-5047-4b3e-bf6f-b0a100e571db",
+        "v4": "0eccda7c-5235-4874-9407-b0a100e58c3d",
+        "v5": "a944730f-6834-40e3-a438-b0a100e5c4f4",
+        "v6": "a1ae4ee8-204e-4fc1-a6f0-b0a100e5d032",
+        "v7": "0a7fa7c1-0efb-493b-8c46-b0a100e5f10f",
+        "v8": "ef091e62-64eb-46d2-9bc8-b0a100e6036d",
+        "v9": "a26bf8d2-7484-4e71-82e5-b0a100e6179b",
+        "v10": "acf6f96c-3890-4243-b52e-b0a100ebf392",
+        "v11": "7877ce10-f67c-47f8-8dc7-b0a100edd3c2"
+    },
+    "videoEnv": "https://cranfield.cloud.panopto.eu/Panopto/Pages/Embed.aspx?id=",
+    "videoSettings": "&autoplay=true&offerviewer=false&showtitle=false&showbrand=false&captions=false&interactivity=none"
 }
 
 

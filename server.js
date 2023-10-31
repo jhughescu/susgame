@@ -211,7 +211,7 @@ const processPresentationData = (d) => {
             s.code = `${id.substr(0, 3)} ${id.substr(3, 3)} ${id.substr(6, 3)}`
         }
         if (s.type === 'video') {
-            s.src = d.videoLinks[s.srcRef];
+            s.src = `${d.videoEnv}${d.videoLinks[s.srcRef]}${d.videoSettings}`;
         }
     }
     d.gamedata = gamedata;
@@ -352,18 +352,21 @@ const terminateSession = () => {
     playersMap = new Map();
     sessionID = null;
     session = null;
+    updateApp();
     io.emit('terminateSession');
 };
 //
 const getPresentationPack = (cb) => {
     presentationdata = processPresentationData(require('./data/presentationdata.json'));
     cb(presentationdata);
+//    return presentationdata;
 };
 const updatePresentationPack = () => {
     presentationdata = processPresentationData(require('./data/presentationdata.json'));
 //    console.log('UPP');
 //    console.log(presentationdata);
     io.emit(`updatePresentationPack`, presentationdata);
+//    return presentationdata;
 };
 //
 
@@ -1090,7 +1093,6 @@ const exitApp = () => {
     clearLogs();
 };
 
-
 io.on('connection', (socket) => {
     socket.on('customDataEvent', (customData) => {
         socket.customData = customData;
@@ -1266,7 +1268,6 @@ io.on('connection', (socket) => {
     });
 });
 
-
 // Code to run when the server app shuts down:
 process.on('exit', () => {
     exitApp();
@@ -1290,12 +1291,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'default.html'));
 });
-//app.get('/player', (req, res) => {
-//    res.sendFile(path.join(__dirname, 'public', 'player.html'));
-//});
-//    app.get('/sustain', (req, res) => {
-//        res.sendFile(path.join(__dirname, 'public', 'player.html'));
-//    });
 app.get('/admin', (req, res) => {
 //    res.render('admin');
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));

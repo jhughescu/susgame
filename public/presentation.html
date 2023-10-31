@@ -16,6 +16,7 @@
 <body>
 <!--    <h1>Presenation</h1>-->
 <!--    <p>This is the presentation screen</p>-->
+    <div id='controls'></div>
     <div id='content'></div>
 
 
@@ -37,22 +38,20 @@
         const getInfo = () => {
             return JSON.parse(localStorage.getItem(STOREID));
         };
+        const prepSlide = (s) => {
+            s.url = window.location.origin;
+            return s;
+        };
         const showSlide = (id) => {
-            currentSlide = slideList[id];
-            currentSlide.url = window.location.origin;
-//            console.log(currentSlide);
-//            renderTemplate(currentSlide.id, 'content', currentSlide);
+            currentSlide = prepSlide(slideList[id]);
+//            currentSlide.url = window.location.origin;
             renderSlide(currentSlide.id, currentSlide);
             storeInfo();
         };
         const refreshSlide = () => {
-//            console.log(`refreshSlide`);
-//            console.log(JSON.parse(JSON.stringify(currentSlide)));
             let i = currentSlide.index;
-            currentSlide = presentationData.slideList[i];
-//            console.log(JSON.parse(JSON.stringify(currentSlide)));
+            currentSlide = prepSlide(presentationData.slideList[i]);
             clearContent();
-//            renderTemplate(currentSlide.id, 'content', currentSlide);
             renderSlide(currentSlide.id, currentSlide);
         };
         const previousSlide = () => {
@@ -92,10 +91,11 @@
         const renderSlide = (temp, o) => {
             let targ = `content`;
             renderTemplate(temp, targ, o);
+            console.log(o);
         };
         const presentationUpdate = (p) => {
             presentationData = p;
-//            console.log('hup');
+            console.log('hup');
 //            console.log(p);
 //            console.log(presentationData);
             refreshSlide();
@@ -119,7 +119,7 @@
                 presentationData = p;
                 gamedata = p.gamedata;
                 STOREID = gamedata.constants.presentation;
-                console.log(gamedata);
+//                console.log(gamedata);
                 slideList = p.slideList;
                 init();
             });
