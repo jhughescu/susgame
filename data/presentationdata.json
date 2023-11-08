@@ -1,6 +1,6 @@
 {
     "slideList": [
-        {"id": "slide_010_intro", "title": "Introduction/menu", "type": "fullscreen1", "header": "the new title"},
+        {"id": "slide_010_intro", "title": "Introduction/menu", "viewtype": "fullscreen1", "header": "the new title"},
         {"id": "video", "type": "video", "srcRef": "v1", "title": "Entrance Soundscape"},
         {"id": "video", "type": "video", "srcRef": "v2", "title": "Welcome"},
         {"id": "video", "type": "video", "srcRef": "v3", "title": "Resources"},
@@ -11,11 +11,12 @@
         {"id": "video", "type": "video", "srcRef": "v8", "title": "2030"},
         {"id": "video", "type": "video", "srcRef": "v9", "title": "Disruption"},
         {"id": "video", "type": "video", "srcRef": "v10", "title": "Recalculation"},
-        {"id": "video", "type": "video", "srcRef": "v11", "title": "Collabortaion"},
-        {"id": "slide_020_entry", "title": "Address/session", "type": "fullscreen1", "url": "null", "code": "null"},
-        {"id": "slide_010_intro", "title": "test page", "type": "fullscreen1", "header": "hey, this is new"},
-        {"id": "slide_010_intro", "title": "another test", "type": "fullscreen1", "header": "a load of stuff"},
-        {"id": "slide_010_intro", "title": "not real", "type": "fullscreen1", "header": "I write server code"}
+        {"id": "video", "type": "video", "srcRef": "v11", "title": "Collaboration"},
+        {"id": "slide_020_entry", "title": "Address/session", "viewtype": "fullscreen1", "url": "null", "code": "null"},
+        {"id": "slide_010_intro", "title": "test page", "viewtype": "fullscreen1", "header": "hey, this is new"},
+        {"id": "slide_110_stakeholders", "title": "frame?", "viewtype": "frame1", "header": "hey, this is really new"},
+        {"id": "slide_010_intro", "title": "another test", "viewtype": "fullscreen1", "header": "a load of stuff"},
+        {"id": "slide_010_intro", "title": "not real", "viewtype": "fullscreen1", "header": "I write server code"}
     ],
     "videoLinks": {
         "v1": "4d35e81e-85e8-4fd3-8394-b0a100e3fbf8",

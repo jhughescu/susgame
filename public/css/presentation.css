@@ -1,8 +1,6 @@
 body, html {
-/*
     height: 100%;
     margin: 0;
-*/
 }
 * {
 /*    color: black;*/
@@ -69,10 +67,14 @@ body, html {
     justify-content: center;
     align-items: center;
     height: 100%;
-    background-image: url(../assets/forest.jpg);
+/*    background-image: url(../assets/forest.jpg);*/
     background-size: cover;
+    background-repeat: no-repeat;
 }
-.container::before {
+.container.fullscreen1 {
+    background-image: url(../assets/forest.jpg);
+}
+.container.fullscreen1::before {
     content: "";
     display: block;
     position: absolute;
@@ -81,6 +83,27 @@ body, html {
     width: 100%;
     height: 100%;
     background: linear-gradient(to bottom right, rgba(92, 131, 142, 0.23), rgba(33, 216, 216, 0.5));
+}
+.frame1full {
+    width: 100%;
+    height: 100%;
+    background-image: url(../assets/frame1full.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.container.frame1top {
+    background-size: contain;
+    background-image: url(../assets/frame1_top.png);
+    background-position: top;
+    position: absolute;
+}
+.container.frame1bottom {
+    background-size: cover;
+    background-image: url(../assets/frame1_bottom.png);
+    background-position: bottom;
+    position: absolute;
+    bottom: 0px;
 }
 .box {
 /*    width: 350px;*/
@@ -119,4 +142,75 @@ body, html {
 #vidFrame, #vidDiv {
     width: 100%;
     height: 100%;
+}
+/*
+.frame2 {
+    display: grid;
+    grid-template-areas:
+        "top-left top top-right"
+        "left center right"
+        "bottom-left bottom bottom-right";
+    grid-template-rows: 500px 1fr 500px;
+    grid-template-columns: 500px 1fr 500px;
+    height: 100%;
+    background-color: black;
+}
+.framecorner {
+    background-repeat: no-repeat;
+}
+.frame2 .top-left {
+    background-image: url(../assets/frame1_1.png);
+}
+.frame2 .top-right {
+    background-image: url(../assets/frame1_2.png);
+    background-position: right;
+}
+.frame2 .bottom-left {
+    background-image: url(../assets/frame1_3.png);
+}
+.frame2 .bottom-right {
+    background-image: url(../assets/frame1_4.png);
+    background-position: bottom;
+}
+*/
+.frame2 {
+/*
+    display: grid;
+    grid-template-areas:
+        "top-left top top-right"
+        "left center right"
+        "bottom-left bottom bottom-right";
+    grid-template-rows: 500px 1fr 500px;
+    grid-template-columns: 500px 1fr 500px;
+*/
+    height: 100%;
+/*    background-color: black;*/
+}
+.framecorner {
+    background-repeat: no-repeat;
+    background-size: contain;
+/*    background-color: yellow;*/
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+.frame2 .top-left {
+    background-image: url(../assets/frame1_1tl.png);
+/*    background-color: green;*/
+}
+.frame2 .top-right {
+    background-image: url(../assets/frame1_2tr.png);
+    background-position: right;
+/*    background-position: right;*/
+}
+.frame2 .bottom-left {
+    background-image: url(../assets/frame1_3bl.png);
+    background-position: left;
+/*    background-position: bottom;*/
+/*    left: 0px;*/
+}
+.frame2 .bottom-right {
+    background-image: url(../assets/frame1_4br.png);
+/*    background-position: bottom;*/
+    background-position: right;
 }
