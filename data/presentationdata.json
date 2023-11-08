@@ -3,6 +3,8 @@
         {"id": "slide_010_intro", "title": "Introduction/menu", "viewtype": "fullscreen1", "header": "the new title"},
         {"id": "video", "type": "video", "srcRef": "v1", "title": "Entrance Soundscape"},
         {"id": "video", "type": "video", "srcRef": "v2", "title": "Welcome"},
+        {"id": "slide_020_entry", "title": "Address/session", "viewtype": "fullscreen1", "url": "null", "code": "null"},
+        {"id": "slide_110_stakeholders", "title": "Teams", "viewtype": "frame1"},
         {"id": "video", "type": "video", "srcRef": "v3", "title": "Resources"},
         {"id": "video", "type": "video", "srcRef": "v4", "title": "PVPlayers"},
         {"id": "video", "type": "video", "srcRef": "v5", "title": "Instruction"},
@@ -12,9 +14,7 @@
         {"id": "video", "type": "video", "srcRef": "v9", "title": "Disruption"},
         {"id": "video", "type": "video", "srcRef": "v10", "title": "Recalculation"},
         {"id": "video", "type": "video", "srcRef": "v11", "title": "Collaboration"},
-        {"id": "slide_020_entry", "title": "Address/session", "viewtype": "fullscreen1", "url": "null", "code": "null"},
         {"id": "slide_010_intro", "title": "test page", "viewtype": "fullscreen1", "header": "hey, this is new"},
-        {"id": "slide_110_stakeholders", "title": "frame?", "viewtype": "frame1", "header": "hey, this is really new"},
         {"id": "slide_010_intro", "title": "another test", "viewtype": "fullscreen1", "header": "a load of stuff"},
         {"id": "slide_010_intro", "title": "not real", "viewtype": "fullscreen1", "header": "I write server code"}
     ],

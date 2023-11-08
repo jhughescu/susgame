@@ -41,6 +41,9 @@
         };
         const prepSlide = (s) => {
             s.url = window.location.origin;
+            s.gamedata = gamedata;
+            console.log('prepSlide');
+            console.log(s);
             return s;
         };
         const showSlide = (id) => {
@@ -74,13 +77,9 @@
         };
         // Methods that could potentially be made universal
         const renderTemplate = (temp, targ, o) => {
-//            console.log(`render template ${temp} ${targ} `);
-//            console.log(o);
             targ = '#' + targ;
             let ob = Object.assign({}, o);
             const compiledTemplate = Handlebars.templates[temp];
-//            console.log(compiledTemplate);
-//            console.log(compiledTemplate());
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');
             $(targ).html(renderedHtml);
@@ -92,7 +91,7 @@
         const renderSlide = (temp, o) => {
             let targ = `content`;
             renderTemplate(temp, targ, o);
-            console.log(o);
+//            console.log(o);
         };
         const presentationUpdate = (p) => {
             presentationData = p;
@@ -102,15 +101,12 @@
             refreshSlide();
         };
         const init = () => {
-//            window.location.reload();
             let i = getInfo();
             let cs = 0;
-//            console.log(i);
             if (i) {
                 cs = i.currentSlide ? i.currentSlide : 0;
             }
             showSlide(cs);
-//            repeater();
         };
 
         socket.on('connect', () => {
@@ -124,6 +120,7 @@
                 slideList = p.slideList;
                 init();
             });
+
         });
         socket.on('nextSlide', nextSlide);
         socket.on('previousSlide', previousSlide);

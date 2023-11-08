@@ -1,9 +1,13 @@
-<!--{{> fullscreen2}}-->
-<!--{{> frame1}}-->
 {{> frame1full}}
-<!--
-<div class='wrapper intro'>
-    <div class="container {{viewtype}}">
+<div class='container'>
+    <table class='stakeholders'><tbody>
+        <tr><td>{{> stakeholder_card}}{{> stakeholder_card}}{{> stakeholder_card}}</td></tr>
+        <tr><td>{{> stakeholder_card}}{{> stakeholder_card}}</td></tr>
+    </tbody></table>
+
+    <div class="grid-container">
+        {{#each gamedata.mainTeams}}
+        <div class="cell">{{> stakeholder_card}}</div>
+        {{/each}}
     </div>
 </div>
--->
