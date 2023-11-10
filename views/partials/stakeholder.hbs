@@ -19,7 +19,11 @@
     {{/each}}
     </select>
     <br>
-    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateVote(this)' type='number' value='0'>
+    <div id="input-container">
+        <textarea id='actionDesc' placeholder="Add description here..."></textarea>
+    </div>
+    <br>
+    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateVote(this)' type='number'>
     <button class='buttonAllocate' id='buttonAllocate'>Submit</button>
 </div>
 {{/if}}

@@ -156,7 +156,7 @@
             return p;
         };
         const newPlayer = () => {
-            console.log(`newPlayer called, id: ${id}`);
+//            console.log(`newPlayer called, id: ${id}`);
 //            storageID = getStorageID();
 //            document.title = id;
             player.enrolled = true;
@@ -198,6 +198,9 @@
 //            console.log(`renderTemplate ${temp} ${targ}`);
             $(targ).html(renderedHtml);
         };
+        const getTemplate = () => {
+
+        };
         const renderGameScreen = () => {
             let o = {
                 playerID: staticID
@@ -208,17 +211,8 @@
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
                         let mainTeam = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax;
-                        console.log(o.session.round);
-                        console.log(o.session.round > 0);
-//                        if (o.session.round > 0) {
-                            console.log('partial name ready')
                             player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
-//                        }
-                    } else{
-//                        console.log(`no team defined for the player`);
                     }
-                } else {
-//                    console.log(`no session.assigned`);
                 }
                 player = Object.assign(env.gamedata, player);
                 player = finalisePlayer(player);
@@ -365,10 +359,10 @@
         };
         const onConnect = () => {
             connectionWarning(true);
-            console.log('onconnect event');
+//            console.log('onconnect event');
             socket.emit('getPlayerPack', (p) => {
-                console.log('playerPack')
-                console.log(p)
+//                console.log('playerPack')
+//                console.log(p)
                 isDev = p.isDev;
                 env = Object.assign({}, p);
                 if (Boolean(p.session)) {
@@ -544,17 +538,28 @@
             });
             //
             // Allocation - non-collaborative self-allocation of resources
-//            console.log('set up the actions');
             let ab = $('#buttonAllocate');
             let av = $('#allocateVal');
             let as = $('#actionSelect');
-//            console.log(ab)
-//            console.log(av)
-//            console.log(as)
+            let ad = $('#actionDesc');
             ab.on('click', function () {
-                console.log(`let's see what the button does`);
-                console.log(as.val());
-                console.log(av.val());
+                if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
+//                    console.log('chips');
+//                    console.log(player.teamObj);
+                    let c = confirm('are you sure?');
+                    if (c) {
+                        let o = {
+                            t: player.teamObj.id,
+                            action_name: as.val(),
+                            action_desc: ad.val(),
+                            resource: av.val()
+                        }
+                        socket.emit('allocation1', o);
+                    }
+                } else {
+                    alert('please complete all options');
+                }
+
             });
 
             viewUpdate();

@@ -41,7 +41,11 @@
         };
         const prepSlide = (s) => {
             s.url = window.location.origin;
-            s.gamedata = gamedata;
+//            s.gamedata = gamedata;
+            gamedata.mainTeams.forEach((v, i) => {
+//                console.log(i, v);
+                s[`card_${i}`] = v;
+            });
             console.log('prepSlide');
             console.log(s);
             return s;
@@ -75,6 +79,57 @@
             window.location.reload();
             setTimeout(repeater, 1000);
         };
+        const setupCards = () => {
+//            $('.flower').hide();
+//            console.log('mooooo');
+            let i = $(`.stakeholder_card`).length;
+            while (i >= 0) {
+                showLeaf(i, false, false);
+                i--;
+            }
+        };
+        const showLeaf = (id, boo, anim) => {
+            let leaf = $(`#stakeholder_card_${id}`).find('.cls-8');
+//            console.log(leaf);
+            if (boo) {
+                if (anim) {
+                    leaf.fadeIn();
+                } else {
+                    leaf.show();
+                }
+            } else {
+                if (anim) {
+                    leaf.fadeOut();
+                } else {
+                    leaf.hide();
+                }
+            }
+            leaf = $(`#stakeholder_card_${id}`).find('.cls-9');
+            if (boo) {
+                if (anim) {
+                    leaf.fadeIn();
+                } else {
+                    leaf.show();
+                }
+            } else {
+                if (anim) {
+                    leaf.fadeOut();
+                } else {
+                    leaf.hide();
+                }
+            }
+        };
+        const updateCard1 = (c, p, v) => {
+            let card = $(`#stakeholder_card_${c}`);
+            let prop = card.find(`.${p}`);
+            prop.html(v);
+            console.log(c, p, v);
+            if (p === 'resource') {
+                console.log('resauce');
+                showLeaf(c, true, true);
+            }
+        };
+
         // Methods that could potentially be made universal
         const renderTemplate = (temp, targ, o) => {
             targ = '#' + targ;
@@ -92,10 +147,13 @@
             let targ = `content`;
             renderTemplate(temp, targ, o);
 //            console.log(o);
+            if ($('.stakeholder_card').length > 0) {
+                setupCards();
+            }
         };
         const presentationUpdate = (p) => {
             presentationData = p;
-            console.log('hup');
+//            console.log('hup');
 //            console.log(p);
 //            console.log(presentationData);
             refreshSlide();
@@ -129,6 +187,13 @@
             showSlide(s);
         });
         socket.on('updatePresentationPack', (p) => {presentationUpdate(p)});
+        socket.on('updateAllocation1', (o) => {
+            console.log(`updateAllocation`);
+            console.log(o);
+            updateCard1(o.t, 'action_name', o.action_name);
+            updateCard1(o.t, 'action_desc', o.action_desc);
+            updateCard1(o.t, 'resource', o.resource);
+        });
 
     </script>
 </body>

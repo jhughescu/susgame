@@ -1,13 +1,22 @@
 {{> frame1full}}
 <div class='container'>
-    <table class='stakeholders'><tbody>
-        <tr><td>{{> stakeholder_card}}{{> stakeholder_card}}{{> stakeholder_card}}</td></tr>
-        <tr><td>{{> stakeholder_card}}{{> stakeholder_card}}</td></tr>
-    </tbody></table>
-
-    <div class="grid-container">
-        {{#each gamedata.mainTeams}}
-        <div class="cell">{{> stakeholder_card}}</div>
-        {{/each}}
+    <div class="grid-container1">
+        <div class="cell">
+            {{> stakeholder_card card_0}}
+        </div>
+        <div class="cell">
+            {{> stakeholder_card card_1}}
+        </div>
+        <div class="cell">
+            {{> stakeholder_card card_2}}
+        </div>
+    </div>
+    <div class="grid-container2">
+        <div class="cell">
+            {{> stakeholder_card card_3}}
+        </div>
+        <div class="cell">
+            {{> stakeholder_card card_4}}
+        </div>
     </div>
 </div>

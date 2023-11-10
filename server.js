@@ -369,7 +369,13 @@ const updatePresentationPack = () => {
 //    return presentationdata;
 };
 //
-
+const allocation1 = (o) => {
+    // stakeholder lead has submitted an initial resource allocation
+    io.emit('updateAllocation1', o);
+    console.log('updateAllocation1');
+    console.log(o);
+}
+//
 const pvStakeholderScoreFunk = (o) => {
     let sc = session.getCurrentScores();
     if (!sc.hasOwnProperty('pvVotes')) {
@@ -417,7 +423,7 @@ const pvStakeholderScoreFunk = (o) => {
     io.emit('scoreUpdate', o);
     session.getCurrentScores().pvVotes = ob;
     return ob;
-}
+};
 const pvStakeholderScore = (o) => {
     let t = Object.values(gamedata.teams);
     if (session) {
@@ -475,7 +481,7 @@ const stStakeholderScoreFunk = (o) => {
     io.emit('scoreUpdate', o);
     session.getCurrentScores().stakeholderVotes = ob;
     return ob;
-}
+};
 const stStakeholderScore = (o) => {
 //    console.log('first score!!');
 //    console.log(o);
@@ -1236,6 +1242,9 @@ io.on('connection', (socket) => {
         setAdmin(boo);
     });
     //
+    socket.on('allocation1', (o) => {
+        allocation1(o);
+    });
     socket.on('pvStakeholderScore', (o) => {
         pvStakeholderScore(o);
     });
