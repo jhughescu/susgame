@@ -3,32 +3,27 @@
         "t0": {
             "id": 0,
             "title": "Government",
-            "displayColour": "#0099C4",
             "displayColour": "#0099C4"
         },
         "t1": {
             "id": 1,
             "title": "Individual Change Maker",
-            "displayColour": "#633e88",
-            "displayColour": "#95C11F"
+            "displayColour": "#633e88"
         },
         "t2": {
             "id": 2,
             "title": "Well-established Business",
-            "displayColour": "#95C11F",
-            "displayColour": "#633E8C"
+            "displayColour": "#95C11F"
         },
         "t3": {
             "id": 3,
             "title": "Civil Society Organisation",
-            "displayColour": "#F6C310",
-            "displayColour": "#D1356F"
+            "displayColour": "#F6C310"
         },
         "t4": {
             "id": 4,
             "title": "Small Enterprise",
-            "displayColour": "#D1356F",
-            "displayColour": "#F6C310"
+            "displayColour": "#D1356F"
         },
         "t5": {
             "id": 5,
@@ -68,6 +63,7 @@
     },
     "rounds": [null, "allocation", "collaboration_1"],
     "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"],
+    "actions": ["", "", "", "", ""],
     "constants": {
         "presentation": "suspresstore"
     }

@@ -451,6 +451,8 @@
         };
         const viewUpdate = () => {
             socket.emit('getPlayerPack', (pp) => {
+                console.log(`viewUpdate`);
+                console.log(pp);
                 enableScorePV(pp.session.round > 0);
                 if (pp.session.round > 0) {
                     let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
@@ -490,6 +492,8 @@
             scoreUpdate(getMinID());
         };
         const renderVotes = (p) => {
+            console.log(`renderVotes`);
+            console.log(p);
             let v = p.teamObj.votes;
             debugServer(`renderVotes called`);
             $('#votes').html(v);
@@ -506,9 +510,13 @@
             }
         };
         const scoreUpdate = (o) => {
+            console.log(`scoreUpdate:`);
+            console.log(o);
             if (o.src === getMinID()) {
-//                console.log(`OK, we can go`);
+                console.log(`OK, we can go`);
                 socket.emit('getPlayer', o.src, (p) => {
+                    console.log(`getPlayer CB:`);
+                    console.log(p);
                     renderVotes(p)
                 });
             }
@@ -544,16 +552,19 @@
             let ad = $('#actionDesc');
             ab.on('click', function () {
                 if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
-//                    console.log('chips');
-//                    console.log(player.teamObj);
                     let c = confirm('are you sure?');
                     if (c) {
                         let o = {
+                            src: player.id,
                             t: player.teamObj.id,
                             action_name: as.val(),
                             action_desc: ad.val(),
-                            resource: av.val()
+                            resource: parseInt(av.val())
                         }
+                        ab.attr('disabled', true);
+                        av.attr('disabled', true);
+                        as.attr('disabled', true);
+                        ad.attr('disabled', true);
                         socket.emit('allocation1', o);
                     }
                 } else {
@@ -573,6 +584,9 @@
             const value = parseFloat(inp.value);
             if (value > max) {
                 inp.value = max;
+            }
+            if (value < 0) {
+                inp.value = 0;
             }
         };
         // End stakeholder

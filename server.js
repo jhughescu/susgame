@@ -275,7 +275,16 @@ const updateSinglePlayerDetail = (id) => {
         console.log(`can't update ${id} because storedData has not been defined`)
     }
 };
+const getTeamFromNumber = (n) => {
+//    console.log(gamedata);
+    let t = null;
+    if (gamedata.hasOwnProperty('mainTeams')) {
+        t = gamedata.mainTeams[n];
+    }
+    return t;
+};
 const getPlayerFromID = (id) => {
+//    console.log(`getPlayerFromID: ${id}`);
     let pl = playersDetail[id];
     return pl;
 };
@@ -376,13 +385,29 @@ const updatePresentationPack = () => {
 const allocation1 = (o) => {
     // stakeholder lead has submitted an initial resource allocation
     let sc = session.getCurrentScores();
+    let t = getTeamFromNumber(o.t);
+    let pl = getPlayerFromID(o.src);
     io.emit('updateAllocation1', o);
     console.log('updateAllocation1');
     if (!sc.hasOwnProperty('allocations')) {
         sc.allocations = {};
     }
     sc.allocations[`team_${o.t}`] = o;
-    console.log(sc);
+    t.votes -= o.resource;
+    pl.teamObj.votes -= o.resource;
+//    console.log(o);
+//    console.log(sc);
+//    console.log(t);
+//    console.log(pl);
+    let sco = {
+        src: o.src,
+        team: o.t,
+        targ: o.t,
+        v: o.resource
+    }
+    stStakeholderScore(sco);
+//    console.log(sco);
+    io.emit('scoreUpdate', sco);
     sessionUpdate();
 }
 //
@@ -430,6 +455,8 @@ const pvStakeholderScoreFunk = (o) => {
     pl.scores[r].push({targ: o.targ, v: o.v});
     // Update the vote total in the scoring player
     pl.teamObj.votes -= Math.abs(o.v);
+    console.log('this is the PV event, object:');
+    console.log(o);
     io.emit('scoreUpdate', o);
     session.getCurrentScores().pvVotes = ob;
     sessionUpdate();
@@ -489,13 +516,15 @@ const stStakeholderScoreFunk = (o) => {
     pl.scores[r].push({targ: o.targ, v: o.v});
     // Update the vote total in the scoring player
     pl.teamObj.votes -= Math.abs(o.v);
+    console.log('this is the ST event, object:');
+    console.log(o);
     io.emit('scoreUpdate', o);
     session.getCurrentScores().stakeholderVotes = ob;
     return ob;
 };
 const stStakeholderScore = (o) => {
-//    console.log('first score!!');
-//    console.log(o);
+    console.log('first score!!');
+    console.log(o);
     let t = Object.values(gamedata.teams);
     if (session) {
         if (session.assigned) {
