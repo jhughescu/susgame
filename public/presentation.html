@@ -48,6 +48,10 @@
             });
             console.log('prepSlide');
             console.log(s);
+            console.log(gamedata);
+            socket.emit('getSession', (o) => {
+                console.log(o)
+            });
             return s;
         };
         const showSlide = (id) => {
@@ -87,6 +91,10 @@
                 showLeaf(i, false, false);
                 i--;
             }
+            socket.emit('getSession', (s) => {
+                console.log('I have the sesh');
+                onSessionUpdate(s);
+            });
         };
         const showLeaf = (id, boo, anim) => {
             let leaf = $(`#stakeholder_card_${id}`).find('.cls-8');
@@ -129,7 +137,25 @@
                 showLeaf(c, true, true);
             }
         };
-
+        const onSessionUpdate = (s) => {
+            console.log('session updated:');
+            console.log(s);
+            console.log(s.scores.round1);
+            if (s.scores) {
+                if (s.scores.round1) {
+                    console.log('we are r1');
+                    if (s.scores.round1.allocations) {
+                        let a = s.scores.round1.allocations;
+                        Object.values(a).forEach((o) => {
+                            console.log(o);
+                            updateCard1(o.t, 'action_name', o.action_name);
+                            updateCard1(o.t, 'action_desc', o.action_desc);
+                            updateCard1(o.t, 'resource', o.resource);
+                        });
+                    }
+                }
+            }
+        };
         // Methods that could potentially be made universal
         const renderTemplate = (temp, targ, o) => {
             targ = '#' + targ;
@@ -148,6 +174,7 @@
             renderTemplate(temp, targ, o);
 //            console.log(o);
             if ($('.stakeholder_card').length > 0) {
+                console.log('renderSlide');
                 setupCards();
             }
         };
@@ -188,12 +215,17 @@
         });
         socket.on('updatePresentationPack', (p) => {presentationUpdate(p)});
         socket.on('updateAllocation1', (o) => {
+            // replaced by the sessionUpdate event
+            return;
             console.log(`updateAllocation`);
             console.log(o);
             updateCard1(o.t, 'action_name', o.action_name);
             updateCard1(o.t, 'action_desc', o.action_desc);
             updateCard1(o.t, 'resource', o.resource);
         });
+        socket.on('sessionUpdate', (s) => {
+            onSessionUpdate(s);
+        })
 
     </script>
 </body>

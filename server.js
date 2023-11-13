@@ -316,6 +316,10 @@ const requestSession = (o) => {
     }
     onRequestSession(ro);
 };
+const sessionUpdate = () => {
+    // emit an event in the case of any update to the session
+    io.emit('sessionUpdate', session);
+};
 const allPlayersEnrolled = () => {
     let allIn = true;
     for (var i in playersDetail) {
@@ -371,9 +375,15 @@ const updatePresentationPack = () => {
 //
 const allocation1 = (o) => {
     // stakeholder lead has submitted an initial resource allocation
+    let sc = session.getCurrentScores();
     io.emit('updateAllocation1', o);
     console.log('updateAllocation1');
-    console.log(o);
+    if (!sc.hasOwnProperty('allocations')) {
+        sc.allocations = {};
+    }
+    sc.allocations[`team_${o.t}`] = o;
+    console.log(sc);
+    sessionUpdate();
 }
 //
 const pvStakeholderScoreFunk = (o) => {
@@ -422,6 +432,7 @@ const pvStakeholderScoreFunk = (o) => {
     pl.teamObj.votes -= Math.abs(o.v);
     io.emit('scoreUpdate', o);
     session.getCurrentScores().pvVotes = ob;
+    sessionUpdate();
     return ob;
 };
 const pvStakeholderScore = (o) => {
@@ -1255,7 +1266,8 @@ io.on('connection', (socket) => {
         if (session) {
             session.setRound(r);
             io.emit('startRound', r);
-            io.emit('sessionUpdate');
+//            io.emit('sessionUpdate');
+            sessionUpdate();
         }
     });
     socket.on('setClean', (boo) => {

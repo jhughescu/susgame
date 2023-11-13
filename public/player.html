@@ -568,6 +568,13 @@
         const setupStakeholder = () => {
             initst();
         };
+
+        const validateAllocation = (inp) => {
+            const value = parseFloat(inp.value);
+            if (value > max) {
+                inp.value = max;
+            }
+        };
         // End stakeholder
 
         // End type-specific code
