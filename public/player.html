@@ -88,6 +88,9 @@
 //            console.log(`sid set to ${sid}`);
             return sid;
         };
+        const getUniqueStorageID = (id) => {
+            return `${getStorageID()}-${id}`;
+        };
         const generateID = () => {
 //            console.log(`gen id`);
             let id = 'player-' + Math.round(Math.random() * 1000);
@@ -148,8 +151,9 @@
                 });
             }
             if (p.teamObj) {
+//                console.log(p.teamObj);
                 if (p.teamObj.hasLead) {
-                    p.actions = env.gamedata.actions;
+                    p.actions = p.teamObj.hasOwnProperty('actions') ? p.teamObj.actions : env.gamedata.actions;
                 }
             }
 //            console.log(p);
@@ -201,6 +205,22 @@
         const getTemplate = () => {
 
         };
+        const setState = (o) => {
+            // record a state for the page to return to upon refresh
+            localStorage.setItem(getUniqueStorageID('state'), JSON.stringify(o));
+        };
+        const updateState = () => {
+            // return the page to its present state
+            let o = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+            console.log('return to state');
+            for (var i in o) {
+                console.log(i, o[i], `#${i}`, $(`#${i}`).length);
+                if ($(`#${i}`).length > 0) {
+                    $(`#${i}`).val(o[i]);
+                    $(`#${i}`).attr('disabled', true);
+                }
+            }
+        };
         const renderGameScreen = () => {
             let o = {
                 playerID: staticID
@@ -219,6 +239,9 @@
                 if (steak !== player.stakeholderID) {
                     // Only render if the stakeholder has changed -  may need to add other conditions later
                     renderTemplate('game', 'insertion', player);
+//                    console.log('the game updates');
+//                    console.log(player);
+                    updateState();
                 }
             });
         };
@@ -458,6 +481,7 @@
                     let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
                     $('.round').hide();
                     $(`#${theDiv}`).show();
+                    console.log(`show ${theDiv}`)
                     let s = localStorage.getItem(lid);
                     if (s) {
                         debugServer(`stored data: ${s}`);
@@ -537,6 +561,12 @@
         // End Public Voices
 
         // Stakeholder
+        const registerScore = (src, targ, valID, val) => {
+            socket.emit('getNewScorePacket', src, targ, valID, val, (sp) => {
+//                console.log('spspspspspspspspspspspspspspspsp');
+                console.log(sp);
+            })
+        };
         const initst = () => {
             lid = `st-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
@@ -554,18 +584,28 @@
                 if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
                     let c = confirm('are you sure?');
                     if (c) {
+                        registerScore(player.id, player.id, 'action_name', as.val());
+                        registerScore(player.id, player.id, 'action_desc', ad.val());
+                        registerScore(player.id, player.id, 'vote', parseInt(av.val()));
+                        let sto = {
+                            allocateVal: av.val(),
+                            actionDesc: ad.val(),
+                            actionSelect: as.val(),
+                            buttonAllocate: ''
+                        };
+                        setState(sto);
                         let o = {
                             src: player.id,
                             t: player.teamObj.id,
                             action_name: as.val(),
                             action_desc: ad.val(),
                             resource: parseInt(av.val())
-                        }
+                        };
                         ab.attr('disabled', true);
                         av.attr('disabled', true);
                         as.attr('disabled', true);
                         ad.attr('disabled', true);
-                        socket.emit('allocation1', o);
+//                        socket.emit('allocation1', o);
                     }
                 } else {
                     alert('please complete all options');

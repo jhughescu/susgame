@@ -4,7 +4,8 @@
             "id": 0,
             "title": "Government",
             "displayColour": "#0099C4",
-            "displayColour": "#0099C4"
+            "displayColour": "#0099C4",
+            "actions": ["action ken", "action bill", "action ron", "action cow", "action tits"]
         },
         "t1": {
             "id": 1,
@@ -66,7 +67,7 @@
     "definitions": {
         "teams": "stakeholders"
     },
-    "rounds": [null, "allocation", "collaboration_1"],
+    "rounds": [null, "allocation", "collaboration_1", "publicvoices"],
     "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"],
     "constants": {
         "presentation": "suspresstore"

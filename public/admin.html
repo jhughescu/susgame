@@ -41,6 +41,7 @@
     <div class='controls' id='controlRounds'>
         <button class='startRound' id='r1'>Start Round 1</button>
         <button class='startRound' id='r2'>Start Round 2</button>
+<!--        <button class='startRound' id='r3'>Public Voices vote</button>-->
     </div>
     <br>
     <div class='controls' id='controlDisplay'>
@@ -416,7 +417,9 @@
                 hasSt: false,
                 teams: []
             };
-//            console.log(o);
+            // HACK: try getting rid of the concept of rounds to allow scores to accru
+//            o.round = 1;
+            console.log(o)
             let t = JSON.parse(JSON.stringify(env.gamedata.mainTeams));
             if (o.round) {
                 if (o.round > 0) {
@@ -426,7 +429,7 @@
                     let summ = null;
                     oo.hasPV = Boolean(scPV);
                     oo.hasSt = Boolean(scSt);
-                    console.clear();
+//                    console.clear();
                     t.forEach((v, id) => {
                         let ot = {
                             title: v.title,

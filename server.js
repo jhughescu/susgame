@@ -40,6 +40,7 @@ let session = null;
 let storedData = null;
 let sessionArchive = [];
 let admin = null;
+let scorePackets = [];
 
 class Player {
     constructor(id, socket) {
@@ -88,6 +89,8 @@ class Session {
         return this.round;
     }
     getCurrentScores() {
+        let r = this.round;
+        r = 1;
         return this.scores[`round${this.round}`];
     }
 };
@@ -109,7 +112,29 @@ class Stakeholder {
 //        this.likes = 0;
     }
 };
+class ScorePacket {
+    constructor(src, targ, valID, val) {
+        this.id = getPacketID();
+        this.src = src;
+        this.targ = targ;
+        this.val = val;
+        this.valID = valID;
+        this.round = session.getRound();
+    }
+};
+const getPacketID = () => {
+    return scorePackets.length;
+};
+const getNewScorePacket = (cb, src, targ, val, valID) => {
 
+//    getNewScorePacket(cb, src, targ, val, valID);
+
+    let sp = new ScorePacket(src, targ, valID, val);
+    scorePackets.push(sp);
+    applyScorePacket(sp);
+//    getTeamMembers(targ);
+    cb(sp);
+}
 
 const isLocal = () => {
     return process.env.NODE_ENV === 'development';
@@ -283,6 +308,19 @@ const getTeamFromNumber = (n) => {
     }
     return t;
 };
+const getTeamMembers = (id) => {
+    let t = null;
+    console.log(`getTeamMembers: ${id}`);
+    // return an array of players from a given team. Can be derived either from player ID (String) or team ID (Number)
+    if (typeof (id) === 'number') {
+        // Number, assume this is a team ID and return all members with matching team id.
+    }
+    if (typeof (id) === 'string') {
+        // String, assume this is a player ID. Use the team object to access the team ID
+        t = getPlayerFromID(id);
+        console.log(t.teamObj);
+    }
+};
 const getPlayerFromID = (id) => {
 //    console.log(`getPlayerFromID: ${id}`);
     let pl = playersDetail[id];
@@ -328,6 +366,11 @@ const requestSession = (o) => {
 const sessionUpdate = () => {
     // emit an event in the case of any update to the session
     io.emit('sessionUpdate', session);
+    logSession();
+};
+const logSession = () => {
+//    console.log(`logSession`);
+    updateLogFile('session', session);
 };
 const allPlayersEnrolled = () => {
     let allIn = true;
@@ -409,7 +452,7 @@ const allocation1 = (o) => {
 //    console.log(sco);
     io.emit('scoreUpdate', sco);
     sessionUpdate();
-}
+};
 //
 const pvStakeholderScoreFunk = (o) => {
     let sc = session.getCurrentScores();
@@ -476,6 +519,8 @@ const pvStakeholderScore = (o) => {
 //
 const stStakeholderScoreFunk = (o) => {
     let sc = session.getCurrentScores();
+    console.log(`stStakeholderScoreFunk`);
+    console.log(sc);
     if (!sc.hasOwnProperty('stakeholderVotes')) {
         sc.stakeholderVotes = {
             list: [],
@@ -491,6 +536,7 @@ const stStakeholderScoreFunk = (o) => {
     });
     ob.list.forEach((v) => {
         if (!ob.summary[`t-${v.targ}`].hasOwnProperty(`v-${v.team}`)) {
+            console.log('SET TO ZERO');
             ob.summary[`t-${v.targ}`][`v-${v.team}`] = {a: [], t: 0}
         }
         ob.summary[`t-${v.targ}`][`v-${v.team}`].a.push(v.v);
@@ -520,6 +566,7 @@ const stStakeholderScoreFunk = (o) => {
     console.log(o);
     io.emit('scoreUpdate', o);
     session.getCurrentScores().stakeholderVotes = ob;
+    console.log(session.getCurrentScores());
     return ob;
 };
 const stStakeholderScore = (o) => {
@@ -535,6 +582,20 @@ const stStakeholderScore = (o) => {
                 return stStakeholderScoreFunk(o);
             }
         }
+    }
+};
+//
+const applyScorePacket = (sp) => {
+//    console.log(sp);
+    if (session) {
+        if (!session.hasOwnProperty('scores')) {
+            session.scores = {};
+        }
+        if (!session.scores.hasOwnProperty('raw')) {
+            session.scores.raw = [];
+        }
+        session.scores.raw.push(sp);
+        sessionUpdate();
     }
 };
 //
@@ -1294,6 +1355,7 @@ io.on('connection', (socket) => {
     socket.on('startRound', (r) => {
         if (session) {
             session.setRound(r);
+//            session.setRound(1);
             io.emit('startRound', r);
 //            io.emit('sessionUpdate');
             sessionUpdate();
@@ -1301,6 +1363,10 @@ io.on('connection', (socket) => {
     });
     socket.on('setClean', (boo) => {
         clean = boo;
+    });
+    socket.on('getNewScorePacket', (src, targ, valID, val, cb) => {
+//        console.log(cb);
+        getNewScorePacket(cb, src, targ, val, valID);
     });
     //
     socket.on('getPresentationPack', (cb) => {
@@ -1370,17 +1436,24 @@ app.get('/test', (req, res) => {
 app.get('/download-session', (req, res) => {
     console.log('go down the route');
     let ob = session;
+    if (!ob) {
+        res.render('sessionno');
+        return;
+    }
     const csvWriterInstance = csvWriter({
-        path: ob,
+//        path: ob,
+        path: '',
         header: [
             { id: 'name', title: 'Name' },
             { id: 'score', title: 'Score' },
         ],
     });
-
+    console.log('this bit done');
+    console.log(ob);
     csvWriterInstance.writeRecords(ob)
         .then(() => {
             res.download(ob, (err) => {
+
                 if (err) {
                     console.error('Error sending CSV:', err);
                 }
@@ -1433,7 +1506,7 @@ app.get('/fakes', (req, res) => {
 
 
 app.get('*', (req, res) => {
-    res.status('404').sendFile(path.join(__dirname, 'public', 'default.html'));
+    res.status(404).sendFile(path.join(__dirname, 'public', 'default.html'));
 });
 
 server.listen(port, () => {
