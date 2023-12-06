@@ -11,3 +11,9 @@
     color: yellow;
     font-weight: bold;
 }
+table {
+    width: 600px;
+}
+th {
+    background-color: black;
+}

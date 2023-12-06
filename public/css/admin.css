@@ -12,8 +12,36 @@ button, input {
 .inactive {
     opacity: 0.5;
 }
+
+#status {
+    display: none;
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    width: 400px;
+    height: 300px;
+    background-color: rgba(0, 0, 0, 0.79);
+}
+#status span {
+    position: absolute;
+    top: 30px;
+}
+.indr {
+    height: 6px;
+    background-color: #011c01;
+    border: 2px solid #2f382f;
+    border-left-color: black;
+    border-top-color: black;
+/*    padding: 5px 5px;*/
+}
+.indr.highlight {
+    background-color: #009b00;
+}
 #playerList {
     width: 1000px;
+}
+#playerList th {
+    cursor: pointer;
 }
 #scoreSummary {
 /*    font-size: 2.3rem;*/

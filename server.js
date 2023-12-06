@@ -30,6 +30,7 @@ const logging = false;
 
 let clean = true; /* clean means no activity has taken place, it can only be set to false when an admin screen connects*/
 let logCount = 0;
+let statusMessages = [];
 let gamedata = null;
 let presentationdata = null;
 let sessionID = null;
@@ -113,27 +114,37 @@ class Stakeholder {
     }
 };
 class ScorePacket {
-    constructor(src, targ, valID, val) {
+    constructor(src, targ, valID, val, roundComplete) {
         this.id = getPacketID();
         this.src = src;
         this.targ = targ;
         this.val = val;
         this.valID = valID;
         this.round = session.getRound();
+        this.roundComplete = roundComplete;
     }
 };
 const getPacketID = () => {
     return scorePackets.length;
 };
 const getNewScorePacket = (cb, src, targ, val, valID) => {
-
-//    getNewScorePacket(cb, src, targ, val, valID);
-
+    console.log('OLD METHOD CALL');
     let sp = new ScorePacket(src, targ, valID, val);
     scorePackets.push(sp);
     applyScorePacket(sp);
-//    getTeamMembers(targ);
     cb(sp);
+}
+const getNewScorePacket2 = (o) => {
+    if (o.hasOwnProperty('src') && o.hasOwnProperty('targ') && o.hasOwnProperty('valID') && o.hasOwnProperty('val')) {
+        let roundComplete = o.hasOwnProperty('roundComplete') ? o.roundComplete : false;
+        let sp = new ScorePacket(o.src, o.targ, o.valID, o.val, roundComplete);
+
+        scorePackets.push(sp);
+        updateLogFile('scorePackets', scorePackets);
+        applyScorePacket(sp);
+    } else {
+        console.log('WARNING scorePackets require as a minimum a src, targ, valID and val')
+    }
 }
 
 const isLocal = () => {
@@ -152,7 +163,7 @@ const writeLogFile = (id, c, msg) => {
             c = Object.assign({msg: msg}, c);
         }
         fs.writeFile(f, JSON.stringify(c, null, 4), () => {
-        console.log(`log written: ${f}`)
+//        console.log(`log written: ${f}`)
     })
     }
 };
@@ -164,7 +175,7 @@ const updateLogFile = (id, c, msg) => {
             c = Object.assign({msg: msg}, c);
         }
         fs.writeFile(f, JSON.stringify(c, null, 4), () => {
-        console.log(`log written: ${f}`);
+//        console.log(`log written: ${f}`);
     })
     }
 };
@@ -175,7 +186,7 @@ const consoleLog = (m) => {
     console.log(`Line ${l}: ${m}`);
 //    console.log(m);
     io.emit('logoutput', `Line ${l}: ${m}`);
-}
+};
 const clearLogs = (cb) => {
     if (isLocal() && isLogging()) {
         fs.readdir(logPath, (err, files) => {
@@ -200,6 +211,30 @@ const clearLogs = (cb) => {
             }
         });
     }
+};
+const getScoreString = (p) => {
+//    console.log(`============ getScoreString`);
+//    console.log(p);
+//    getTeamFromPlayer(p.src);
+//    console.log('=========================');
+    let ttarg = Object.values(gamedata.teams)[p.targ];
+    let tsrc = getTeamFromPlayer(p.src);
+//    console.log(`allocation? ${ttarg.id === tsrc.id}`);
+    return `${p.valID} set to ${p.val} for ${ttarg.title} ${ttarg.id === tsrc.id ? '(allocation)' : ''}`;
+};
+const statusUpdate = (s) => {
+//    console.log(`statusUpdate, ${typeof(m)}`);
+//    console.log(m);
+    let m = '';
+    if (s instanceof ScorePacket) {
+        m = JSON.stringify(s);
+        m = getScoreString(s);
+    }
+    if (typeof(s) === 'string') {
+        m = s;
+    }
+    statusMessages.push({message: m});
+    io.emit('onStatusUpdate', statusMessages);
 };
 const updateApp = () => {
     updatePresentationPack();
@@ -308,18 +343,48 @@ const getTeamFromNumber = (n) => {
     }
     return t;
 };
-const getTeamMembers = (id) => {
+const getTeamFromPlayer = (p) => {
+    // return a team object based on a player, expressed as either a numeric or alphanumeric id or as an object
     let t = null;
-    console.log(`getTeamMembers: ${id}`);
+    if (typeof(p) === 'number') {
+
+    } else if (typeof(p) === 'string') {
+        Object.values(gamedata.teams).forEach((tm) => {
+            let obj = tm.team.reduce(function(acc, cur, i) {
+              acc[cur] = i;
+              return acc;
+            }, {});
+            if (obj.hasOwnProperty(p)) {
+//                console.log(`team for ${p} found:`);
+//                console.log(tm);
+                t = tm;
+            }
+
+        });
+    } else if (typeof(p) === 'object') {
+
+    }
+    return t;
+};
+const getTeamMembers = (id) => {
+    let t = [];
+//    console.log(`getTeamMembers: ${id}`);
     // return an array of players from a given team. Can be derived either from player ID (String) or team ID (Number)
     if (typeof (id) === 'number') {
         // Number, assume this is a team ID and return all members with matching team id.
+        Object.entries(playersDetail).forEach((te, i) => {
+            if (te[1].teamObj.id === id) {
+                t.push(te[1]);
+            }
+//            console.log(te.length);
+        })
     }
     if (typeof (id) === 'string') {
         // String, assume this is a player ID. Use the team object to access the team ID
         t = getPlayerFromID(id);
-        console.log(t.teamObj);
+//        console.log(t.teamObj);
     }
+    return t;
 };
 const getPlayerFromID = (id) => {
 //    console.log(`getPlayerFromID: ${id}`);
@@ -366,6 +431,10 @@ const requestSession = (o) => {
 const sessionUpdate = () => {
     // emit an event in the case of any update to the session
     io.emit('sessionUpdate', session);
+//    console.log('session');
+//    console.log('session');
+//    console.log('session');
+//    console.log(session);
     logSession();
 };
 const logSession = () => {
@@ -427,6 +496,8 @@ const updatePresentationPack = () => {
 //
 const allocation1 = (o) => {
     // stakeholder lead has submitted an initial resource allocation
+    // DEPRECATED METHOD
+    /*
     let sc = session.getCurrentScores();
     let t = getTeamFromNumber(o.t);
     let pl = getPlayerFromID(o.src);
@@ -438,10 +509,6 @@ const allocation1 = (o) => {
     sc.allocations[`team_${o.t}`] = o;
     t.votes -= o.resource;
     pl.teamObj.votes -= o.resource;
-//    console.log(o);
-//    console.log(sc);
-//    console.log(t);
-//    console.log(pl);
     let sco = {
         src: o.src,
         team: o.t,
@@ -449,9 +516,9 @@ const allocation1 = (o) => {
         v: o.resource
     }
     stStakeholderScore(sco);
-//    console.log(sco);
     io.emit('scoreUpdate', sco);
     sessionUpdate();
+    */
 };
 //
 const pvStakeholderScoreFunk = (o) => {
@@ -504,7 +571,7 @@ const pvStakeholderScoreFunk = (o) => {
     session.getCurrentScores().pvVotes = ob;
     sessionUpdate();
     return ob;
-};
+ };
 const pvStakeholderScore = (o) => {
     let t = Object.values(gamedata.teams);
     if (session) {
@@ -585,8 +652,33 @@ const stStakeholderScore = (o) => {
     }
 };
 //
+const teamRoundComplete = (o) => {
+    console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+//    console.log(gamedata);
+    if (session) {
+        let t = getTeamMembers(o.team);
+        t.forEach((p, id) => {
+            let r = `r${session.getRound()}`;
+            let a = p.teamObj.rounds.length === 0 ? [] : p.teamObj.rounds.split(',');
+//            console.log(a);
+            a.push(r);
+//            console.log(a);
+            p.teamObj.rounds = a.join(',');
+//            console.log(a);
+        });
+        onPlayersUpdate();
+    }
+};
+const roundIsComplete = () => {
+    let d = gamedata;
+    let s = session;
+    let r = s.getRound();
+    let t = d[d.rounds[r].teams];
+    let c = s.scores[`round_${r}`];
+//    console.log();
+    return t.length === c.length;
+};
 const applyScorePacket = (sp) => {
-//    console.log(sp);
     if (session) {
         if (!session.hasOwnProperty('scores')) {
             session.scores = {};
@@ -594,8 +686,59 @@ const applyScorePacket = (sp) => {
         if (!session.scores.hasOwnProperty('raw')) {
             session.scores.raw = [];
         }
+        if (!session.scores.hasOwnProperty(`round_${session.getRound()}`)) {
+            session.scores[`round_${session.getRound()}`] = [];
+        }
         session.scores.raw.push(sp);
+
+        if (sp.valID === 'vote') {
+            session.scores[`round_${session.getRound()}`].push(sp);
+            let teamSrc = getTeamFromPlayer(sp.src);
+            // assign/subtract votes to src and targ separately
+            let t = getTeamMembers(sp.targ);
+            t.forEach((te, id) => {
+//                te.teamObj.votes -= parseInt(sp.val);
+                te.teamObj.votesReceived = te.teamObj.hasOwnProperty('votesReceived') ? te.teamObj.votesReceived : 0;
+                te.teamObj.votesReceived += parseInt(sp.val);
+            });
+            t = getTeamMembers(teamSrc.id);
+            console.log(`applyScorePacket`);
+            console.log(sp);
+            if (sp.roundComplete) {
+                teamRoundComplete({team: sp.targ});
+//                    te.teamObj[session.getRound()]
+            }
+            t.forEach((te, id) => {
+                te.teamObj.votes -= Math.abs(parseInt(sp.val));
+
+//                    te.teamObj.votesReceived = te.teamObj.hasOwnProperty('votesReceived') ? te.teamObj.votesReceived : 0;
+//                    te.teamObj.votesReceived += parseInt(sp.val);
+            });
+
+
+            // update the team members for targ
+            Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
+                getSocketFromID(p).emit('scoreUpdate', sp);
+            });
+//            console.log(sp);
+
+//            console.log(teamSrc);
+            if (sp.targ !== teamSrc.id) {
+                Object.values(gamedata.teams)[teamSrc.id].team.forEach((p, i) => {
+                    getSocketFromID(p).emit('scoreUpdate', sp);
+                });
+            }
+            console.log(`round complete? ${roundIsComplete()}`);
+            io.emit('roundUpdate', {
+                round: session.getRound(),
+                complete: roundIsComplete(),
+                scorePacket: sp
+            });
+        }
         sessionUpdate();
+        statusUpdate(sp);
+        onPlayersUpdate();
+        updateLogFile('playersDetail', playersDetail, `applyScorePacket`);
     }
 };
 //
@@ -783,7 +926,7 @@ const addNewPlayer = (o, socket, callback) => {
     } else {
         pl.fake = false;
     }
-    console.log(`~~~~~~~~~~~~~~~~ addNewPlayer id: ${id}, socketid: ${socket.id}`);
+//    console.log(`~~~~~~~~~~~~~~~~ addNewPlayer id: ${id}, socketid: ${socket.id}`);
 //    console.log(o);
     if (!playersBasic.hasOwnProperty(id)) {
         playersBasic[id] = getBasicPlayerSummary(pl);
@@ -1135,9 +1278,9 @@ const assignTeams = (cb) => {
             let pl = playersDetail[p];
             if (pl) {
                 if (pl.active && pl.enrolled) {
-                    if (v.hasLead) {
+//                    if (v.hasLead) {
                         pl.isLead = i === 0;
-                    }
+//                    }
                     pl.stakeholder = v.id;
                     pl.teamObj = Object.assign(copyObj(v), {});
                     let sock = playersMap.get(pl.socketID);
@@ -1343,9 +1486,12 @@ io.on('connection', (socket) => {
         setAdmin(boo);
     });
     //
+    /*
+    // DEPRECATED
     socket.on('allocation1', (o) => {
         allocation1(o);
     });
+    */
     socket.on('pvStakeholderScore', (o) => {
         pvStakeholderScore(o);
     });
@@ -1355,11 +1501,12 @@ io.on('connection', (socket) => {
     socket.on('startRound', (r) => {
         if (session) {
             session.setRound(r);
-//            session.setRound(1);
-            io.emit('startRound', r);
-//            io.emit('sessionUpdate');
+            io.emit('onStartRound', r);
             sessionUpdate();
         }
+    });
+    socket.on('teamRoundComplete', (o) => {
+        teamRoundComplete(o);
     });
     socket.on('setClean', (boo) => {
         clean = boo;
@@ -1367,6 +1514,10 @@ io.on('connection', (socket) => {
     socket.on('getNewScorePacket', (src, targ, valID, val, cb) => {
 //        console.log(cb);
         getNewScorePacket(cb, src, targ, val, valID);
+    });
+    socket.on('getNewScorePacket2', (o) => {
+//        console.log(cb);
+        getNewScorePacket2(o);
     });
     //
     socket.on('getPresentationPack', (cb) => {
@@ -1381,6 +1532,12 @@ io.on('connection', (socket) => {
     socket.on('clientDebug', (str) => {
         console.log(`client: ${str}`);
 //        console.log(o.obj);
+    });
+    socket.on('statusUpdate', (m, cb) => {
+        statusUpdate(m, cb);
+    });
+    socket.on('getStatusMessages', (cb) => {
+        cb(statusMessages);
     });
 });
 
@@ -1428,6 +1585,9 @@ app.get('/gamedata', (req, res) => {
 });
 app.get('/session', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'session.html'));
+});
+app.get('/status', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'status.html'));
 });
 app.get('/test', (req, res) => {
     const d = {title: 'awesome', answer: 'Oh hell yes'};

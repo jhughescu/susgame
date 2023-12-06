@@ -17,6 +17,16 @@
 <body>
     <h1>Sustainability Game</h1>
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
+    <div class='info_box' id='info_resources'>
+        <p>resources</p>
+        <p>remaining</p>
+        <p id='remain' class='resources highlight'>10</p>
+    </div>
+    <div class='info_box' id='info_votes'>
+        <p>votes</p>
+        <p>received</p>
+        <p id='votes_received' class='votes_received highlight'></p>
+    </div>
     <div id='overlay'>
 
 
@@ -173,7 +183,7 @@
             gameInit();
         };
         const gameInit = () => {
-            console.log(`gameInit`);
+//            console.log(`gameInit`);
             // this code is open to abuse, replace it with insertion of template HTML
             let sessionID = txt.value;
             renderGameScreen();
@@ -212,12 +222,35 @@
         const updateState = () => {
             // return the page to its present state
             let o = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
-            console.log('return to state');
-            for (var i in o) {
-                console.log(i, o[i], `#${i}`, $(`#${i}`).length);
-                if ($(`#${i}`).length > 0) {
-                    $(`#${i}`).val(o[i]);
-                    $(`#${i}`).attr('disabled', true);
+            if (o) {
+                if (o.hasOwnProperty('length')) {
+                    o.forEach((v) => {
+//                        console.log(v);
+//                        console.log(v.disabled);
+//                        console.log(typeof(v.disabled));
+                        $(`#${v.option}`).val(v.val);
+                        $(`#${v.option}`).attr('disabled', v.disabled);
+                        $(`#${v.button}`).attr('disabled', v.disabled);
+//                        console.log($(`#${v.button}`));
+//                        debugger;
+                    });
+                } else {
+                    for (var i in o) {
+                        if ($(`#${i}`).length > 0) {
+                            $(`#${i}`).val(o[i]);
+                            $(`#${i}`).attr('disabled', true);
+                        }
+                    }
+                }
+            }
+        };
+        const updateValues = (pl) => {
+            if (pl) {
+                $('#info_resources').show();
+                $(`.resources`).html(pl.teamObj.votes);
+                if (pl.teamObj.votesReceived) {
+                    $('#info_votes').show();
+                    $(`.votes_received`).html(pl.teamObj.votesReceived);
                 }
             }
         };
@@ -231,7 +264,10 @@
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
                         let mainTeam = Object.values(env.gamedata.teams)[player.stakeholderID].hasMax;
-                            player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
+                        player.partialName = mainTeam ? 'stakeholder' : 'publicvoices';
+                        if (player.isLead && document.title.indexOf('*', 0) < 0) {
+                            document.title = `* ${document.title}`
+                        }
                     }
                 }
                 player = Object.assign(env.gamedata, player);
@@ -239,8 +275,6 @@
                 if (steak !== player.stakeholderID) {
                     // Only render if the stakeholder has changed -  may need to add other conditions later
                     renderTemplate('game', 'insertion', player);
-//                    console.log('the game updates');
-//                    console.log(player);
                     updateState();
                 }
             });
@@ -307,7 +341,7 @@
         };
         let currentState = null;
         const refreshViewCallback = (p) => {
-            console.log(`refreshViewCallback`);
+//            console.log(`refreshViewCallback`);
             let id = getMinID();
             let newPlayer = !p.playersBasic.hasOwnProperty(id);
             let enrolled = false;
@@ -395,9 +429,11 @@
                     id = getID();
                     storageID = getStorageID();
                     document.title = id;
+//                    console.log(p);
                     $('h2').html(`id: ${id}`);
                     socket.emit('addNewPlayer', {id: id}, (o) => {
                         player = o.player;
+//                        console.log(player);
                     });
                     let sid = false;
                     if (p.storedData) {
@@ -448,17 +484,61 @@
         };
         const submitVote = function (src, toEmit) {
             const vi = src.parent().find('.voteVal');
+            let rc = player.teamObj.votes - parseInt(vi.val()) <= 0;
+//            console.log(`check the vals, mine: ${vi.val()}, votes: ${player.teamObj.votes}`);
+//            console.log(player);
+//            console.log(player.teamObj.votes === 0);
+//            console.log(`rc ${rc}`)
+            vv.each((i, v) => {
+//                console.log($(v).val());
+            });
+            if (!rc) {
+                rc = true;
+                vb.each((i, v) => {
+                    if ($(v).attr('disabled') !== 'disabled') {
+//                        console.log(`change to false at ${i}`);
+                        rc = false;
+                    }
+                });
+            }
+//            let o = {
+//                src: player.id,
+//                team: player.stakeholderID,
+//                targ: parseInt(vi.attr('id').split('_')[1]),
+//                v: parseInt(vi.val())
+//            };
+//            ls[o.targ] = o.v;
+//            localStorage.setItem(lid, ls);
+//            src.attr('disabled', true);
+//            vi.attr('disabled', true);
+            let so = {
+                src: player.id,
+                targ: parseInt(vi.attr('id').split('_')[1]),
+                valID: 'vote',
+                val: parseInt(vi.val()),
+                roundComplete: rc
+            }
+            registerScore2(so);
+//            registerScore(player.id, parseInt(vi.attr('id').split('_')[1]), 'vote', parseInt(vi.val()));
+        };
+        const submitVoteV1 = function (src, toEmit) {
+            const vi = src.parent().find('.voteVal');
             let o = {
                 src: player.id,
                 team: player.stakeholderID,
                 targ: parseInt(vi.attr('id').split('_')[1]),
                 v: parseInt(vi.val())
             };
+//            console.log('submitVote');
+//            console.log(o);
             ls[o.targ] = o.v;
             localStorage.setItem(lid, ls);
             src.attr('disabled', true);
             vi.attr('disabled', true);
-            socket.emit(toEmit, o);
+//            socket.emit(toEmit, o);
+
+            //
+            registerScore(player.id, parseInt(vi.attr('id').split('_')[1]), 'vote', parseInt(vi.val()));
         };
         vv = $('.voteVal');
         const getRemain = () => {
@@ -472,16 +552,37 @@
             }
             return m;
         };
+        const autoCompleteAllocation = () => {
+            let sel = $('#actionSelect');
+            let desc = $('#actionDesc');
+            let val = $('#allocateVal');
+            if (!Boolean(sel.val()) && !Boolean(desc.val()) && !Boolean(val.val())) {
+                let op = $('#actionSelect option');
+                let ri = Math.floor(Math.random() * op.length);
+                let ro = op.eq(ri);
+                sel.val(ro.val());
+                desc.val('a test description');
+                val.val(Math.ceil(Math.random() * 4));
+                if (Boolean(sel.val()) && Boolean(desc.val()) && Boolean(val.val())) {
+                    setTimeout(() => {
+                        $('#buttonAllocate').click();
+                    }, (500 + (Math.random() * 500)));
+                } else {
+                    setTimeout(300, autoCompleteAllocation);
+                }
+            }
+        };
         const viewUpdate = () => {
             socket.emit('getPlayerPack', (pp) => {
-                console.log(`viewUpdate`);
-                console.log(pp);
+//                console.log(`viewUpdate`);
+//                console.log(pp);
                 enableScorePV(pp.session.round > 0);
                 if (pp.session.round > 0) {
-                    let theDiv = env.gamedata.rounds[pp.session.round].split('_')[0];
+                    let theDiv = env.gamedata.rounds[pp.session.round].id.split('_')[0];
                     $('.round').hide();
                     $(`#${theDiv}`).show();
-                    console.log(`show ${theDiv}`)
+                    updateState();
+//                    console.log(`show ${theDiv}`);
                     let s = localStorage.getItem(lid);
                     if (s) {
                         debugServer(`stored data: ${s}`);
@@ -497,12 +598,18 @@
                             }
                         });
                     }
+//                    console.log('automatic');
+//                    console.log(getInitProps().autoenroll);
+                    if (theDiv === 'allocation' && getInitProps().autoenroll) {
+//                        console.log('automatic');
+                        setTimeout(autoCompleteAllocation, (500 + (Math.random() * 1000)));
+                    }
                 }
             });
         };
         const onSessionUpdate = () => {
             viewUpdate();
-            console.log('session update calls viewUpdate');
+//            console.log('session update calls viewUpdate');
         };
         const initpv = () => {
             debugServer('initialise a Public Voice');
@@ -516,17 +623,26 @@
             scoreUpdate(getMinID());
         };
         const renderVotes = (p) => {
-            console.log(`renderVotes`);
-            console.log(p);
+//            console.log(`renderVotes`);
+//            console.log(p);
             let v = p.teamObj.votes;
+            let rc = player.teamObj.votes === 0;
             debugServer(`renderVotes called`);
             $('#votes').html(v);
             max = v;
+            let c = 1;
             vv.each((i, el) => {
+//                console.log(i, $(el).prop('disabled'));
+                c+= $(el).prop('disabled') ? 1 : 0;
                 if (!$(el).prop('disabled')) {
                     validateVote(el);
                 }
-            })
+            });
+//            console.log(`${c} out of ${vv.length}`)
+            console.log(`renderVotes: ${c === vv.length}`);
+            if (c === vv.length) {
+                socket.emit('teamRoundComplete', {team: p.teamObj.id})
+            }
             if (v <= 0) {
                 $('#votes').addClass('false');
                 vb.attr('disabled', true);
@@ -534,15 +650,31 @@
             }
         };
         const scoreUpdate = (o) => {
-            console.log(`scoreUpdate:`);
-            console.log(o);
+            //forget the incoming object, it's a red herring, go to the server for the player object instead
+            console.log(`scoreUpdate`);
+//            console.log(o);
+            socket.emit('getPlayer', getMinID(), (p) => {
+//                console.log(`getPlayer CB:`);
+//                console.log(p);
+                renderVotes(p);
+                updateValues(p);
+            });
+        }
+        const scoreUpdateV1 = (o) => {
+//            console.log(`scoreUpdate:`);
+//            console.log(o);
+//            console.log(getMinID());
+            // Conditional modified to always be true - this method is sent to all team members, hence can always run. Check to see whether the event is emitted in other methods, if not we can get rid of the conditional, if it is then the conditional needs to be modified to match the team ID.
             if (o.src === getMinID()) {
                 console.log(`OK, we can go`);
                 socket.emit('getPlayer', o.src, (p) => {
                     console.log(`getPlayer CB:`);
                     console.log(p);
-                    renderVotes(p)
+                    renderVotes(p);
+                    updateValues(p);
                 });
+            } else {
+                console.warn('ID mismatch, cannot update');
             }
         };
         const enableScorePV = (boo) => {
@@ -561,10 +693,16 @@
         // End Public Voices
 
         // Stakeholder
+        const registerScore2 = (o) => {
+            socket.emit('getNewScorePacket2', o);
+            console.log(o);
+            console.log('getNewScorePacket2');
+        }
         const registerScore = (src, targ, valID, val) => {
+//            console.log(`registerScore`, src, targ, valID, val);
+            registerScore2(`registerScore`, src, targ, valID, val);
             socket.emit('getNewScorePacket', src, targ, valID, val, (sp) => {
-//                console.log('spspspspspspspspspspspspspspspsp');
-                console.log(sp);
+//                console.log(sp);
             })
         };
         const initst = () => {
@@ -572,6 +710,29 @@
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
+//                console.log('this is the event');
+//                console.log($('.voteVal').length);
+                let d = $(this).attr('id');
+                let o = {};
+                let a = [];
+                let st = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+                $('.voteVal').each(function (i, vo) {
+                    o = {
+                        option: $(this).attr('id'),
+                        button: `buttonVote_${$(this).attr('id').split('_')[1]}`,
+                        val: $(this).val(),
+                        disabled: d.split('_')[1] === $(this).attr('id').split('_')[1]
+                    }
+//                    console.log(st);
+                    if (st) {
+                        if (st.hasOwnProperty('length')) {
+                            o.disabled = st[i].disabled ? true : o.disabled;
+                        }
+                    }
+//                    o[$(this).attr('id')] = $(this).val();
+                    a.push(o);
+                });
+                setState(a);
                 submitVote($(this), 'stStakeholderScore');
             });
             //
@@ -581,31 +742,40 @@
             let as = $('#actionSelect');
             let ad = $('#actionDesc');
             ab.on('click', function () {
+
                 if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
-                    let c = confirm('are you sure?');
-                    if (c) {
-                        registerScore(player.id, player.id, 'action_name', as.val());
-                        registerScore(player.id, player.id, 'action_desc', ad.val());
-                        registerScore(player.id, player.id, 'vote', parseInt(av.val()));
-                        let sto = {
-                            allocateVal: av.val(),
-                            actionDesc: ad.val(),
-                            actionSelect: as.val(),
-                            buttonAllocate: ''
-                        };
-                        setState(sto);
-                        let o = {
-                            src: player.id,
-                            t: player.teamObj.id,
-                            action_name: as.val(),
-                            action_desc: ad.val(),
-                            resource: parseInt(av.val())
-                        };
-                        ab.attr('disabled', true);
-                        av.attr('disabled', true);
-                        as.attr('disabled', true);
-                        ad.attr('disabled', true);
-//                        socket.emit('allocation1', o);
+                    if (av.val() < 1) {
+                        alert('value must be more than 0');
+                    } else {
+                        let c = getInitProps().autoenroll ? true :  confirm('are you sure?');
+                        if (c) {
+//                            registerScore(player.id, player.teamObj.id, 'action_name', as.val());
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_name', val: as.val()});
+//                            registerScore(player.id, player.teamObj.id, 'action_desc', ad.val());
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_desc', val: ad.val()});
+//                            registerScore(player.id, player.teamObj.id, 'vote', parseInt(av.val()));
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'vote', val: parseInt(av.val()), roundComplete: true});
+                            let sto = {
+                                allocateVal: av.val(),
+                                actionDesc: ad.val(),
+                                actionSelect: as.val(),
+                                buttonAllocate: ''
+                            };
+                            setState(sto);
+                            let o = {
+                                src: player.id,
+                                t: player.teamObj.id,
+                                action_name: as.val(),
+                                action_desc: ad.val(),
+                                resource: parseInt(av.val())
+                            };
+                            ab.attr('disabled', true);
+                            av.attr('disabled', true);
+                            as.attr('disabled', true);
+                            ad.attr('disabled', true);
+    //                        scoreUpdate(o);
+    //                        socket.emit('allocation1', o);
+                        }
                     }
                 } else {
                     alert('please complete all options');
@@ -614,7 +784,6 @@
             });
 
             viewUpdate();
-            scoreUpdate(getMinID());
         };
         const setupStakeholder = () => {
             initst();

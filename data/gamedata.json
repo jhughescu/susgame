@@ -5,7 +5,7 @@
             "title": "Government",
             "displayColour": "#0099C4",
             "displayColour": "#0099C4",
-            "actions": ["action ken", "action bill", "action ron", "action cow", "action tits"]
+            "actions": ["action ken", "action bill", "action ron", "action cow", "action toast"]
         },
         "t1": {
             "id": 1,
@@ -59,7 +59,8 @@
         "likes": false,
         "weight": 2,
         "hasMax": true,
-        "hasLead": true
+        "hasLead": true,
+        "rounds": ""
     },
     "prefixes": {
         "player": "player-"
@@ -67,7 +68,12 @@
     "definitions": {
         "teams": "stakeholders"
     },
-    "rounds": [null, "allocation", "collaboration_1", "publicvoices"],
+    "rounds": [
+        {"id": "null"},
+        {"id": "allocation", "teams": "mainTeams"},
+        {"id": "collaboration_1", "teams": "mainTeams"},
+        {"id": "publicvoices", "teams": "stakeholder"}
+    ],
     "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"],
     "constants": {
         "presentation": "suspresstore"

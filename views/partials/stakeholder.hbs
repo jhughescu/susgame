@@ -1,7 +1,7 @@
 <p>Role: Stakeholder Team {{#if isLead}}Lead{{else}}Member{{/if}}</p>
 {{#if isLead}}
 <div class='round' id='collaboration'>
-    <div>Votes remaining: <span id='votes' class='highlight'>{{teamObj.votes}}</span></div>
+    <div>Votes remaining: <span id='votes' class='highlight resources'>{{teamObj.votes}}</span></div>
     <table><tbody>
         {{#each mainTeams}}
         {{#if isMyTeam}}{{else}}

@@ -1,1 +1,11 @@
-I am the sesh
+<p>I am the sesh</p>
+<div>
+    <p>raw score table:</p>
+    <table><tbody>
+        <tr><th>id</th><th>src</th><th>targ</th><th>round</th><th>valID:</th><th>val</th></tr>
+        {{#each scores.raw}}
+        <tr><td>{{id}}</td><td>{{src}}</td><td>{{targ}}</td><td>{{round}}</td><td>{{valID}}:</td><td>{{val}}</td></tr>
+        {{/each}}
+    </tbody></table>
+
+</div>

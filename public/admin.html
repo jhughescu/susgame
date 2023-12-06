@@ -20,6 +20,7 @@
     <p>This is the admin screen</p>
     <p id='message'></p>
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
+    <div id='status'><span></span><div class='closer'>x</div></div>
     <div class='controls' id='controlSettings'>
         <button class='caution' id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
         <button class='caution' id='setMax'>Set max votes</button>
@@ -39,9 +40,20 @@
         <button id='slideReload'>Reload slide</button>
     </div>
     <div class='controls' id='controlRounds'>
-        <button class='startRound' id='r1'>Start Round 1</button>
-        <button class='startRound' id='r2'>Start Round 2</button>
-<!--        <button class='startRound' id='r3'>Public Voices vote</button>-->
+        <table><tbody>
+            <tr>
+                <td>
+                    <button class='startRound' id='r1'>Start Round 1</button>
+                </td>
+                <td>
+                    <button class='startRound' id='r2'>Start Round 2</button>
+                </td>
+                <td>
+                    <button class='startRound' id='r3'>Start Round 3</button>
+                </td>
+            </tr>
+            <tr><td class='indr' id='indr1'></td><td class='indr' id='indr2'></td><td class='indr' id='indr3'></td></tr>
+        </tbody></table>
     </div>
     <br>
     <div class='controls' id='controlDisplay'>
@@ -49,7 +61,7 @@
         <button id='showScores'>Show scores</button>
     </div>
     <div>
-        <iframe id='slideshow' src='presentation.html'></iframe>
+        <iframe id='slideshow' src='' style='display: none;'></iframe>
     </div>
     <div id='playlist'><div id='slidelist'></div></div>
     <div id='players'></div>
@@ -98,7 +110,8 @@
 //                console.log('get clicked');
                 bu.addEventListener('click', (evt) => {
                     let id = evt.target.id.replace(REFRESHBTN, '');
-                    let r = confirm(`are you sure you want to refresh player ${id}?`);
+//                    let r = confirm(`are you sure you want to refresh player ${id}?`);
+                    let r = true;
                     if (r) {
 //                        console.log('refreshPlayer', id);
                         socket.emit('refreshPlayer', id);
@@ -125,6 +138,13 @@
                     let id = evt.target.id.replace(RESETBTN, '');
                     socket.emit('playerReset', id);
                 });
+            });
+            b = $('#playerList').find('th');
+//            console.log('table links?')
+//            console.log(b)
+            b.off('click');
+            b.on('click', function () {
+                listPlayers($(this).html());
             });
         };
         //
@@ -163,6 +183,23 @@
         const updateStoreObj = (p, v) => {
             storeObj[p] = v;
             localStorage.setItem(STORE_ALL, JSON.stringify(storeObj));
+        };
+        const updateStatus = (m, o) => {
+            socket.emit('statusUpdate', m, o);
+
+        };
+        const onStatusUpdate = (s) => {
+            // functionality removed to the 'status' route
+            return;
+            $('#status').show();
+            $('#status').find('span').html(``);
+            s.forEach((sm) => {
+                $('#status').find('span').append(`${sm}<br>`);
+            });
+            $('#status').find('.closer').off('click');
+            $('#status').find('.closer').on('click', function () {
+                $('#status').hide();
+            });
         };
         const getStoredVal = (p) => {
             let r = null;
@@ -209,7 +246,7 @@
             socket.emit('assignTeams', (t) => {
                 listPlayers();
                 enableRoundStart(1);
-                enableRoundStart(2);
+//                enableRoundStart(2);
                 getGameToStore();
             });
         }
@@ -276,7 +313,7 @@
         };
         const onPlayerConnect = (msg) => {
             document.getElementById('message').innerHTML += `<p>player ${msg} has connected</p>`;
-            console.log('YES IT DOES');
+//            console.log('YES IT DOES');
 
         };
         const onGetPlayers = (arr) => {
@@ -313,10 +350,8 @@
         };
         const adminTerminateSession = () => {
             socket.emit('getPlayersDetail', (d) => {
-//                console.log(d);
                 let p = 0;
                 for (var i in d) {
-//                    console.log(d[i]);
                     p += (d[i].enrolled ? 1 : 0);
                 }
                 if (p > 0) {
@@ -324,12 +359,6 @@
                     if (conf) {
                         socket.emit('adminTerminateSession');
                     }
-//                    if (conf) {
-//                        conf = confirm('Are you REALLY sure?');
-//                        if (conf) {
-//                            socket.emit('adminTerminateSession');
-//                        }
-//                    }
                 } else {
                     socket.emit('adminTerminateSession');
                 }
@@ -342,11 +371,14 @@
             setSessionButtons(false);
             setupSessionControls();
             $('h2').find('span').html(`ended`);
+            $('#status').hide();
+            onStartRound(-1);
             updatePlayersView();
         };
         const enableRoundStart = (n) => {
             // Allow a given round to be triggered
             // n is round 1, 2 etc, hence subtract one to address the array of buttons
+//            console.log(`enableRoundStart ${n}`);
             enableButton($(buttonsStartRound[(n - 1)]), true);
         };
         const startRound = function () {
@@ -361,7 +393,28 @@
 //                alert('will go');
                 socket.emit('startRound', r);
             }
+//            $('.indr').removeClass('highlight');
+//            $(`#indr${r}`).addClass('highlight');
+            updateStatus(`start round ${r}`);
+            enableButton(id, false);
+        };
+        const onStartRound = (r) => {
+//            console.log(`i will start round ${r}`);
+            $('.indr').removeClass('highlight');
+            $(`#indr${r}`).addClass('highlight');
 //            enableButton(id, false);
+        };
+        const roundUpdate = (o) => {
+            let v = o.scorePacket.val;
+            let p = `${o.scorePacket.valID}${v < 2 ? '' : 's'}`;
+            let t = Object.values(env.gamedata.teams)[o.scorePacket.targ].title;
+            let comp = o.complete ? 'complete' : 'incomplete';
+            updateStatus(`${v} ${p} for ${t} (round ${o.round} ${comp})`, o);
+            if (o.complete) {
+                $('.indr').removeClass('highlight');
+                enableRoundStart(o.round + 1);
+                updateStatus(`round ${o.round} completed`);
+            }
         };
         const buttonSetupNONEED = () => {
             let b = document.getElementsByClassName('pingBtn');
@@ -378,36 +431,48 @@
 //            console.log(`showPlayersView called`);
             listPlayers();
         };
+        let sortVal = {val: null, n: 1};
+        const sortPlayers = (s) => {
+            return function (a, b) {
+                const va = a[s];
+                const vb = b[s];
+                if (va > vb) {
+                    return sortVal.n;
+                } else if (va < vb) {
+                    return -1 * sortVal.n;
+                } else {
+                    return 0;
+                }
+            };
+        };
         const updatePlayersView = (p) => {
-//            console.log(`updatePlayersView: ${currentDisplay}`);
             if (currentDisplay === 'listPlayers') {
+                console.log(`updatePlayersView`);
                 renderTemplate('playerList', 'controlPanel', {players: p});
                 buttonSetup();
             }
-        }
-        const listPlayers = () => {
-//            console.log(`listPlayers`);
-
+        };
+        const listPlayers = (s) => {
             socket.emit('getPlayersDetail', (d) => {
-//                console.log(' I have my answer')
                 if (env) {
-//                    console.log('env, yes')
                     let p = Object.values(d);
-//                    console.log(`I need env now please`);
-//                    console.log(env);
+                    p = p.slice();
                     p.forEach((pn) => {
                         pn.stakeholderID = pn.stakeholder;
                         pn.assigned = pn.stakeholder > -1;
                         pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
                     });
+                    console.log(`listPlayers: ${JSON.stringify(sortVal)}`);
+                    if (s) {
+                        sortVal.n = sortVal.val === s ? sortVal.n * -1 : 1;
+                        p = p.sort(sortPlayers(s));
+                        sortVal.val = s;
+                    } else if (sortVal.val) {
+                        p.sort(sortPlayers(sortVal.val));
+                    }
                     updatePlayersView(p);
-    //                updateDisplay('listPlayers');
-//                    console.log(`listPlayers completed`);
                     clearTimeout(plTime)
                     plTime = setTimeout(setupSessionControls, 500);
-
-                } else {
-//                    console.log(`can't list players at this time? env not set)`);
                 }
             });
         };
@@ -419,7 +484,7 @@
             };
             // HACK: try getting rid of the concept of rounds to allow scores to accru
 //            o.round = 1;
-            console.log(o)
+//            console.log(o);
             let t = JSON.parse(JSON.stringify(env.gamedata.mainTeams));
             if (o.round) {
                 if (o.round > 0) {
@@ -719,6 +784,7 @@
                 pl.hide();
                 f.hide();
             } else {
+                f.attr('src', 'presentation.html')
                 pl.show();
                 f.show();
                 renderPlaylist();
@@ -728,13 +794,16 @@
         };
         const slideUpdate = () => {
             renderPlaylist((p) => {
-                buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
-                buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
+                if (p.currentSlide) {
+                    buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
+                    buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
+                }
             });
         };
 
         //
         const initDisplay = (s) => {
+            // return to current display state on refresh
             let sd = localStorage.getItem(STORE_DISPLAY);
 //            console.log(`initDisplay called: ${sd}`);
             if (sd) {
@@ -754,24 +823,33 @@
             sd = getStoredVal('playlistOpen');
 //            console.log(sd);
             slideUpdate();
-            togglePlaylist(!sd);
+            // if a session is currently active show the relevant round indicator etc:
+            if (env.session) {
+//                console.log(env.session);
+                if (env.session.active) {
+                    onStartRound(env.session.round);
+                }
+            }
+//            togglePlaylist(!sd);
         };
         const setupSessionControls = () => {
-            enableButton(buttonsStartRound, false);
+//            console.log(`setupSessionControls`);
+//            enableButton(buttonsStartRound, false);
             enableButton(buttonAssignTeams, false);
             checkAssigned((ass) => {
 //                console.log(`ass is ${ass}, ${typeof(ass)}`);
                 if (typeof(ass) === 'boolean') {
-                    enableButton(buttonsStartRound, ass);
+//                    enableButton(buttonsStartRound, ass);
                     enableButton(buttonAssignTeams, !ass);
                 }
             });
         }
         const init = () => {
-//            console.log('init')
+            console.log('init');
             setSessionButtons(false);
             enableButton(buttonEndSesh, false);
             setupSessionControls();
+            buttonsStartRound.attr('disabled', true);
             socket.emit('areWeDev', (d) => {
                 showDevMode(d);
             });
@@ -810,12 +888,9 @@
             enableButton('endSession', false);
             enableButton('startSession', false);
             storedGame = getStoredGame();
-//            console.log(`getStoredGame: ${storedGame}`);
-//            console.log(storedGame);
             if (storedGame) {
                 storedGame.version = 2;
                 storedGame.elements = Object.keys(storedGame.p).length;
-//                console.log();
                 socket.emit('storedGameFound', storedGame);
                 let s = hasStoredSession(storedGame);
                 setSessionButtons(Boolean(storedGame.sid));
@@ -827,7 +902,6 @@
             }
             socket.emit('customDataEvent', clientData);
             socket.emit('getPlayerPack', (p) => {
-//                console.log(`this house is clean? ${p.clean}`);
                 if (p.clean) {
                     console.log(`looks like a new run, wipe everything`);
                     socket.emit('setClean', false);
@@ -835,14 +909,12 @@
                 }
                 isDev = p.isDev;
                 env = Object.assign({}, p);
-//                console.log(`should have env now`);
-//                console.log(env);
                 activeAdmin = !env.admin;
                 clientData.activeAdmin = activeAdmin;
                 socket.emit('customDataEvent', clientData);
-
                 if (activeAdmin) {
-//                    console.log('env is ready, call the init')
+//                    console.log('env is ready, call the init');
+//                    console.log(p);
                     initDisplay();
                     socket.emit('setAdmin', true);
                 } else {
@@ -868,8 +940,8 @@
         });
         socket.on('playersUpdate', (pd) => {
 //            console.log(pd);
-            updatePlayersView(pd);
-//            listPlayers();
+//            updatePlayersView(pd);
+            listPlayers();
         });
         socket.on('newPlayer', (players) => {
             newPlayer(players);
@@ -893,10 +965,19 @@
         socket.on('onRequestSession', (o) => {
             onRequestSession(o);
         });
+        socket.on('onStatusUpdate', (s) => {
+            onStatusUpdate(s);
+        });
         //
         socket.on('scoreUpdateNoooooo', updateScores);
         socket.on('scoreUpdate', (o) => {
             updateScores(o);
+        });
+        socket.on('onStartRound', (r) => {
+            onStartRound(r);
+        });
+        socket.on('roundUpdate', (o) => {
+            roundUpdate(o);
         });
         //
         socket.on('slideUpdate', () => {
