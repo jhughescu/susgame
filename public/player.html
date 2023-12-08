@@ -225,14 +225,9 @@
             if (o) {
                 if (o.hasOwnProperty('length')) {
                     o.forEach((v) => {
-//                        console.log(v);
-//                        console.log(v.disabled);
-//                        console.log(typeof(v.disabled));
                         $(`#${v.option}`).val(v.val);
                         $(`#${v.option}`).attr('disabled', v.disabled);
                         $(`#${v.button}`).attr('disabled', v.disabled);
-//                        console.log($(`#${v.button}`));
-//                        debugger;
                     });
                 } else {
                     for (var i in o) {
@@ -243,6 +238,7 @@
                     }
                 }
             }
+            scoreUpdate();
         };
         const updateValues = (pl) => {
             if (pl) {
@@ -420,6 +416,7 @@
             socket.emit('getPlayerPack', (p) => {
 //                console.log('playerPack')
 //                console.log(p)
+//                console.log(player);
                 isDev = p.isDev;
                 env = Object.assign({}, p);
                 if (Boolean(p.session)) {
@@ -553,6 +550,7 @@
             return m;
         };
         const autoCompleteAllocation = () => {
+//            return;
             let sel = $('#actionSelect');
             let desc = $('#actionDesc');
             let val = $('#allocateVal');
@@ -574,13 +572,15 @@
         };
         const viewUpdate = () => {
             socket.emit('getPlayerPack', (pp) => {
-//                console.log(`viewUpdate`);
-//                console.log(pp);
+                console.log(`viewUpdate`);
+                console.log(pp);
                 enableScorePV(pp.session.round > 0);
+                $('.round').hide();
                 if (pp.session.round > 0) {
                     let theDiv = env.gamedata.rounds[pp.session.round].id.split('_')[0];
                     $('.round').hide();
                     $(`#${theDiv}`).show();
+                    $(`.round${pp.session.round}`).show();
                     updateState();
 //                    console.log(`show ${theDiv}`);
                     let s = localStorage.getItem(lid);
@@ -630,17 +630,31 @@
             debugServer(`renderVotes called`);
             $('#votes').html(v);
             max = v;
-            let c = 1;
+            let c = 0;
             vv.each((i, el) => {
-//                console.log(i, $(el).prop('disabled'));
-                c+= $(el).prop('disabled') ? 1 : 0;
+//                console.log(i, $(el).attr('id'), $(el).prop('disabled'), $(el).is(':visible'));
+                c+= $(el).prop('disabled') && $(el).is(':visible') ? 1 : 0;
                 if (!$(el).prop('disabled')) {
                     validateVote(el);
                 }
             });
-//            console.log(`${c} out of ${vv.length}`)
-            console.log(`renderVotes: ${c === vv.length}`);
-            if (c === vv.length) {
+//            console.log(`${c} out of ${vv.length}`);
+            // condition: input boxes exist, are all filled and no round score already held
+            let boxes = c === vv.length && vv.length > 0;
+            let newRound = player.teamObj.rounds.toString().indexOf(env.session.round) < 0;
+            let remain = Boolean(player.teamObj.votes);
+
+            let ok = (boxes && newRound) || (!remain && newRound);
+//            console.log(` ===== renderVotes: ${ok}`);
+//            console.log(`boxes: ${boxes}`);
+//            console.log(`newRound: ${newRound}`);
+//            console.log(`remain: ${remain}`);
+//            console.log(player.teamObj.votes);
+//            console.log(player.teamObj.rounds.toString().indexOf(env.session.round) < 0);
+//            console.log(env.session.round)
+            if (ok) {
+                console.log('EMIT');
+                console.log(p);
                 socket.emit('teamRoundComplete', {team: p.teamObj.id})
             }
             if (v <= 0) {
@@ -649,13 +663,23 @@
                 vv.attr('disabled', true);
             }
         };
+        const updatePlayer = (p) => {
+            if (JSON.stringify(player.teamObj) !== JSON.stringify(p.teamObj)) {
+//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+                Object.assign(player.teamObj, p.teamObj);
+//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+            }
+        };
         const scoreUpdate = (o) => {
             //forget the incoming object, it's a red herring, go to the server for the player object instead
-            console.log(`scoreUpdate`);
+//            console.log(`scoreUpdate`);
 //            console.log(o);
             socket.emit('getPlayer', getMinID(), (p) => {
 //                console.log(`getPlayer CB:`);
-//                console.log(p);
+//                console.log(JSON.parse(JSON.stringify(p.teamObj)));
+//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+//                console.log(JSON.stringify(player.teamObj) === JSON.stringify(p.teamObj));
+                updatePlayer(p);
                 renderVotes(p);
                 updateValues(p);
             });

@@ -39,7 +39,7 @@ Handlebars.partials['publicvoices'] = template({"1":function(container,depth0,he
         return undefined
     };
 
-  return "<p>OK, I am a Public Voices thing</p>\n<div class='roundNO' id='publicvoicesNO'>\n<div>Votes remaining: <span id='votes' class='highlight'>"
+  return "<p>OK, I am a Public Voices thing</p>\n<div class='round' id='publicvoicesNO'>\n<div>Votes remaining: <span id='votes' class='highlight'>"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n<table>\n    <tbody>\n        <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n        "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":8},"end":{"line":7,"column":269}}})) != null ? stack1 : "")
@@ -60,7 +60,7 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
         return undefined
     };
 
-  return "<div class='round' id='collaboration'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
+  return "<div class='round' id='collaboration'>\n    <div>Votes remaining: <span id='votes' class='highlight resources'>"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n    <table><tbody>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(alias1,(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(6, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":10,"column":17}}})) != null ? stack1 : "")

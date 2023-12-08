@@ -653,20 +653,26 @@ const stStakeholderScore = (o) => {
 };
 //
 const teamRoundComplete = (o) => {
-    console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+
 //    console.log(gamedata);
     if (session) {
-        let t = getTeamMembers(o.team);
-        t.forEach((p, id) => {
-            let r = `r${session.getRound()}`;
-            let a = p.teamObj.rounds.length === 0 ? [] : p.teamObj.rounds.split(',');
-//            console.log(a);
-            a.push(r);
-//            console.log(a);
-            p.teamObj.rounds = a.join(',');
-//            console.log(a);
-        });
-        onPlayersUpdate();
+        if (session.getRound() > 0) {
+            console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+            let tid = `t${o.team}`;
+            if (!session.scores[`round${session.getRound()}`].hasOwnProperty(tid)) {
+                session.scores[`round${session.getRound()}`][tid] = o;
+            }
+            let t = getTeamMembers(o.team);
+            t.forEach((p, id) => {
+                let r = `r${session.getRound()}`;
+                let a = p.teamObj.rounds.length === 0 ? [] : p.teamObj.rounds.split(',');
+                if (a.toString().indexOf(r) < 0) {
+                    a.push(r);
+                }
+                p.teamObj.rounds = a.join(',');
+            });
+            onPlayersUpdate();
+        }
     }
 };
 const roundIsComplete = () => {
@@ -702,8 +708,8 @@ const applyScorePacket = (sp) => {
                 te.teamObj.votesReceived += parseInt(sp.val);
             });
             t = getTeamMembers(teamSrc.id);
-            console.log(`applyScorePacket`);
-            console.log(sp);
+//            console.log(`applyScorePacket`);
+//            console.log(sp);
             if (sp.roundComplete) {
                 teamRoundComplete({team: sp.targ});
 //                    te.teamObj[session.getRound()]
@@ -1506,6 +1512,8 @@ io.on('connection', (socket) => {
         }
     });
     socket.on('teamRoundComplete', (o) => {
+        console.log(`teamRoundComplete event`);
+        console.log(o);
         teamRoundComplete(o);
     });
     socket.on('setClean', (boo) => {

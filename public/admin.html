@@ -845,11 +845,13 @@
             });
         }
         const init = () => {
-            console.log('init');
+//            console.log('init');
             setSessionButtons(false);
             enableButton(buttonEndSesh, false);
             setupSessionControls();
+//            debugger;
             buttonsStartRound.attr('disabled', true);
+//            debugger;
             socket.emit('areWeDev', (d) => {
                 showDevMode(d);
             });
