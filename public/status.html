@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/status.css'>
 </head>
 
 <body>
@@ -22,8 +23,6 @@
     <script>
         const socket = io();
         const updateStatus = (s) => {
-//            console.log(`updateStatus`);
-//            console.log(s);
             $('#message').html('<table><tbody>');
             s.forEach((o) => {
                 $('#message').append(`<tr><td>${o.message}</td>`);
@@ -33,6 +32,8 @@
                 $('#message').append('</tr>');
             });
             $('#message').append('</tbody></table>');
+            var objDiv = document.getElementById('message');
+            objDiv.scrollTop = objDiv.scrollHeight;
         };
         socket.on('onStatusUpdate', (s) => {
             updateStatus(s);

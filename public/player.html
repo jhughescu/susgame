@@ -17,15 +17,26 @@
 <body>
     <h1>Sustainability Game</h1>
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
-    <div class='info_box' id='info_resources'>
-        <p>resources</p>
-        <p>remaining</p>
-        <p id='remain' class='resources highlight'>10</p>
+    <div class='info_box' id='info_multiplier'>
+        <p>multiplier</p>
+        <p id='multiplier' class='multiplier highlight'></p>
     </div>
     <div class='info_box' id='info_votes'>
         <p>votes</p>
         <p>received</p>
         <p id='votes_received' class='votes_received highlight'></p>
+    </div>
+    <div class='info_box' id='info_totalscore'>
+        <p>total</p>
+        <p id='totalscore' class='totalscore highlight'></p>
+    </div>
+    <div class='info_box' id='info_resources'>
+        <p>resources</p>
+        <p>remaining</p>
+        <p id='remain' class='resources highlight'>10</p>
+    </div>
+    <div id='scoresheet' class=''>
+
     </div>
     <div id='overlay'>
 
@@ -42,6 +53,7 @@
         let clientData = {role: 'player'};
         let player = null;
         let suspend = false; /* suspend is true when the server connection is down */
+        let allowAutoComplete = true;
 
         Handlebars.registerHelper('playerPartial', function(partialName, context) {
             const partial = Handlebars.partials[partialName];
@@ -65,6 +77,7 @@
             // De-comment the below line with care, it results in heavy server load if many clients are connected
 //            socket.emit('clientDebug', str);
         };
+//        class ScoreReport
         //
         const onRequestSession = (o) => {
             if (o.player === staticID) {
@@ -217,14 +230,20 @@
         };
         const setState = (o) => {
             // record a state for the page to return to upon refresh
+//            console.log(`setState`);
+//            console.log(o);
             localStorage.setItem(getUniqueStorageID('state'), JSON.stringify(o));
         };
         const updateState = () => {
             // return the page to its present state
+//            console.log(`updateState`);
             let o = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+//            console.log(o);
             if (o) {
                 if (o.hasOwnProperty('length')) {
+//                    console.log('looks like an array');
                     o.forEach((v) => {
+//                        console.log(v);
                         $(`#${v.option}`).val(v.val);
                         $(`#${v.option}`).attr('disabled', v.disabled);
                         $(`#${v.button}`).attr('disabled', v.disabled);
@@ -242,11 +261,46 @@
         };
         const updateValues = (pl) => {
             if (pl) {
-                $('#info_resources').show();
-                $(`.resources`).html(pl.teamObj.votes);
-                if (pl.teamObj.votesReceived) {
-                    $('#info_votes').show();
-                    $(`.votes_received`).html(pl.teamObj.votesReceived);
+                if (pl.hasOwnProperty(`teamObj`)) {
+                    let list = ['votes', 'votesReceived', 'multiplier', 'total'];
+                    let o = {
+                        votes: pl.teamObj.type === 1 ? pl.teamObj.votes : pl.votes,
+                        votesReceived: pl.teamObj.votesReceived,
+                        multiplier: pl.teamObj.multiplier,
+                        total: pl.teamObj.votesReceived * pl.teamObj.multiplier
+                    }
+                    let t = pl.teamObj;
+                    let ob = null;
+                    o = {vals: []};
+                    list.forEach((l) => {
+                        if (t.hasOwnProperty(l)) {
+                            ob = {
+                                prop: l,
+                                val: l === 'votes' ? (pl.teamObj.type === 1 ? t[l] : pl[l]) : t[l]
+                            };
+                            o.vals.push(ob);
+                        }
+                    });
+//                    console.log(o);
+                    if (o.vals.length > 0) {
+                        renderTemplate('scoresheet', 'scoresheet', o);
+                    }
+//                    console.log(pl.teamObj);
+                    /*
+                    $('#info_resources').show();
+                    $(`.resources`).html(pl.teamObj.votes);
+                    if (pl.teamObj.votesReceived) {
+                        $('#info_votes').show();
+                        $(`.votes_received`).html(pl.teamObj.votesReceived);
+                    }
+                    if (pl.teamObj.multiplier) {
+                        $('#info_multiplier').show();
+                        $(`.multiplier`).html(pl.teamObj.multiplier);
+                        $('#info_totalscore').show();
+                        $(`.totalscore`).html(pl.teamObj.multiplier * pl.teamObj.votesReceived);
+                    }
+                    $('.info_box').hide();
+                    */
                 }
             }
         };
@@ -447,6 +501,7 @@
 
         let isDev = false;
         let logList = {};
+        let autoTO = null;
 
         // Potential univeral code:
 
@@ -479,35 +534,24 @@
                 inp.value = (-1 * max);
             }
         };
-        const submitVote = function (src, toEmit) {
+        const inputsDisabled = (src, pre) => {
             const vi = src.parent().find('.voteVal');
-            let rc = player.teamObj.votes - parseInt(vi.val()) <= 0;
-//            console.log(`check the vals, mine: ${vi.val()}, votes: ${player.teamObj.votes}`);
-//            console.log(player);
-//            console.log(player.teamObj.votes === 0);
-//            console.log(`rc ${rc}`)
-            vv.each((i, v) => {
-//                console.log($(v).val());
-            });
-            if (!rc) {
-                rc = true;
+            let ad = pre === undefined ? false : pre;
+            if (!ad) {
+                ad = true;
                 vb.each((i, v) => {
-                    if ($(v).attr('disabled') !== 'disabled') {
-//                        console.log(`change to false at ${i}`);
-                        rc = false;
+                    // if the button is the same as the clicked button this can't set rc to false (because we know this button is disabled)
+                    if ($(v).attr('disabled') !== 'disabled' && $(v).attr('id') !== src.attr('id')) {
+                        ad = false;
                     }
                 });
             }
-//            let o = {
-//                src: player.id,
-//                team: player.stakeholderID,
-//                targ: parseInt(vi.attr('id').split('_')[1]),
-//                v: parseInt(vi.val())
-//            };
-//            ls[o.targ] = o.v;
-//            localStorage.setItem(lid, ls);
-//            src.attr('disabled', true);
-//            vi.attr('disabled', true);
+            return ad;
+        };
+        const submitVote = function (src, toEmit) {
+            const vi = src.parent().find('.voteVal');
+            let rc = inputsDisabled(src, player.teamObj.votes - parseInt(vi.val()) <= 0);
+//            console.log(`ac: ${rc}`);
             let so = {
                 src: player.id,
                 targ: parseInt(vi.attr('id').split('_')[1]),
@@ -516,7 +560,35 @@
                 roundComplete: rc
             }
             registerScore2(so);
-//            registerScore(player.id, parseInt(vi.attr('id').split('_')[1]), 'vote', parseInt(vi.val()));
+        };
+        const submitVotev2 = function (src, toEmit) {
+            /*
+            This method modified to include the new 'inputsDisabled' method, which checks whether all text inputs a
+            on a page are disabled (meaning the form is complete).
+            Old method retained in case of failure.
+            */
+            const vi = src.parent().find('.voteVal');
+            let rc = inputsDisabled(src, player.teamObj.votes - parseInt(vi.val()) <= 0);
+//            console.log(`ad: ${inputsDisabled(src, rc)}`);
+//            if (!rc) {
+//                rc = true;
+//                vb.each((i, v) => {
+//                    // if the button is the same as the clicked button this can't set rc to false (because we know this button is disabled)
+//                    if ($(v).attr('disabled') !== 'disabled' && $(v).attr('id') !== src.attr('id')) {
+//                        rc = false;
+//                    }
+//                });
+//            }
+            console.log(`ac: ${rc}`);
+
+            let so = {
+                src: player.id,
+                targ: parseInt(vi.attr('id').split('_')[1]),
+                valID: 'vote',
+                val: parseInt(vi.val()),
+                roundComplete: rc
+            }
+            registerScore2(so);
         };
         const submitVoteV1 = function (src, toEmit) {
             const vi = src.parent().find('.voteVal');
@@ -526,7 +598,7 @@
                 targ: parseInt(vi.attr('id').split('_')[1]),
                 v: parseInt(vi.val())
             };
-//            console.log('submitVote');
+            console.log('submitVote');
 //            console.log(o);
             ls[o.targ] = o.v;
             localStorage.setItem(lid, ls);
@@ -549,31 +621,85 @@
             }
             return m;
         };
+        const autoCompleteCollaboration = () => {
+//            console.log(`autoCompleteCollaboration: ${allowAutoComplete}`);
+            if (allowAutoComplete) {
+                let v = $('.voteVal');
+                let b = $('.buttonVote');
+                let vt = player.teamObj.votes;
+                let div = $('.voteVal').length - 1;
+                let min = Math.floor(vt / div);
+                let over = vt - (min * div);
+                let a = Array.from({length: div}, () => min);
+                console.log(vt, min, over);
+                while (over > 0) {
+                    a[Math.floor(Math.random() * a.length)] += 1;
+                    over--;
+                }
+                a.sort(() => {return Math.round(Math.random() * 3 - 2)});
+                console.log(a);
+                a.push(0);
+                allowAutoComplete = false;
+                a.forEach((av, i) => {
+                    $(v[i]).val(av);
+//                    $(b[i]).click();
+                });
+                b.click();
+                setTimeout(() => {
+                    $(b[0]).click();
+                }, 5000);
+            }
+        };
         const autoCompleteAllocation = () => {
-//            return;
-            let sel = $('#actionSelect');
-            let desc = $('#actionDesc');
-            let val = $('#allocateVal');
-            if (!Boolean(sel.val()) && !Boolean(desc.val()) && !Boolean(val.val())) {
-                let op = $('#actionSelect option');
-                let ri = Math.floor(Math.random() * op.length);
-                let ro = op.eq(ri);
-                sel.val(ro.val());
-                desc.val('a test description');
-                val.val(Math.ceil(Math.random() * 4));
-                if (Boolean(sel.val()) && Boolean(desc.val()) && Boolean(val.val())) {
-                    setTimeout(() => {
+            if (allowAutoComplete) {
+//                console.log(`I will autoCompleteAllocation`);
+                let sel = $('#actionSelect');
+                let desc = $('#actionDesc');
+                let val = $('#allocateVal');
+                if (sel.length === 0 || desc.length === 0 || val.length === 0) {
+//                    console.log(`no I won't, wrong type`);
+                    return;
+                }
+                if (!Boolean(sel.val()) && !Boolean(desc.val()) && !Boolean(val.val())) {
+                    let op = $('#actionSelect option');
+                    let ri = Math.ceil(Math.random() * (op.length - 1));
+                    let ro = op.eq(ri);
+                    sel.val(ro.val());
+                    desc.val('a test description');
+                    let opval = Math.ceil(Math.random() * 4);
+//                    console.log(`setting op to ${ri}`);
+                    val.val(opval);
+                    if (Boolean(sel.val()) && Boolean(desc.val()) && Boolean(val.val())) {
                         $('#buttonAllocate').click();
-                    }, (500 + (Math.random() * 500)));
-                } else {
-                    setTimeout(300, autoCompleteAllocation);
+//                        let tot = 500 + (Math.random() * 500);
+//                        allowAutoComplete = false;
+//                        setTimeout(() => {
+//                            console.log(`the click`);
+//                            $('#buttonAllocate').click();
+//                        }, tot);
+                    } else {
+//                        console.log(`not enough info, try again`);
+                        setTimeout(300, autoCompleteAllocation);
+                    }
                 }
             }
         };
+        const updateSession = (s) => {
+            if (JSON.stringify(s) !== JSON.stringify(env.session)) {
+//                console.log(`old session: ${JSON.stringify(env.session)}`);
+                Object.assign(env.session, s);
+//                console.log(`new session: ${JSON.stringify(env.session)}`);
+            } else {
+                console.log(`updateSession called but no change detected`);
+            }
+        };
         const viewUpdate = () => {
+//            console.log(`viewUpdate`);
+            clearTimeout(autoTO);
             socket.emit('getPlayerPack', (pp) => {
-                console.log(`viewUpdate`);
-                console.log(pp);
+//                console.log(`viewUpdate callback`);
+//                console.log(pp);
+                updateSession(pp.session);
                 enableScorePV(pp.session.round > 0);
                 $('.round').hide();
                 if (pp.session.round > 0) {
@@ -582,7 +708,6 @@
                     $(`#${theDiv}`).show();
                     $(`.round${pp.session.round}`).show();
                     updateState();
-//                    console.log(`show ${theDiv}`);
                     let s = localStorage.getItem(lid);
                     if (s) {
                         debugServer(`stored data: ${s}`);
@@ -598,18 +723,59 @@
                             }
                         });
                     }
-//                    console.log('automatic');
-//                    console.log(getInitProps().autoenroll);
-                    if (theDiv === 'allocation' && getInitProps().autoenroll) {
-//                        console.log('automatic');
-                        setTimeout(autoCompleteAllocation, (500 + (Math.random() * 1000)));
+//                    if (theDiv === 'allocation' && getInitProps().autoenroll) {
+                    if (getInitProps().autoenroll && pp.session.round < 3 && player.isLead && player.teamObj.type === 1) {
+//                        let tot = 500 + (Math.random() * 1000);
+                        let tot = (player.teamObj.id + 1) * 200;
+                        clearTimeout(autoTO);
+                        autoTO = setTimeout(pp.session.round === 1 ? autoCompleteAllocation : autoCompleteCollaboration, tot);
                     }
                 }
             });
         };
         const onSessionUpdate = () => {
+//            console.log('==================== session update calls viewUpdate');
             viewUpdate();
-//            console.log('session update calls viewUpdate');
+        };
+
+        const submitMultiplier = function (src, toEmit) {
+            const vi = src.parent().find('.voteVal');
+//            let rc = inputsDisabled(src, player.teamObj.votes - parseInt(vi.val()) <= 0);
+            let rc = inputsDisabled(src, false);
+//            console.log(`ac: ${rc}`);
+            let so = {
+                src: player.id,
+                targ: parseInt(vi.attr('id').split('_')[1]),
+                valID: 'vote',
+                isMultiplier: true,
+                val: parseInt(vi.val()),
+                roundComplete: rc
+            }
+            registerScore2(so);
+            so = [];
+            vv.each((id, v) =>  {
+//                console.log(id, v);
+//                console.log($(v).attr('id'), $(v).val());
+                let st = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+                let vid = $(v).attr('id').split('_')[1];
+//                console.log($(v).attr('id'), src.attr('id'));
+                let o = {
+                    option: $(v).attr('id'),
+                    button: `buttonVote_${vid}`,
+                    val: $(v).val(),
+                    disabled: $(v).attr('id').split('_')[1] === src.attr('id').split('_')[1]
+                };
+                if (st) {
+                    if (st.hasOwnProperty('length')) {
+                        o.disabled = st[id].disabled ? true : o.disabled;
+                    }
+                }
+//                o[$(v).attr('id')] = $(v).val();
+                so.push(o);
+
+//                console.log(v.attr('id'), v.val());
+            });
+            setState(so);
         };
         const initpv = () => {
             debugServer('initialise a Public Voice');
@@ -617,18 +783,27 @@
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
-                submitVote($(this), 'pvStakeholderScore');
+                submitMultiplier($(this), 'pvStakeholderScore');
             });
             viewUpdate();
-            scoreUpdate(getMinID());
+//            scoreUpdate(getMinID());
         };
+        // MAJOR function; should be reorganised & split up:
         const renderVotes = (p) => {
 //            console.log(`renderVotes`);
 //            console.log(p);
+            if (!p.hasOwnProperty(`teamObj`)) {
+                return;
+            }
             let v = p.teamObj.votes;
+//            let m = p.teamObj.multiplier;
+//            let t = parseInt(v) * parseInt(m);
+//            console.log(v, m, t);
             let rc = player.teamObj.votes === 0;
             debugServer(`renderVotes called`);
             $('#votes').html(v);
+//            $('.multiplier').html(m);
+//            $('.totalscore').html(t);
             max = v;
             let c = 0;
             vv.each((i, el) => {
@@ -643,19 +818,25 @@
             let boxes = c === vv.length && vv.length > 0;
             let newRound = player.teamObj.rounds.toString().indexOf(env.session.round) < 0;
             let remain = Boolean(player.teamObj.votes);
-
-            let ok = (boxes && newRound) || (!remain && newRound);
-//            console.log(` ===== renderVotes: ${ok}`);
-//            console.log(`boxes: ${boxes}`);
-//            console.log(`newRound: ${newRound}`);
-//            console.log(`remain: ${remain}`);
+            let isLead = player.isLead;
+            let isType = player.teamObj.type === env.gamedata.rounds[env.session.round].type;
+            /* isType checks to see if this player can score in this round */
+            let ok = ((boxes && newRound) || (!remain && newRound)) && isLead && isType;
+            /*
+            console.log(` ===== renderVotes: ${ok}`);
+            console.log(`boxes: ${boxes}`);
+            console.log(`newRound: ${newRound}`);
+            console.log(`remain: ${remain}`);
+            console.log(`isLead: ${isLead}`);
+            console.log(`isType: ${isType}`);
+            */
 //            console.log(player.teamObj.votes);
 //            console.log(player.teamObj.rounds.toString().indexOf(env.session.round) < 0);
 //            console.log(env.session.round)
             if (ok) {
                 console.log('EMIT');
                 console.log(p);
-                socket.emit('teamRoundComplete', {team: p.teamObj.id})
+                socket.emit('teamRoundComplete', {team: p.teamObj.id, player: p.id})
             }
             if (v <= 0) {
                 $('#votes').addClass('false');
@@ -676,9 +857,6 @@
 //            console.log(o);
             socket.emit('getPlayer', getMinID(), (p) => {
 //                console.log(`getPlayer CB:`);
-//                console.log(JSON.parse(JSON.stringify(p.teamObj)));
-//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
-//                console.log(JSON.stringify(player.teamObj) === JSON.stringify(p.teamObj));
                 updatePlayer(p);
                 renderVotes(p);
                 updateValues(p);
@@ -719,8 +897,8 @@
         // Stakeholder
         const registerScore2 = (o) => {
             socket.emit('getNewScorePacket2', o);
-            console.log(o);
-            console.log('getNewScorePacket2');
+//            console.log('getNewScorePacket2');
+//            console.log(o);
         }
         const registerScore = (src, targ, valID, val) => {
 //            console.log(`registerScore`, src, targ, valID, val);
@@ -734,8 +912,6 @@
             vb = $('.buttonVote');
             vv = $('.voteVal');
             vb.on('click', function () {
-//                console.log('this is the event');
-//                console.log($('.voteVal').length);
                 let d = $(this).attr('id');
                 let o = {};
                 let a = [];
@@ -747,13 +923,11 @@
                         val: $(this).val(),
                         disabled: d.split('_')[1] === $(this).attr('id').split('_')[1]
                     }
-//                    console.log(st);
                     if (st) {
                         if (st.hasOwnProperty('length')) {
                             o.disabled = st[i].disabled ? true : o.disabled;
                         }
                     }
-//                    o[$(this).attr('id')] = $(this).val();
                     a.push(o);
                 });
                 setState(a);
@@ -766,7 +940,7 @@
             let as = $('#actionSelect');
             let ad = $('#actionDesc');
             ab.on('click', function () {
-
+//                console.log(`I am the click`);
                 if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
                     if (av.val() < 1) {
                         alert('value must be more than 0');
@@ -851,7 +1025,7 @@
         socket.on('serverShutdown', serverShutdown);
         socket.on('ping', () => {
             onPinged();
-            console.log(`i got pinged`);
+//            console.log(`i got pinged`);
         });
         socket.on('refresh', () => {
             refreshMe();

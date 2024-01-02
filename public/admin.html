@@ -91,7 +91,8 @@
         let plTime = null;
         let storeObj = {
             playlistOpen: false
-        }
+        };
+        let devTO = null;
         //
         const buttonSetup = () => {
             // Ping buttons
@@ -113,7 +114,7 @@
 //                    let r = confirm(`are you sure you want to refresh player ${id}?`);
                     let r = true;
                     if (r) {
-//                        console.log('refreshPlayer', id);
+//                        console.log(`refreshing ${id}`);
                         socket.emit('refreshPlayer', id);
                     }
                 });
@@ -246,8 +247,8 @@
             socket.emit('assignTeams', (t) => {
                 listPlayers();
                 enableRoundStart(1);
-//                enableRoundStart(2);
                 getGameToStore();
+
             });
         }
         const assignTeams = () => {
@@ -380,23 +381,27 @@
             // n is round 1, 2 etc, hence subtract one to address the array of buttons
 //            console.log(`enableRoundStart ${n}`);
             enableButton($(buttonsStartRound[(n - 1)]), true);
+            if (env.isDev) {
+                clearTimeout(devTO);
+                devTO = setTimeout(() => {
+                    console.log(`teams assigned, start round ${n} automatically`);
+//                    console.log(env.gamedata.rounds.length);
+                    startRoundFunk(n);
+                }, 1000);
+            }
+        };
+        const startRoundFunk = (r) => {
+//            console.log(`startRound ${r}`);
+            socket.emit('startRound', r);
+            updateStatus(`start round ${r}`);
+            enableButton(`r${r}`, false)
         };
         const startRound = function () {
             // NOTE do not alter this to an arrow function!
             let id = $(this).attr('id');
             let r = parseInt(id.replace(/[^0-9]/g, ''));
-            let go = true;
-            if (r === 1) {
-//                go = confirm('Round 1 is currently in development and may cause unepected issues. Are you sure you want to continue?');
-            }
-            if (go) {
-//                alert('will go');
-                socket.emit('startRound', r);
-            }
-//            $('.indr').removeClass('highlight');
-//            $(`#indr${r}`).addClass('highlight');
-            updateStatus(`start round ${r}`);
-            enableButton(id, false);
+            startRoundFunk(r);
+//            enableButton(id, false);
         };
         const onStartRound = (r) => {
 //            console.log(`i will start round ${r}`);
@@ -445,9 +450,43 @@
                 }
             };
         };
+        const checkList = () => {
+            // check to see if all players are enrolled & enroll them if not, then auto-start the game
+//            console.log(`checkList: ${Boolean(env.session)}`)
+            if (env.isDev && !Boolean(env.session)) {
+//                debugger;
+                clearTimeout(devTO);
+                devTO = setTimeout(() => {
+                    socket.emit('getPlayerPack', (pp) => {
+                        let pd = Object.values(pp.playersDetail);
+//                        console.log(`checkList callback`);
+//                        console.log(pp.session);
+                        let ae = true;
+                        if (pd.length > 0) {
+                            pd.forEach((p) => {
+                                if (!p.enrolled) {
+//                                    console.log(`auto refresh ${p.id}`)
+                                    socket.emit('refreshPlayer', p.id);
+                                    ae = false;
+                                }
+                            });
+                            if (ae && pp.session.round === 0) {
+//                                console.log('all players enrolled, assign teams automatically');
+                                clearTimeout(devTO);
+                                devTO = setTimeout(() => {
+//                                    console.log(``);
+                                    assignTeams();
+                                }, 1000);
+                            }
+                        }
+                    })
+
+                }, 500);
+            }
+        };
         const updatePlayersView = (p) => {
             if (currentDisplay === 'listPlayers') {
-                console.log(`updatePlayersView`);
+//                console.log(`updatePlayersView`);
                 renderTemplate('playerList', 'controlPanel', {players: p});
                 buttonSetup();
             }
@@ -462,7 +501,7 @@
                         pn.assigned = pn.stakeholder > -1;
                         pn.stakeholder = pn.stakeholder > -1 ? Object.values(env.gamedata.teams)[pn.stakeholder].title : 'unassigned';
                     });
-                    console.log(`listPlayers: ${JSON.stringify(sortVal)}`);
+//                    console.log(`listPlayers: ${JSON.stringify(sortVal)}`);
                     if (s) {
                         sortVal.n = sortVal.val === s ? sortVal.n * -1 : 1;
                         p = p.sort(sortPlayers(s));
@@ -946,11 +985,14 @@
             listPlayers();
         });
         socket.on('newPlayer', (players) => {
+//            console.log('new player');
             newPlayer(players);
         });
         socket.on('onAddNewPlayer', () => {
 //            console.log('onAddNewPlayer');
+//            console.log(env.session);
             getGameToStore();
+            checkList();
         });
         socket.on('serverShutdown', onServerShutdown);
         socket.on('serverStartup', onServerStartup);

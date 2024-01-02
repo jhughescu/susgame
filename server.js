@@ -65,6 +65,12 @@ class Player {
         this.connected = false;
 //        alert('ham')
     };
+    getVotes() {
+        return this.teamObj.type === 1 ? this.teamObj.votes : this.votes;
+    }
+    setVotes(v) {
+        this.teamObj.type === 1 ? this.teamObj.votes = v : this.votes = v;
+    }
 };
 class Session {
     constructor(id) {
@@ -120,7 +126,8 @@ class ScorePacket {
         this.targ = targ;
         this.val = val;
         this.valID = valID;
-        this.round = session.getRound();
+        this.isMultiplier = false;
+        this.round = session ? session.getRound() : 0;
         this.roundComplete = roundComplete;
     }
 };
@@ -138,7 +145,7 @@ const getNewScorePacket2 = (o) => {
     if (o.hasOwnProperty('src') && o.hasOwnProperty('targ') && o.hasOwnProperty('valID') && o.hasOwnProperty('val')) {
         let roundComplete = o.hasOwnProperty('roundComplete') ? o.roundComplete : false;
         let sp = new ScorePacket(o.src, o.targ, o.valID, o.val, roundComplete);
-
+        o.isMultiplier ? sp.isMultiplier = o.isMultiplier : '';
         scorePackets.push(sp);
         updateLogFile('scorePackets', scorePackets);
         applyScorePacket(sp);
@@ -384,6 +391,18 @@ const getTeamMembers = (id) => {
         t = getPlayerFromID(id);
 //        console.log(t.teamObj);
     }
+    return t;
+};
+const getAllTeams = () => {
+    // return teams with live data
+//    console.log(`getAllTeams`);
+    let p = playersDetail;
+    let t = {};
+    Object.values(p).forEach((pl) => {
+        t[`t${pl.teamObj.id}`] = pl.teamObj;
+    });
+    t = Object.values(t);
+//    console.log(t);
     return t;
 };
 const getPlayerFromID = (id) => {
@@ -653,11 +672,10 @@ const stStakeholderScore = (o) => {
 };
 //
 const teamRoundComplete = (o) => {
-
-//    console.log(gamedata);
     if (session) {
         if (session.getRound() > 0) {
-            console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+//            console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+//            console.log(o);
             let tid = `t${o.team}`;
             if (!session.scores[`round${session.getRound()}`].hasOwnProperty(tid)) {
                 session.scores[`round${session.getRound()}`][tid] = o;
@@ -676,15 +694,50 @@ const teamRoundComplete = (o) => {
     }
 };
 const roundIsComplete = () => {
+//    console.log(`roundIsComplete ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     let d = gamedata;
     let s = session;
     let r = s.getRound();
     let t = d[d.rounds[r].teams];
     let c = s.scores[`round_${r}`];
-//    console.log();
-    return t.length === c.length;
+    let ric = true;
+    if ('hidethis') {
+//    console.log(d.rounds[s.getRound()].type);
+//    console.log(t);
+    /*
+    t.forEach((te) => {
+        if (te.type === d.rounds[r].type) {
+            // only include teams which match the current round type
+//            consoleLog(`check team ${te.title}, ${te.rounds}, ${te.rounds.indexOf(`r${r}`)}`);
+//            console.log(te);
+            if (te.rounds.indexOf(`r${r}`) === 0) {
+                ric = false;
+//                console.log(`no round completion for ${te.title}`);
+//                break;
+            }
+        }
+    });
+    */
+    }
+    t = getAllTeams();
+    t.forEach((te) => {
+        if (te.type === d.rounds[r].type) {
+//            console.log(`${te.title}: ${te.rounds}, ${te.rounds.indexOf(`r${r}`)}`);
+            if (te.rounds.indexOf(`r${r}`) === -1) {
+                ric = false;
+//                console.log(`no round completion for ${te.title}`);
+            }
+        }
+    });
+//    console.log(`roundIsComplete (r${r})? ${ric}`);
+    return ric;
+//    console.log(t.length, c.length);
+//    return t.length === c.length;
 };
 const applyScorePacket = (sp) => {
+
+    let teamSrc = getTeamFromPlayer(sp.src);
+//    console.log(playersDetail[sp.src]);
     if (session) {
         if (!session.hasOwnProperty('scores')) {
             session.scores = {};
@@ -696,51 +749,61 @@ const applyScorePacket = (sp) => {
             session.scores[`round_${session.getRound()}`] = [];
         }
         session.scores.raw.push(sp);
-
+        session.scores[`round_${session.getRound()}`].push(sp);
+        if (session.getRound() === 3) {
+            console.log(`applyScorePacket`);
+            console.log(sp);
+        }
         if (sp.valID === 'vote') {
-            session.scores[`round_${session.getRound()}`].push(sp);
-            let teamSrc = getTeamFromPlayer(sp.src);
             // assign/subtract votes to src and targ separately
             let t = getTeamMembers(sp.targ);
+                // if the SP is a multiplier then it is treated as a voteReceived for the src but as a multiplier for the targ
+            let vType = sp.isMultiplier ? 'multiplier' : 'votesReceived';
+            let vDef = sp.isMultiplier ? 1 : 0;
             t.forEach((te, id) => {
-//                te.teamObj.votes -= parseInt(sp.val);
-                te.teamObj.votesReceived = te.teamObj.hasOwnProperty('votesReceived') ? te.teamObj.votesReceived : 0;
-                te.teamObj.votesReceived += parseInt(sp.val);
+                te.teamObj[vType] = te.teamObj.hasOwnProperty(vType) ? te.teamObj[vType] : vDef;
+                te.teamObj[vType] += parseInt(sp.val);
+                if (te.teamObj.hasOwnProperty('multiplier')) {
+                    te.teamObj.total = te.teamObj.votesReceived * te.teamObj.multiplier;
+                }
             });
+//            }
             t = getTeamMembers(teamSrc.id);
-//            console.log(`applyScorePacket`);
-//            console.log(sp);
             if (sp.roundComplete) {
-                teamRoundComplete({team: sp.targ});
-//                    te.teamObj[session.getRound()]
+                teamRoundComplete({team: getTeamFromPlayer(sp.src).id});
             }
             t.forEach((te, id) => {
-                te.teamObj.votes -= Math.abs(parseInt(sp.val));
-
-//                    te.teamObj.votesReceived = te.teamObj.hasOwnProperty('votesReceived') ? te.teamObj.votesReceived : 0;
-//                    te.teamObj.votesReceived += parseInt(sp.val);
+                if (playersDetail[sp.src].teamObj.type === 1) {
+                    // type one players have shared votes
+                    te.teamObj.votes -= Math.abs(parseInt(sp.val));
+                } else {
+                    // type 2 players have their own votes
+                    // BUT they don't share votes
+//                    playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 0;
+//                    playersDetail[sp.src].votes += Math.abs(parseInt(sp.val));
+                }
             });
+            if (playersDetail[sp.src].teamObj.type === 2) {
+//                playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 10;
+//                playersDetail[sp.src].votes -= Math.abs(parseInt(sp.val));
+            }
 
-
-            // update the team members for targ
-            Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
+        }
+        // update the team members for targ
+        Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
+            getSocketFromID(p).emit('scoreUpdate', sp);
+        });
+        // update team members for src, if different to targ
+        if (sp.targ !== teamSrc.id) {
+            Object.values(gamedata.teams)[teamSrc.id].team.forEach((p, i) => {
                 getSocketFromID(p).emit('scoreUpdate', sp);
             });
-//            console.log(sp);
-
-//            console.log(teamSrc);
-            if (sp.targ !== teamSrc.id) {
-                Object.values(gamedata.teams)[teamSrc.id].team.forEach((p, i) => {
-                    getSocketFromID(p).emit('scoreUpdate', sp);
-                });
-            }
-            console.log(`round complete? ${roundIsComplete()}`);
-            io.emit('roundUpdate', {
-                round: session.getRound(),
-                complete: roundIsComplete(),
-                scorePacket: sp
-            });
         }
+        io.emit('roundUpdate', {
+            round: session.getRound(),
+            complete: roundIsComplete(),
+            scorePacket: sp
+        });
         sessionUpdate();
         statusUpdate(sp);
         onPlayersUpdate();
@@ -1512,8 +1575,8 @@ io.on('connection', (socket) => {
         }
     });
     socket.on('teamRoundComplete', (o) => {
-        console.log(`teamRoundComplete event`);
-        console.log(o);
+//        console.log(`teamRoundComplete event`);
+//        console.log(o);
         teamRoundComplete(o);
     });
     socket.on('setClean', (boo) => {
