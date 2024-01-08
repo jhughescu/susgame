@@ -759,6 +759,9 @@ const applyScorePacket = (sp) => {
             let t = getTeamMembers(sp.targ);
                 // if the SP is a multiplier then it is treated as a voteReceived for the src but as a multiplier for the targ
             let vType = sp.isMultiplier ? 'multiplier' : 'votesReceived';
+//            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+//            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+//            console.log(vType);
             let vDef = sp.isMultiplier ? 1 : 0;
             t.forEach((te, id) => {
                 te.teamObj[vType] = te.teamObj.hasOwnProperty(vType) ? te.teamObj[vType] : vDef;
@@ -766,30 +769,34 @@ const applyScorePacket = (sp) => {
                 if (te.teamObj.hasOwnProperty('multiplier')) {
                     te.teamObj.total = te.teamObj.votesReceived * te.teamObj.multiplier;
                 }
+//                console.log(`team ${te.teamObj.id} ${vType} ${te.teamObj[vType]}`)
             });
 //            }
             t = getTeamMembers(teamSrc.id);
             if (sp.roundComplete) {
                 teamRoundComplete({team: getTeamFromPlayer(sp.src).id});
             }
+            let pt = playersDetail[sp.src].teamObj.type;
             t.forEach((te, id) => {
-                if (playersDetail[sp.src].teamObj.type === 1) {
+                if (pt === 1 || pt === 2) {
                     // type one players have shared votes
                     te.teamObj.votes -= Math.abs(parseInt(sp.val));
                 } else {
                     // type 2 players have their own votes
                     // BUT they don't share votes
 //                    playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 0;
-//                    playersDetail[sp.src].votes += Math.abs(parseInt(sp.val));
+//                    playersDetail[sp.src].votes -= Math.abs(parseInt(sp.val));
                 }
             });
-            if (playersDetail[sp.src].teamObj.type === 2) {
+            if (pt === 2) {
 //                playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 10;
 //                playersDetail[sp.src].votes -= Math.abs(parseInt(sp.val));
             }
 
         }
         // update the team members for targ
+
+//        console.log(sp);
         Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
             getSocketFromID(p).emit('scoreUpdate', sp);
         });
@@ -828,7 +835,8 @@ const getPlayerPack = (cb, sock) => {
         playersBasic: playersBasic,
         playersDetail: playersDetail,
         storedData: storedData,
-        gamedata: gamedata
+        gamedata: gamedata,
+        process: process.env
     }
     if (cb) {
         cb(o);
@@ -837,7 +845,9 @@ const getPlayerPack = (cb, sock) => {
 const getPlayer = (id, cb) => {
     // return just the player defined by id
 //    console.log(`request to getPlayer ${id}`);
-    cb(getPlayerFromID(id));
+    let pl = getPlayerFromID(id);
+//    console.log(pl)
+    cb(pl);
 };
 const getGameMin = (cb) => {
     // Prepare & return a minimal game summary for localStorage
@@ -989,14 +999,11 @@ const addNewPlayer = (o, socket, callback) => {
     let id = o.id;
     id = id.replace(gamedata.prefixes.player, '');
     let pl = new Player(id, socket);
-//    writeLogFile('newplayer', pl);
     if (o.fake) {
         pl.fake = true;
     } else {
         pl.fake = false;
     }
-//    console.log(`~~~~~~~~~~~~~~~~ addNewPlayer id: ${id}, socketid: ${socket.id}`);
-//    console.log(o);
     if (!playersBasic.hasOwnProperty(id)) {
         playersBasic[id] = getBasicPlayerSummary(pl);
     }
@@ -1352,6 +1359,9 @@ const assignTeams = (cb) => {
 //                    }
                     pl.stakeholder = v.id;
                     pl.teamObj = Object.assign(copyObj(v), {});
+                    if (pl.teamObj.type === 2) {
+                        pl.votes = pl.teamObj.votes
+                    }
                     let sock = playersMap.get(pl.socketID);
                     sock.emit('onAssignTeams', k);
                 }
@@ -1568,6 +1578,9 @@ io.on('connection', (socket) => {
         stStakeholderScore(o);
     });
     socket.on('startRound', (r) => {
+        console.log(`startRound ${r} ${process.env.NODE_ENV}`);
+        console.log(`startRound ${r} ${process.env.AUTO}`);
+//        console.log(ENV)
         if (session) {
             session.setRound(r);
             io.emit('onStartRound', r);

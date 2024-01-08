@@ -28,6 +28,10 @@
     font-family: monospace;
 }
 
+body.small_enterprise.lead {
+    background-color: green;
+}
+
 #overlay #wrapper{
     position: fixed;
     top: 0;

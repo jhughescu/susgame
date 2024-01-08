@@ -166,6 +166,15 @@
         //
         const inputMax = $(`#showMax`);
         //
+        const isAutoMode = () => {
+            let am = false;
+            if (env.hasOwnProperty('process')) {
+                if (env.process.hasOwnProperty('AUTO')) {
+                    am = env.process.AUTO === 'true';
+                }
+            }
+            return am;
+        }
         const enableButton = (b, boo) => {
 //            console.log(b);
             if (typeof(b) === 'string') {
@@ -381,13 +390,13 @@
             // n is round 1, 2 etc, hence subtract one to address the array of buttons
 //            console.log(`enableRoundStart ${n}`);
             enableButton($(buttonsStartRound[(n - 1)]), true);
-            if (env.isDev) {
+            if (isAutoMode()) {
                 clearTimeout(devTO);
                 devTO = setTimeout(() => {
                     console.log(`teams assigned, start round ${n} automatically`);
 //                    console.log(env.gamedata.rounds.length);
                     startRoundFunk(n);
-                }, 1000);
+                }, 2000);
             }
         };
         const startRoundFunk = (r) => {
@@ -453,6 +462,7 @@
         const checkList = () => {
             // check to see if all players are enrolled & enroll them if not, then auto-start the game
 //            console.log(`checkList: ${Boolean(env.session)}`)
+//            if (isAutoMode() && !Boolean(env.session)) {
             if (env.isDev && !Boolean(env.session)) {
 //                debugger;
                 clearTimeout(devTO);

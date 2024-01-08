@@ -53,7 +53,7 @@
         let clientData = {role: 'player'};
         let player = null;
         let suspend = false; /* suspend is true when the server connection is down */
-        let allowAutoComplete = true;
+        let autoCompleteAllowed = true;
 
         Handlebars.registerHelper('playerPartial', function(partialName, context) {
             const partial = Handlebars.partials[partialName];
@@ -260,15 +260,18 @@
             scoreUpdate();
         };
         const updateValues = (pl) => {
+//            console.log(pl);
             if (pl) {
                 if (pl.hasOwnProperty(`teamObj`)) {
                     let list = ['votes', 'votesReceived', 'multiplier', 'total'];
                     let o = {
-                        votes: pl.teamObj.type === 1 ? pl.teamObj.votes : pl.votes,
+//                        votes: pl.teamObj.type === 1 ? pl.teamObj.votes : pl.votes,
+                        votes: pl.teamObj.votes,
                         votesReceived: pl.teamObj.votesReceived,
                         multiplier: pl.teamObj.multiplier,
                         total: pl.teamObj.votesReceived * pl.teamObj.multiplier
                     }
+//                    console.log(o);
                     let t = pl.teamObj;
                     let ob = null;
                     o = {vals: []};
@@ -276,31 +279,16 @@
                         if (t.hasOwnProperty(l)) {
                             ob = {
                                 prop: l,
-                                val: l === 'votes' ? (pl.teamObj.type === 1 ? t[l] : pl[l]) : t[l]
+//                                val: l === 'votes' ? (pl.teamObj.type === 1 ? t[l] : pl[l]) : t[l],
+//                                val: l === 'votes' ? (pl.teamObj.type === 1 ? t[l] : pl[l]) : t[l],
+                                val: t[l]
                             };
                             o.vals.push(ob);
                         }
                     });
-//                    console.log(o);
                     if (o.vals.length > 0) {
                         renderTemplate('scoresheet', 'scoresheet', o);
                     }
-//                    console.log(pl.teamObj);
-                    /*
-                    $('#info_resources').show();
-                    $(`.resources`).html(pl.teamObj.votes);
-                    if (pl.teamObj.votesReceived) {
-                        $('#info_votes').show();
-                        $(`.votes_received`).html(pl.teamObj.votesReceived);
-                    }
-                    if (pl.teamObj.multiplier) {
-                        $('#info_multiplier').show();
-                        $(`.multiplier`).html(pl.teamObj.multiplier);
-                        $('#info_totalscore').show();
-                        $(`.totalscore`).html(pl.teamObj.multiplier * pl.teamObj.votesReceived);
-                    }
-                    $('.info_box').hide();
-                    */
                 }
             }
         };
@@ -526,12 +514,15 @@
         let ls = [];
         let lid = null;
         const validateVote = (inp) => {
-            const value = parseFloat(inp.value);
-            if (value > max) {
-                inp.value = max;
-            }
-            if (value < (-1 * max)) {
-                inp.value = (-1 * max);
+            if ($(inp).is(':visible')) {
+                const value = parseFloat(inp.value);
+                if (value > max) {
+                    inp.value = max;
+                }
+                if (value < (-1 * max)) {
+                    inp.value = (-1 * max);
+                }
+//                console.log(max, inp.value);
             }
         };
         const inputsDisabled = (src, pre) => {
@@ -557,8 +548,10 @@
                 targ: parseInt(vi.attr('id').split('_')[1]),
                 valID: 'vote',
                 val: parseInt(vi.val()),
+                round: env.session.round,
                 roundComplete: rc
             }
+//            console.log('get it here');
             registerScore2(so);
         };
         const submitVotev2 = function (src, toEmit) {
@@ -621,9 +614,13 @@
             }
             return m;
         };
+        const allowAutoComplete = () => {
+            let m = 10;
+            return env.session.round < m ? autoCompleteAllowed : false;
+        };
         const autoCompleteCollaboration = () => {
-//            console.log(`autoCompleteCollaboration: ${allowAutoComplete}`);
-            if (allowAutoComplete) {
+//            console.log(`autoCompleteCollaboration: ${allowAutoComplete()}`);
+            if (allowAutoComplete()) {
                 let v = $('.voteVal');
                 let b = $('.buttonVote');
                 let vt = player.teamObj.votes;
@@ -639,7 +636,7 @@
                 a.sort(() => {return Math.round(Math.random() * 3 - 2)});
                 console.log(a);
                 a.push(0);
-                allowAutoComplete = false;
+                autoCompleteAllowed = false;
                 a.forEach((av, i) => {
                     $(v[i]).val(av);
 //                    $(b[i]).click();
@@ -651,7 +648,7 @@
             }
         };
         const autoCompleteAllocation = () => {
-            if (allowAutoComplete) {
+            if (allowAutoComplete()) {
 //                console.log(`I will autoCompleteAllocation`);
                 let sel = $('#actionSelect');
                 let desc = $('#actionDesc');
@@ -672,7 +669,7 @@
                     if (Boolean(sel.val()) && Boolean(desc.val()) && Boolean(val.val())) {
                         $('#buttonAllocate').click();
 //                        let tot = 500 + (Math.random() * 500);
-//                        allowAutoComplete = false;
+//                        autoCompleteAllowed = false;
 //                        setTimeout(() => {
 //                            console.log(`the click`);
 //                            $('#buttonAllocate').click();
@@ -740,42 +737,41 @@
 
         const submitMultiplier = function (src, toEmit) {
             const vi = src.parent().find('.voteVal');
-//            let rc = inputsDisabled(src, player.teamObj.votes - parseInt(vi.val()) <= 0);
-            let rc = inputsDisabled(src, false);
-//            console.log(`ac: ${rc}`);
-            let so = {
-                src: player.id,
-                targ: parseInt(vi.attr('id').split('_')[1]),
-                valID: 'vote',
-                isMultiplier: true,
-                val: parseInt(vi.val()),
-                roundComplete: rc
-            }
-            registerScore2(so);
-            so = [];
-            vv.each((id, v) =>  {
-//                console.log(id, v);
-//                console.log($(v).attr('id'), $(v).val());
-                let st = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
-                let vid = $(v).attr('id').split('_')[1];
-//                console.log($(v).attr('id'), src.attr('id'));
-                let o = {
-                    option: $(v).attr('id'),
-                    button: `buttonVote_${vid}`,
-                    val: $(v).val(),
-                    disabled: $(v).attr('id').split('_')[1] === src.attr('id').split('_')[1]
-                };
-                if (st) {
-                    if (st.hasOwnProperty('length')) {
-                        o.disabled = st[id].disabled ? true : o.disabled;
-                    }
+            const viz = vi.is(':visible');
+//            console.log(vi.val(), max, viz);
+            if (vi.val() > max) {
+                alert(`sorry, you only have ${max} votes left`);
+            } else {
+    //            console.log(`viz: ${viz}`);
+                let rc = inputsDisabled(src, false);
+                let so = {
+                    src: player.id,
+                    targ: parseInt(vi.attr('id').split('_')[1]),
+                    valID: 'vote',
+                    isMultiplier: true,
+                    val: parseInt(vi.val()),
+                    roundComplete: rc
                 }
-//                o[$(v).attr('id')] = $(v).val();
-                so.push(o);
-
-//                console.log(v.attr('id'), v.val());
-            });
-            setState(so);
+                registerScore2(so);
+                so = [];
+                vv.each((id, v) =>  {
+                    let st = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+                    let vid = $(v).attr('id').split('_')[1];
+                    let o = {
+                        option: $(v).attr('id'),
+                        button: `buttonVote_${vid}`,
+                        val: $(v).val(),
+                        disabled: $(v).attr('id').split('_')[1] === src.attr('id').split('_')[1]
+                    };
+                    if (st) {
+                        if (st.hasOwnProperty('length')) {
+                            o.disabled = st[id].disabled ? true : o.disabled;
+                        }
+                    }
+                    so.push(o);
+                });
+                setState(so);
+            }
         };
         const initpv = () => {
             debugServer('initialise a Public Voice');
@@ -822,20 +818,24 @@
             let isType = player.teamObj.type === env.gamedata.rounds[env.session.round].type;
             /* isType checks to see if this player can score in this round */
             let ok = ((boxes && newRound) || (!remain && newRound)) && isLead && isType;
+            ///*
+//            if (env.session.round === 3) {
+//                console.log(` ===== renderVotes: ${ok} round ${env.session.round}`);
+//            }
             /*
-            console.log(` ===== renderVotes: ${ok}`);
             console.log(`boxes: ${boxes}`);
             console.log(`newRound: ${newRound}`);
             console.log(`remain: ${remain}`);
             console.log(`isLead: ${isLead}`);
             console.log(`isType: ${isType}`);
             */
+            //*/
 //            console.log(player.teamObj.votes);
 //            console.log(player.teamObj.rounds.toString().indexOf(env.session.round) < 0);
 //            console.log(env.session.round)
             if (ok) {
-                console.log('EMIT');
-                console.log(p);
+//                console.log('EMIT');
+//                console.log(p);
                 socket.emit('teamRoundComplete', {team: p.teamObj.id, player: p.id})
             }
             if (v <= 0) {
@@ -897,17 +897,19 @@
         // Stakeholder
         const registerScore2 = (o) => {
             socket.emit('getNewScorePacket2', o);
-//            console.log('getNewScorePacket2');
-//            console.log(o);
+            console.log('getNewScorePacket2');
+            console.log(o);
         }
         const registerScore = (src, targ, valID, val) => {
-//            console.log(`registerScore`, src, targ, valID, val);
+            console.log(`registerScore`, src, targ, valID, val);
             registerScore2(`registerScore`, src, targ, valID, val);
             socket.emit('getNewScorePacket', src, targ, valID, val, (sp) => {
 //                console.log(sp);
             })
         };
         const initst = () => {
+            $('body').addClass(player.teamObj.stub)
+            $('body').addClass(player.isLead ? 'lead' : 'member')
             lid = `st-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');
