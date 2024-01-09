@@ -14,6 +14,7 @@
         {"id": "video", "type": "video", "srcRef": "v9", "title": "Disruption"},
         {"id": "video", "type": "video", "srcRef": "v10", "title": "Recalculation"},
         {"id": "video", "type": "video", "srcRef": "v11", "title": "Collaboration"},
+        {"id": "slide_210_checkdevice", "title": "Check your Device", "viewtype": "frame1", "header": "check your device"},
         {"id": "slide_010_intro", "title": "test page", "viewtype": "fullscreen1", "header": "hey, this is new"},
         {"id": "slide_010_intro", "title": "another test", "viewtype": "fullscreen1", "header": "a load of stuff"},
         {"id": "slide_010_intro", "title": "not real", "viewtype": "fullscreen1", "header": "I write server code"}

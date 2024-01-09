@@ -616,6 +616,7 @@
         };
         const allowAutoComplete = () => {
             let m = 10;
+            return false;
             return env.session.round < m ? autoCompleteAllowed : false;
         };
         const autoCompleteCollaboration = () => {

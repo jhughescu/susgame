@@ -132,7 +132,7 @@
             let prop = card.find(`.${p}`);
             prop.html(v);
             console.log(c, p, v);
-            if (p === 'resource') {
+            if (p === 'vote') {
                 console.log('resauce');
                 showLeaf(c, true, true);
             }
@@ -140,18 +140,28 @@
         const onSessionUpdate = (s) => {
             console.log('session updated:');
             console.log(s);
-            console.log(s.scores.round1);
-            if (s.scores) {
-                if (s.scores.round1) {
-                    console.log('we are r1');
-                    if (s.scores.round1.allocations) {
-                        let a = s.scores.round1.allocations;
-                        Object.values(a).forEach((o) => {
-                            console.log(o);
-                            updateCard1(o.t, 'action_name', o.action_name);
-                            updateCard1(o.t, 'action_desc', o.action_desc);
-                            updateCard1(o.t, 'resource', o.resource);
-                        });
+//            console.log(s.scores.round1);
+
+            if (s) {
+                if (s.scores) {
+                    let r = s.scores.round_1;
+                    if (r) {
+                        console.log('we are r1');
+    //                    console.log(r);
+    //                    if (r.allocations) {
+                            let a = r;
+    //                        let a = s.scores.round1.allocations;
+                            a.forEach((v) => {
+                                console.log(v);
+                                updateCard1(v.targ, v.valID, v.val);
+                            });
+    //                        Object.values(a).forEach((o) => {
+    //                            console.log(o);
+    //                            updateCard1(o.t, 'action_name', o.action_name);
+    //                            updateCard1(o.t, 'action_desc', o.action_desc);
+    //                            updateCard1(o.t, 'resource', o.resource);
+    //                        });
+    //                    }
                     }
                 }
             }

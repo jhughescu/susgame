@@ -296,6 +296,7 @@ body, html {
     z-index: 10;
     text-align: center;
 /*            background-color: rgba(255, 0, 0, 0.42);*/
+/*    border: 5px solid white;*/
 }
 .stakeholder_card .vertical-center {
     position: relative;
@@ -325,16 +326,25 @@ body, html {
 }
 .stakeholder_card .action_desc {
     top: 95px;
-    top: 37px;
+    top: 46px;
     left: 50px;
     width: 310px;
     height: 110px;
     font-size: 1.1rem;
 }
-.stakeholder_card .resource {
+.stakeholder_card .vote {
     top: 92px;
-    top: 26px;
+    top: 38px;
     left: 216px;
     width: 30px;
-    font-size: 1.9rem;
+    font-size: 2.6rem;
+}
+.centered {
+    width: 50%;
+/*    height: 50%;*/
+    border: 5px solid white;
+}
+.check {
+    font-size: 7em;
+    padding: 160px 30px;
 }

@@ -5,13 +5,14 @@
             "title": "Government",
             "displayColour": "#0099C4",
             "displayColour": "#0099C4",
-            "actions": ["action ken", "action bill", "action ron", "action cow", "action toast"]
+            "actions": ["build a house", "eat chips", "go to jail", "play darts", "buy a boat"]
         },
         "t1": {
             "id": 1,
             "title": "Individual Change Maker",
             "displayColour": "#633e88",
-            "displayColour": "#95C11F"
+            "displayColour": "#95C11F",
+            "actions": ["play golf", "build a canoe", "go on holiday", "eat a whole cake", "learn the violin"]
         },
         "t2": {
             "id": 2,
