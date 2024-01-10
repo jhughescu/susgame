@@ -17,6 +17,13 @@
 <body>
 <!--    <h1>Presenation</h1>-->
 <!--    <p>This is the presentation screen</p>-->
+    <div id='login'>
+        <div class='closer'>x</div>
+        <p>Please enter the admin password:</p>
+        <input type="password" id="passwordInput">
+
+        <button id="submitPassword">Submit</button>
+    </div>
     <div id='controls'></div>
     <div id='content'></div>
 
@@ -41,16 +48,14 @@
         };
         const prepSlide = (s) => {
             s.url = window.location.origin;
-//            s.gamedata = gamedata;
             gamedata.mainTeams.forEach((v, i) => {
-//                console.log(i, v);
                 s[`card_${i}`] = v;
             });
-            console.log('prepSlide');
-            console.log(s);
-            console.log(gamedata);
+//            console.log('prepSlide');
+//            console.log(s);
+//            console.log(gamedata);
             socket.emit('getSession', (o) => {
-                console.log(o)
+//                console.log(o);
             });
             return s;
         };
@@ -58,6 +63,7 @@
             currentSlide = prepSlide(slideList[id]);
 //            currentSlide.url = window.location.origin;
             renderSlide(currentSlide.id, currentSlide);
+            console.log(currentSlide)
             storeInfo();
         };
         const refreshSlide = () => {
@@ -82,6 +88,39 @@
             showSlide(0);
             window.location.reload();
             setTimeout(repeater, 1000);
+        };
+
+        const setupIntro = () => {
+            $('#intro_admin').off('click');
+            $('#intro_player').off('click');
+            $('#submitPassword').off('click');
+            $('#login').find('.closer').off('click');
+            $('#login').find('.closer').on('click', () => {
+                $('#passwordInput').val('');
+                $('#login').hide();
+            });
+            $('#login').hide();
+//            $('')
+            $('#intro_admin').on('click', function () {
+                $('#login').show();
+            });
+            $('#submitPassword').on('click', function () {
+                let pw = $('#passwordInput').val();
+                if (pw !== undefined && pw !== null && pw !== '' ) {
+                    socket.emit('adminLogin', pw, (boo) => {
+                        if (boo) {
+                            $('#login').hide();
+                            window.open('admin', '_blank');
+                        } else {
+                            alert('incorrect password, please try again')
+                        }
+                    });
+                }
+
+            });
+            $('#intro_player').on('click', function () {
+                window.open('player', '_self');
+            });
         };
         const setupCards = () => {
 //            $('.flower').hide();
@@ -178,14 +217,21 @@
         const clearContent = () => {
             $('#content').html('');
         };
-
+        const slideSpecificSetup = () => {
+            if ($('.stakeholder_card').length > 0) {
+//                console.log('renderSlide');
+                setupCards();
+            }
+            if ($('.intro').length > 0) {
+                setupIntro();
+            }
+        };
         const renderSlide = (temp, o) => {
             let targ = `content`;
             renderTemplate(temp, targ, o);
-//            console.log(o);
-            if ($('.stakeholder_card').length > 0) {
-                console.log('renderSlide');
-                setupCards();
+            slideSpecificSetup();
+            if (o.hasOwnProperty('action')) {
+                //
             }
         };
         const presentationUpdate = (p) => {
@@ -203,9 +249,15 @@
             }
             showSlide(cs);
         };
-
+        const reset = () => {
+            showSlide(0);
+        };
+        socket.on('disconnect', () => {
+//            console.log('gone')
+            reset();
+        });
         socket.on('connect', () => {
-//            console.log(`presentation connect`);
+            console.log(`presentation connect`);
             socket.emit('customDataEvent', clientData);
             socket.emit('getPresentationPack', (p) => {
                 presentationData = p;
@@ -215,6 +267,15 @@
                 slideList = p.slideList;
                 init();
             });
+//            socket.emit('getGameData', (gd) => {
+//                console.log('getGameData')
+//                console.log(gd);
+//            })
+//
+//            socket.emit('getSession', (gd) => {
+//                console.log('getSession')
+//                console.log(gd);
+//            })
 
         });
         socket.on('nextSlide', nextSlide);

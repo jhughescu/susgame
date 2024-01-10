@@ -166,6 +166,16 @@
         //
         const inputMax = $(`#showMax`);
         //
+        const procVal = (v) => {
+            let rv = v;
+            if (rv === 'true') {
+                rv = true;
+            }
+            if (rv === 'false') {
+                rv = false;
+            }
+            return rv;
+        };
         const isAutoMode = () => {
             let am = false;
             if (env.hasOwnProperty('process')) {
@@ -412,6 +422,13 @@
             startRoundFunk(r);
 //            enableButton(id, false);
         };
+        const startNextRound = () => {
+//            console.log(`startNextRound`)
+            if (env.session) {
+//                console.log(env.session);
+                startRoundFunk(env.session.round + 1);
+            }
+        };
         const onStartRound = (r) => {
 //            console.log(`i will start round ${r}`);
             $('.indr').removeClass('highlight');
@@ -461,10 +478,11 @@
         };
         const checkList = () => {
             // check to see if all players are enrolled & enroll them if not, then auto-start the game
-//            console.log(`checkList: ${Boolean(env.session)}`)
+            console.log(`checkList: ${Boolean(env.session)} isDev: ${env.isDev} session: ${Boolean(env.session)}`)
 //            if (isAutoMode() && !Boolean(env.session)) {
             if (env.isDev && !Boolean(env.session)) {
 //                debugger;
+//                console.log('on we go');
                 clearTimeout(devTO);
                 devTO = setTimeout(() => {
                     socket.emit('getPlayerPack', (pp) => {
@@ -472,6 +490,7 @@
 //                        console.log(`checkList callback`);
 //                        console.log(pp.session);
                         let ae = true;
+
                         if (pd.length > 0) {
                             pd.forEach((p) => {
                                 if (!p.enrolled) {
@@ -480,8 +499,11 @@
                                     ae = false;
                                 }
                             });
-                            if (ae && pp.session.round === 0) {
+                            let pae = procVal(env.process.AUTO);
+                            if (ae && pp.session.round === 0 && pae) {
 //                                console.log('all players enrolled, assign teams automatically');
+//                                let pae = procVal(env.process.AUTO);
+                                console.log(`this is the auto enroll bit: ${pae} (${typeof(pae)})`);
                                 clearTimeout(devTO);
                                 devTO = setTimeout(() => {
 //                                    console.log(``);
@@ -818,7 +840,9 @@
                 renderTemplate('playlist', 'slidelist', p);
                 $('.slideLink').off('click');
                 $('.slideLink').on('click', function () {
-                    socket.emit('gotoSlide', $(this).attr('id').split('_')[1]);
+                    let id = $(this).attr('id').split('_')[1];
+
+                    socket.emit('gotoSlide', id);
                 });
                 if (cb) {
                     cb(p);
@@ -843,9 +867,19 @@
         };
         const slideUpdate = () => {
             renderPlaylist((p) => {
+//                console.log('slideUpdate');
+//                console.log(p);
                 if (p.currentSlide) {
                     buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
                     buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
+                    if (p.currentSlide.hasOwnProperty('action')) {
+//                        console.log(p.currentSlide.action);
+//                        console.log(this[p.currentSlide.action]);
+                        if (eval(p.currentSlide.action)) {
+                            eval(p.currentSlide.action).call();
+                        }
+//                        this[p.currentSlide.action].call();
+                    }
                 }
             });
         };

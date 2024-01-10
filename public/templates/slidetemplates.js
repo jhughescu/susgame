@@ -12,7 +12,7 @@ templates['slide_010_intro'] = template({"compiler":[8,">= 4.3.0"],"main":functi
     + alias4(((helper = (helper = lookupProperty(helpers,"header") || (depth0 != null ? lookupProperty(depth0,"header") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"header","hash":{},"data":data,"loc":{"start":{"line":6,"column":11},"end":{"line":6,"column":21}}}) : helper)))
     + "</p>\n    </div>\n    <div class=\"container intro "
     + alias4(((helper = (helper = lookupProperty(helpers,"viewtype") || (depth0 != null ? lookupProperty(depth0,"viewtype") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"viewtype","hash":{},"data":data,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":44}}}) : helper)))
-    + "\">\n        <div class=\"box top-box\">admin</div>\n        <div class=\"box bottom-box\">play</div>\n    </div>\n</div>\n";
+    + "\">\n        <div class=\"box top-box button\" id='intro_admin'>admin</div>\n        <div class=\"box bottom-box button\" id='intro_player'>play</div>\n    </div>\n</div>\n";
 },"useData":true});
 templates['slide_020_entry'] = template({"1":function(container,depth0,helpers,partials,data) {
     var helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -72,7 +72,7 @@ templates['slide_210_checkdevice'] = template({"compiler":[8,">= 4.3.0"],"main":
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"frame1full"),depth0,{"name":"frame1full","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "<div class='container'>\r\n    <div class='centered check'>\r\n    CHECK YOUR DEVICE\r\n    </div>\r\n</div>";
+    + "<div class='container'>\n    <div class='centered check'>\n    CHECK YOUR DEVICE\n    </div>\n</div>\n";
 },"usePartial":true,"useData":true});
 templates['video'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {

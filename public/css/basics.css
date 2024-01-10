@@ -24,6 +24,9 @@ a:hover {
     color: yellow;
     font-weight: bold;
 }
+.button {
+    cursor: pointer;
+}
 button:disabled {
     color: gray;
 }

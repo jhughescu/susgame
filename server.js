@@ -27,6 +27,7 @@ const playerPrefix = 'player-';
 //const logPath = `../logs`;
 const logPath = `logs`;
 const logging = false;
+const ADMIN_PASSWORD = 'lemon'
 
 let clean = true; /* clean means no activity has taken place, it can only be set to false when an admin screen connects*/
 let logCount = 0;
@@ -722,7 +723,6 @@ const roundIsComplete = () => {
     t = getAllTeams();
     t.forEach((te) => {
         if (te.type === d.rounds[r].type) {
-//            console.log(`${te.title}: ${te.rounds}, ${te.rounds.indexOf(`r${r}`)}`);
             if (te.rounds.indexOf(`r${r}`) === -1) {
                 ric = false;
 //                console.log(`no round completion for ${te.title}`);
@@ -1564,6 +1564,14 @@ io.on('connection', (socket) => {
     socket.on('setAdmin', (boo) => {
         setAdmin(boo);
     });
+    socket.on('adminLogin', (pw, cb) => {
+//        console.log(`admin Login: ${pw}`);
+        if (cb) {
+            cb(pw === ADMIN_PASSWORD);
+        } else {
+//            console.log('NO CB');
+        }
+    })
     //
     /*
     // DEPRECATED

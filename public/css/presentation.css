@@ -348,3 +348,14 @@ body, html {
     font-size: 7em;
     padding: 160px 30px;
 }
+#login {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    right: 100px;
+    top: 100px;
+    width: 300px;
+    height: 80px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.67);
+}
