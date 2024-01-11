@@ -23,7 +23,8 @@
         }
     });
     txt.focus();
-    if (getInitProps().autoenroll) {
+//    if (getInitProps().autoenroll) {
+    if (autoEnrollAllowed()) {
         console.log('auto enroll this');
         let d = 1000 + (Math.random() * 2000);
         d = 100;

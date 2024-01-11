@@ -53,7 +53,7 @@
         let clientData = {role: 'player'};
         let player = null;
         let suspend = false; /* suspend is true when the server connection is down */
-        let autoCompleteAllowed = true;
+//        let autoCompleteAllowed = true;
 
         Handlebars.registerHelper('playerPartial', function(partialName, context) {
             const partial = Handlebars.partials[partialName];
@@ -212,7 +212,7 @@
             renderTemplate('kickedout', 'insertion');
         };
         const refreshMe = () => {
-//            console.log(`I want refreshment`);
+            console.log(`I want refreshment`);
             window.location.reload()
         };
         const renderTemplate = (temp, targ, o) => {
@@ -491,7 +491,7 @@
         let logList = {};
         let autoTO = null;
 
-        // Potential univeral code:
+        // Potential universal code:
 
 
         const showWarning = (w) => {
@@ -500,6 +500,16 @@
         };
         const closeWarning = () => {
             $('#warning').hide();
+        };
+        const procVal = (v) => {
+            let rv = v;
+            if (rv === 'true') {
+                rv = true;
+            }
+            if (rv === 'false') {
+                rv = false;
+            }
+            return rv;
         };
 
         // end potential universal code
@@ -614,10 +624,17 @@
             }
             return m;
         };
+        const autoCompleteAllowed = () => {
+            return procVal(env.process.AUTO);
+        };
+
+        const autoEnrollAllowed = () => {
+            return procVal(env.process.AUTO);
+        };
         const allowAutoComplete = () => {
-            let m = 10;
-            return false;
-            return env.session.round < m ? autoCompleteAllowed : false;
+            let m = 3;
+//            return false;
+            return env.session.round < m ? autoCompleteAllowed() : false;
         };
         const autoCompleteCollaboration = () => {
 //            console.log(`autoCompleteCollaboration: ${allowAutoComplete()}`);
@@ -635,9 +652,9 @@
                     over--;
                 }
                 a.sort(() => {return Math.round(Math.random() * 3 - 2)});
-                console.log(a);
+//                console.log(a);
                 a.push(0);
-                autoCompleteAllowed = false;
+//                autoCompleteAllowed = false;
                 a.forEach((av, i) => {
                     $(v[i]).val(av);
 //                    $(b[i]).click();

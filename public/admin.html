@@ -492,14 +492,15 @@
                         let ae = true;
 
                         if (pd.length > 0) {
+                            let pae = procVal(env.process.AUTO);
                             pd.forEach((p) => {
-                                if (!p.enrolled) {
+                                if (!p.enrolled && pae) {
 //                                    console.log(`auto refresh ${p.id}`)
                                     socket.emit('refreshPlayer', p.id);
                                     ae = false;
                                 }
                             });
-                            let pae = procVal(env.process.AUTO);
+
                             if (ae && pp.session.round === 0 && pae) {
 //                                console.log('all players enrolled, assign teams automatically');
 //                                let pae = procVal(env.process.AUTO);

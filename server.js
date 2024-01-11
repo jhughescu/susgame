@@ -78,8 +78,8 @@ class Session {
         this.id = id;
         this.round = 0;
         this.scores = {
-            round1: {},
-            round2: {}
+//            round1: {},
+//            round2: {}
         };
     }
     assigned;
@@ -91,7 +91,7 @@ class Session {
     }
     setRound(n) {
         this.round = n;
-        this.scores[`round${n}`] = {};
+//        this.scores[`round${n}`] = {};
     }
     getRound() {
         return this.round;
