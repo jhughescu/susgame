@@ -18,19 +18,22 @@
             "id": 2,
             "title": "Well-established Business",
             "displayColour": "#95C11F",
-            "displayColour": "#633E8C"
+            "displayColour": "#633E8C",
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t3": {
             "id": 3,
             "title": "Civil Society Organisation",
             "displayColour": "#F6C310",
-            "displayColour": "#D1356F"
+            "displayColour": "#D1356F",
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t4": {
             "id": 4,
             "title": "Small Enterprise",
             "displayColour": "#D1356F",
-            "displayColour": "#F6C310"
+            "displayColour": "#F6C310",
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t5": {
             "id": 5,
