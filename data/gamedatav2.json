@@ -5,35 +5,35 @@
             "title": "Government",
             "displayColour": "#0099C4",
             "displayColour": "#0099C4",
-            "actions": ["Be radical", "Be conservative", "Follow others", "Disengage", "Uprise"]
+            "actions": ["build a house", "eat chips", "go to jail", "play darts", "buy a boat"]
         },
         "t1": {
             "id": 1,
             "title": "Individual Change Maker",
             "displayColour": "#633e88",
             "displayColour": "#95C11F",
-            "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise"]
+            "actions": ["play golf", "build a canoe", "go on holiday", "eat a whole cake", "learn the violin"]
         },
         "t2": {
             "id": 2,
             "title": "Well-established Business",
             "displayColour": "#95C11F",
             "displayColour": "#633E8C",
-            "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Throw a tantrum", "Yell at everyone"]
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t3": {
             "id": 3,
             "title": "Civil Society Organisation",
             "displayColour": "#F6C310",
             "displayColour": "#D1356F",
-            "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Yell at someone", "Throw a tantrum"]
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t4": {
             "id": 4,
             "title": "Small Enterprise",
             "displayColour": "#D1356F",
             "displayColour": "#F6C310",
-            "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Ignore everyone"]
+            "actions": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"]
         },
         "t5": {
             "id": 5,
