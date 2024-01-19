@@ -52,22 +52,28 @@ Handlebars.partials['stakeholder_card2'] = template({"compiler":[8,">= 4.3.0"],"
 
   return "<div class='stakeholder_card' id='stakeholder_card_"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":1,"column":51},"end":{"line":1,"column":57}}}) : helper)))
-    + "'>\r\n    <div class='textarea'>\r\n        <div class='vertical-center'>\r\n            <div class='header'>\r\n                "
+    + "'>\n    <div class='textarea'>\n        <div class='vertical-center'>\n            <div class='header'>\n                "
     + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":5,"column":16},"end":{"line":5,"column":25}}}) : helper)))
-    + "\r\n            </div>\r\n        </div>\r\n        <div class='scorebox' id='st"
+    + "\n            </div>\n        </div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":8,"column":36},"end":{"line":8,"column":42}}}) : helper)))
-    + "_v1'></div>\r\n        <div class='scorebox' id='st"
+    + "_v1'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":9,"column":36},"end":{"line":9,"column":42}}}) : helper)))
-    + "_v2'></div>\r\n        <div class='scorebox' id='st"
+    + "_v2'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":10,"column":36},"end":{"line":10,"column":42}}}) : helper)))
-    + "_v3'></div>\r\n        <div class='scorebox' id='st"
+    + "_v3'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":11,"column":36},"end":{"line":11,"column":42}}}) : helper)))
-    + "_v4'></div>\r\n        <div class='scorebox' id='st"
+    + "_v4'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":12,"column":36},"end":{"line":12,"column":42}}}) : helper)))
-    + "_v5'></div>\r\n        <div class='scorebox' id='pv"
+    + "_v5'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":36},"end":{"line":13,"column":42}}}) : helper)))
-    + "_v1'></div>\r\n        <div class='scorebox' id='pv"
+    + "_v1'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":36},"end":{"line":14,"column":42}}}) : helper)))
-    + "_v2'></div>\r\n    </div>\r\n</div>\r\n";
+    + "_v2'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":15,"column":36},"end":{"line":15,"column":42}}}) : helper)))
+    + "_vtotal'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":16,"column":36},"end":{"line":16,"column":42}}}) : helper)))
+    + "_vtotal'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox total' id='score"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":17,"column":45},"end":{"line":17,"column":51}}}) : helper)))
+    + "'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n    </div>\n</div>\n";
 },"useData":true});
 })();

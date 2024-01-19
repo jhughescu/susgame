@@ -274,9 +274,26 @@ body, html {
     position: relative;
     top: 0px;
     height: 339px;
-    width: 50%;
+    width: 100%;
 /*    background-color: green;*/
     z-index: 10;
+}
+.stakeholder_card .textarea {
+/*    background-color: blue;*/
+}
+.stakeholder_card .scorebox {
+    text-align: left;
+    font-size: 1.4em;
+    width: 100%;
+    color: #cccccc;
+}
+.stakeholder_card .scorebox .scoreboxval{
+    color: cyan;
+}
+.stakeholder_card .total {
+    padding-top: 10px;
+    color: white;
+    font-size: 1.8em;
 }
 .stakeholder_card .background {
     position: relative;
@@ -359,3 +376,4 @@ body, html {
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.67);
 }
+
