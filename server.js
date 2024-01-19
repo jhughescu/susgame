@@ -422,10 +422,11 @@ const getAllTeams = () => {
     let p = playersDetail;
     let t = {};
     Object.values(p).forEach((pl) => {
-        t[`t${pl.teamObj.id}`] = pl.teamObj;
+        if (pl.teamObj) {
+            t[`t${pl.teamObj.id}`] = pl.teamObj;
+        }
     });
     t = Object.values(t);
-//    console.log(t);
     return t;
 };
 const getPlayerFromID = (id) => {
