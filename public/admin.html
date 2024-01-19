@@ -81,12 +81,14 @@
         const REMOVEBTN = `removebtn-`;
         const STORE_DISPLAY = 'currentDisplay';
         const STORE_ALL = 'currentState';
+        const ADVER = 'adminVerifier';
         let clientData = {role: 'admin'};
         let storedGame = null;
         let allEnrolled = null;
         let allAssigned = null;
         let env = null;
         let activeAdmin = null;
+        let verified = false;
         let currentDisplay = null;
         let plTime = null;
         let storeObj = {
@@ -250,10 +252,20 @@
             });
         };
         const startNewSession = () => {
-            setSessionButtons(true);
-            socket.emit('startNewSession', function (s) {
-                getGameToStore();
-            });
+            // key function - check for a saved admin password before running
+            let av = sessionStorage.getItem(ADVER);
+            if (av) {
+                socket.emit('requestLogin', 'ADMIN', av, (boo) => {
+                    setSessionButtons(true);
+                    socket.emit('startNewSession', function (s) {
+                        getGameToStore();
+                    });
+                })
+            } else {
+                alert('session ended, please refresh to log in again')
+            }
+
+
         };
         const showTeams = (t) => {
             if (t) {
@@ -297,7 +309,7 @@
         }
         const previewTeams = () => {
 //            console.log('previewTeams');
-//            alert('previewTeams not implemented');
+//            console.log('previewTeams not implemented');
             socket.emit('previewTeams', (t) => {
 //                console.log(t);
                 showTeams(t);
@@ -796,7 +808,7 @@
             allEnrolled = o.allIn;
             if (o.allIn) {
                 setTimeout(() => {
-//                    alert('all players enrolled');
+//                    console.log('all players enrolled');
                 }, 500);
             }
         };
@@ -927,20 +939,109 @@
                     enableButton(buttonAssignTeams, !ass);
                 }
             });
-        }
+        };
         const init = () => {
-//            console.log('init');
-            setSessionButtons(false);
-            enableButton(buttonEndSesh, false);
-            setupSessionControls();
-//            debugger;
-            buttonsStartRound.attr('disabled', true);
-//            debugger;
-            socket.emit('areWeDev', (d) => {
-                showDevMode(d);
-            });
-            if (window.location.host.indexOf('-dev', 0) > -1) {
-                $('H1').append(' - dev');
+            $('button').prop('disabled', true);
+            let av = sessionStorage.getItem(ADVER);
+            if (av) {
+                socket.emit('requestLogin', 'ADMIN', av, (boo) => {
+                    initMeth(boo);
+                });
+            } else {
+                loginRequest(initMeth);
+            }
+        };
+        const initMeth = (boo) => {
+//            console.log(`initMeth, boo: ${boo}`);
+            verified = boo;
+            if (boo) {
+                console.log('we go init');
+                setSessionButtons(false);
+                enableButton(buttonEndSesh, false);
+                setupSessionControls();
+                buttonsStartRound.attr('disabled', true);
+                socket.emit('areWeDev', (d) => {
+                    showDevMode(d);
+                });
+                if (window.location.host.indexOf('-dev', 0) > -1) {
+                    $('H1').append(' - dev');
+                }
+                enableButton(buttonTogglePlaylist, true);
+                enableButton(buttonSlideNext, true);
+                enableButton(buttonSlidePrevious, true);
+                enableButton(buttonSlideReload, true);
+                enableButton(buttonSetMax, true);
+                enableButton(buttonToggleDev, true);
+            } else {
+                $('div').html('');
+                $('#message').html('wrong password');
+                $('#message').css({color: '#ff4d4d', 'font-weight': 'bold'});
+            }
+        };
+        const onConnect = () => {
+            setTimeout(() => {
+                // timeout allows 'verified' to be set before connection method
+                console.log(`admin connect, verified? ${verified}`);
+                if (verified) {
+
+                    enableButton('endSession', false);
+                    enableButton('startSession', false);
+                    storedGame = getStoredGame();
+                    if (storedGame) {
+                        storedGame.version = 2;
+                        storedGame.elements = Object.keys(storedGame.p).length;
+                        socket.emit('storedGameFound', storedGame);
+                        let s = hasStoredSession(storedGame);
+                        setSessionButtons(Boolean(storedGame.sid));
+                        if (s) {
+                            newSessionStarted(storedGame);
+                        }
+                    } else {
+                        setSessionButtons(false);
+                    }
+                    socket.emit('customDataEvent', clientData);
+                    socket.emit('getPlayerPack', (p) => {
+                        if (p.clean) {
+                            console.log(`looks like a new run, wipe everything`);
+                            socket.emit('setClean', false);
+                            adminTerminateSession();
+                        }
+                        isDev = p.isDev;
+                        env = Object.assign({}, p);
+                        activeAdmin = !env.admin;
+                        clientData.activeAdmin = activeAdmin;
+                        socket.emit('customDataEvent', clientData);
+                        if (activeAdmin) {
+        //                    console.log('env is ready, call the init');
+        //                    console.log(p);
+                            initDisplay();
+                            socket.emit('setAdmin', true);
+                        } else {
+//                            $('div').html('');
+                            showWarning('An active admin window is alredy open elsewhere, this page has been locked');
+                            $('.controls').hide();
+                            $('#players').hide();
+                            $('#controlPanel').hide();
+//                            $('button').hide();
+//                            $('input').hide();
+                            $(":enabled").prop("disabled", true);
+                        }
+                    });
+                }
+            }, 500);
+        };
+        const loginRequest = (cb) => {
+            if (!cb) {
+                console.log('needs a callback');
+            } else {
+                let pw = prompt('eat jelly?');
+                socket.emit('requestLogin', 'ADMIN', pw, (boo) => {
+                    cb(boo);
+                    console.log(`boo ${boo} ${typeof(boo)}`);
+                    if (boo) {
+                        sessionStorage.setItem(ADVER, pw);
+                    }
+                });
             }
         };
         //
@@ -970,44 +1071,8 @@
         //
 
         socket.on('connect', () => {
-            console.log(`admin connect`);
-            enableButton('endSession', false);
-            enableButton('startSession', false);
-            storedGame = getStoredGame();
-            if (storedGame) {
-                storedGame.version = 2;
-                storedGame.elements = Object.keys(storedGame.p).length;
-                socket.emit('storedGameFound', storedGame);
-                let s = hasStoredSession(storedGame);
-                setSessionButtons(Boolean(storedGame.sid));
-                if (s) {
-                    newSessionStarted(storedGame);
-                }
-            } else {
-                setSessionButtons(false);
-            }
-            socket.emit('customDataEvent', clientData);
-            socket.emit('getPlayerPack', (p) => {
-                if (p.clean) {
-                    console.log(`looks like a new run, wipe everything`);
-                    socket.emit('setClean', false);
-                    adminTerminateSession();
-                }
-                isDev = p.isDev;
-                env = Object.assign({}, p);
-                activeAdmin = !env.admin;
-                clientData.activeAdmin = activeAdmin;
-                socket.emit('customDataEvent', clientData);
-                if (activeAdmin) {
-//                    console.log('env is ready, call the init');
-//                    console.log(p);
-                    initDisplay();
-                    socket.emit('setAdmin', true);
-                } else {
-                    showWarning('An active admin window is alredy open elsewhere, this page has been locked');
-                    $(":enabled").prop("disabled", true);
-                }
-            });
+//            loginRequest();
+            onConnect();
         });
         socket.on('onPlayerConnect', (msg) => {
             onPlayerConnect(msg);
@@ -1075,7 +1140,8 @@
         });
 
         storedGame = getStoredGame();
-
+//        $('button').prop('disabled', true);
+        console.log('the init')
         init();
 
         window.updateSession = updateSession;

@@ -1,5 +1,26 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+Handlebars.partials['dragwin'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class='dragbar'>\r\n<div class='closer'>x</div>\r\n</div>";
+},"useData":true});
+Handlebars.partials['erascores'] = template({"1":function(container,depth0,helpers,partials,data) {
+    return "<p>"
+    + container.escapeExpression(container.lambda(depth0, depth0))
+    + "</p>";
+},"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "erascores: \r\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"era1") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":2,"column":38}}})) != null ? stack1 : "");
+},"useData":true});
+Handlebars.partials['inner'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "This is the inner";
+},"useData":true});
 Handlebars.partials['playersBasic'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "Wow ";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -39,7 +60,7 @@ Handlebars.partials['publicvoices'] = template({"1":function(container,depth0,he
         return undefined
     };
 
-  return "<p>OK, I am a Public Voices thing</p>\n<div class='round round3' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
+  return "<p>OK, I am a Public Voices thing</p>\n<div class='round round2' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n    <table>\n        <tbody>\n            <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n            "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":12},"end":{"line":7,"column":273}}})) != null ? stack1 : "")

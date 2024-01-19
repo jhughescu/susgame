@@ -1,0 +1,2 @@
+handlebars views/ -f public/templates/sustemplates.js -e hbs
+handlebars views/partials/ -f public/templates/suspartials.js -e hbs -p

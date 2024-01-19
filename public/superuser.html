@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperUser</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='templates/sustemplates.js'></script>
+<!--    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>-->
+    <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/super.css'>
+</head>
+
+<body>
+    <h1>SuperUSer</h1>
+    <h2>session: <span>n/a</span></h2>
+    <p>This is the superuser screen</p>
+    <div id='content'></div>
+    <script>
+        const socket = io();
+        const ADVER = 'superVerifier';
+        const setup = () => {
+            let bss = $('#showSock');
+            bss.off('click');
+            bss.on('click', () => {
+                console.log('go and look')
+                socket.emit('getConnectedAdmins', (s) => {
+                    console.log(s);
+                });
+            });
+        }
+        const init = (boo) => {
+            if (boo) {
+                renderTemplate('superuser', 'content');
+                setup();
+            } else {
+                $('#content').html('wrong password');
+            }
+        };
+        const reset = () => {
+            sessionStorage.clear();
+        };
+        const loginRequest = (cb) => {
+            if (!cb) {
+                console.log('needs a callback');
+            } else {
+                let pw = prompt('please enter the superuser password:');
+                socket.emit('requestLogin', 'SUPER', pw, (boo) => {
+                    cb(boo);
+                    console.log(`boo ${boo} ${typeof(boo)}`);
+                    if (boo) {
+                        sessionStorage.setItem(ADVER, pw);
+                    }
+                });
+            }
+        }
+        const onConnect = () => {
+            let av = sessionStorage.getItem(ADVER);
+            if (av) {
+                socket.emit('requestLogin', 'SUPER', av, (boo) => {
+                    init(boo);
+                });
+            } else {
+                loginRequest(init);
+            }
+        };
+        //
+        // Methods that could potentially be made universal
+        const renderTemplate = (temp, targ, o) => {
+            targ = '#' + targ;
+            let ob = Object.assign({}, o);
+            const compiledTemplate = Handlebars.templates[temp];
+            const renderedHtml = compiledTemplate(ob);
+            $(targ).html('');
+            $(targ).html(renderedHtml);
+        };
+        //
+        socket.on('connect', () => {
+            onConnect();
+        });
+    </script>
+</body>
+</html>

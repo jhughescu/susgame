@@ -9,7 +9,7 @@ const path = require('path');
 const csvWriter = require('csv-writer').createObjectCsvWriter;
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketIO(server);
 
@@ -27,7 +27,10 @@ const playerPrefix = 'player-';
 //const logPath = `../logs`;
 const logPath = `logs`;
 const logging = false;
-const ADMIN_PASSWORD = 'lemon'
+const passwords = {
+    'ADMIN': 'lemon',
+    'SUPER': 'dragon'
+};
 
 let clean = true; /* clean means no activity has taken place, it can only be set to false when an admin screen connects*/
 let logCount = 0;
@@ -35,6 +38,7 @@ let statusMessages = [];
 let gamedata = null;
 let presentationdata = null;
 let sessionID = null;
+let connectedSockets = {};
 let playersBasic = {};
 let playersDetail = {};
 let playersMap = new Map();
@@ -43,6 +47,13 @@ let storedData = null;
 let sessionArchive = [];
 let admin = null;
 let scorePackets = [];
+let scoreMap = [
+    'round',
+    'type',
+    'id',
+    'val',
+    undefined
+];
 
 class Player {
     constructor(id, socket) {
@@ -84,10 +95,14 @@ class Session {
     }
     assigned;
     active;
+    era;
     scores;
     round;
     setAssigned(boo) {
         this.assigned = boo;
+    }
+    setEra(n) {
+        this.era = n;
     }
     setRound(n) {
         this.round = n;
@@ -219,6 +234,13 @@ const clearLogs = (cb) => {
             }
         });
     }
+};
+const getPassword = (p) => {
+    let pw = 'this_will_NEVER_be_a_valid_password_026219873971_jGfTRAjusFtha';
+    if (passwords.hasOwnProperty(p)) {
+        pw = passwords[p];
+    }
+    return pw;
 };
 const getScoreString = (p) => {
 //    console.log(`============ getScoreString`);
@@ -439,6 +461,11 @@ const setMaxVotes = (m) => {
         t.votes = m;
     }
 };
+const getCurrentEra = () => {
+    // eras are discrete scoring sessions (e.g. 2030, 2040)
+    // Initially only a single era is defined
+    return 1;
+};
 const requestSession = (o) => {
 //    if the session ID passed matches the session ID for the app, return the passed player id for verification, otherwise return false:
     let ro = {
@@ -603,6 +630,15 @@ const pvStakeholderScore = (o) => {
         }
     }
 };
+const onShareState = (o) => {
+//    console.log(`onShareState`);
+//    console.log(o);
+    getTeamFromPlayer(o.src).team.forEach((t) => {
+//        console.log(t);
+//        console.log(t.id);
+        getSocketFromID(t).emit('shareStored', o.d);
+    });
+};
 //
 const stStakeholderScoreFunk = (o) => {
     let sc = session.getCurrentScores();
@@ -734,10 +770,13 @@ const roundIsComplete = () => {
 //    console.log(t.length, c.length);
 //    return t.length === c.length;
 };
+let scoreReport = {};
 const applyScorePacket = (sp) => {
-
     let teamSrc = getTeamFromPlayer(sp.src);
-//    console.log(playersDetail[sp.src]);
+    if (sp.targ === 0 && sp.round < 10) {
+        scoreReport[sp.id] = JSON.stringify(sp).replace(/"/gm, '').replace(/,/gm, ', ');
+        updateLogFile('scoreReport', scoreReport)
+    }
     if (session) {
         if (!session.hasOwnProperty('scores')) {
             session.scores = {};
@@ -750,28 +789,24 @@ const applyScorePacket = (sp) => {
         }
         session.scores.raw.push(sp);
         session.scores[`round_${session.getRound()}`].push(sp);
-        if (session.getRound() === 3) {
-            console.log(`applyScorePacket`);
-            console.log(sp);
-        }
         if (sp.valID === 'vote') {
             // assign/subtract votes to src and targ separately
             let t = getTeamMembers(sp.targ);
                 // if the SP is a multiplier then it is treated as a voteReceived for the src but as a multiplier for the targ
             let vType = sp.isMultiplier ? 'multiplier' : 'votesReceived';
-//            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-//            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-//            console.log(vType);
             let vDef = sp.isMultiplier ? 1 : 0;
+            let report = {};
+            let ms = `${session.round}_${teamSrc.type}_${teamSrc.id}_${sp.val}`;
             t.forEach((te, id) => {
-                te.teamObj[vType] = te.teamObj.hasOwnProperty(vType) ? te.teamObj[vType] : vDef;
-                te.teamObj[vType] += parseInt(sp.val);
-                if (te.teamObj.hasOwnProperty('multiplier')) {
-                    te.teamObj.total = te.teamObj.votesReceived * te.teamObj.multiplier;
+                ms = `${session.round}_${teamSrc.type}_${teamSrc.id}_${sp.val}_${id}`;
+                let tob = te.teamObj;
+                tob[vType] = tob.hasOwnProperty(vType) ? tob[vType] : vDef;
+                tob[vType] += parseInt(sp.val);
+                if (tob.hasOwnProperty('multiplier')) {
+                    tob.total = tob.votesReceived * tob.multiplier;
                 }
-//                console.log(`team ${te.teamObj.id} ${vType} ${te.teamObj[vType]}`)
+                tob.scores.eras[`era${getCurrentEra()}`].push(ms);
             });
-//            }
             t = getTeamMembers(teamSrc.id);
             if (sp.roundComplete) {
                 teamRoundComplete({team: getTeamFromPlayer(sp.src).id});
@@ -781,22 +816,10 @@ const applyScorePacket = (sp) => {
                 if (pt === 1 || pt === 2) {
                     // type one players have shared votes
                     te.teamObj.votes -= Math.abs(parseInt(sp.val));
-                } else {
-                    // type 2 players have their own votes
-                    // BUT they don't share votes
-//                    playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 0;
-//                    playersDetail[sp.src].votes -= Math.abs(parseInt(sp.val));
                 }
             });
-            if (pt === 2) {
-//                playersDetail[sp.src].votes = playersDetail[sp.src].hasOwnProperty('votes') ? playersDetail[sp.src].votes : 10;
-//                playersDetail[sp.src].votes -= Math.abs(parseInt(sp.val));
-            }
-
         }
         // update the team members for targ
-
-//        console.log(sp);
         Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
             getSocketFromID(p).emit('scoreUpdate', sp);
         });
@@ -1077,6 +1100,7 @@ const startSession = () => {
             console.log(`Hey, it's a new session, that's awesome`);
             session = new Session(sid);
             session.active = true;
+            session.setEra(getCurrentEra());
             updateApp();
 //            setInterval(updateTimer, 1000);
 //        }
@@ -1408,6 +1432,8 @@ const initApp = () => {
     consoleLog('~ ~ ~ ~ ~ ~ ~ ~ initApp');
     gamedata = processGameData(require('./data/gamedata.json'));
     presentationdata = processPresentationData(require('./data/presentationdata.json'));
+//    console.log(gamedata);
+//    console.log(presentationdata);
     clearLogs();
     io.emit('serverStartup');
 //    initSession();
@@ -1423,6 +1449,7 @@ const exitApp = () => {
 };
 
 io.on('connection', (socket) => {
+    connectedSockets[socket.id] = socket;
     socket.on('customDataEvent', (customData) => {
         socket.customData = customData;
 //        console.log(`socket connected with role ${socket.customData.role} ${socket.id}`);
@@ -1468,6 +1495,13 @@ io.on('connection', (socket) => {
     socket.on('getPlayer', (id, cb) => {
         getPlayer(id, cb);
     });
+    socket.on('getTeams', (cb) => {
+        cb(getAllTeams());
+    });
+    socket.on('getScoreMap', (cb) => {
+        // returns a mapping array for translating score strings
+        cb(scoreMap.slice());
+    });
     socket.on('updateSession', () => {
 //        console.log('onUpdateSession');
         io.emit('onUpdateSession');
@@ -1511,6 +1545,7 @@ io.on('connection', (socket) => {
         removePlayer(id);
     });
     socket.on('disconnect', () => {
+        delete connectedSockets[socket.id];
         // Find the player with the corresponding socket.id in the 'players' map
         let disconnectedPlayer = null;
         for (const [playerId, player] of playersMap.entries()) {
@@ -1549,6 +1584,28 @@ io.on('connection', (socket) => {
             }
         }
     });
+    socket.on('getConnectedAdmins', (cb) => {
+        let cs = connectedSockets;
+        let ca = [];
+//        cs = Object.values(cs);
+        Object.values(cs).forEach((s) => {
+//            consoleLog(s.customData)
+            if (s.customData) {
+//                console.log('#######################');
+//                console.log(s.customData);
+                if (s.customData.role === 'admin') {
+                    ca.push(s.customData);
+                    console.log(s.id);
+                }
+            }
+        })
+//        consoleLog(ca);
+//        console.log(Object.keys(cs).length);
+        if (cb) {
+            cb(ca);
+        }
+//        return cs;
+    });
     socket.on('requestGameData', (cb) => {
         getGameData(cb);
     });
@@ -1564,12 +1621,10 @@ io.on('connection', (socket) => {
     socket.on('setAdmin', (boo) => {
         setAdmin(boo);
     });
-    socket.on('adminLogin', (pw, cb) => {
-//        console.log(`admin Login: ${pw}`);
+    socket.on('requestLogin', (type, pw, cb) => {
         if (cb) {
-            cb(pw === ADMIN_PASSWORD);
-        } else {
-//            console.log('NO CB');
+            let pws = getPassword(type);
+            cb(pw === pws);
         }
     })
     //
@@ -1610,6 +1665,9 @@ io.on('connection', (socket) => {
     socket.on('getNewScorePacket2', (o) => {
 //        console.log(cb);
         getNewScorePacket2(o);
+    });
+    socket.on('shareState', (o) => {
+        onShareState(o);
     });
     //
     socket.on('getPresentationPack', (cb) => {
@@ -1655,6 +1713,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // All other routes will serve the 'default.html' file
 app.get('', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'default.html'));
+});
+app.get('/superuser', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'superuser.html'));
 });
 app.get('/admin', (req, res) => {
 //    res.render('admin');
@@ -1762,6 +1823,6 @@ app.get('*', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
     initApp();
 });

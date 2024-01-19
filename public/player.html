@@ -38,6 +38,9 @@
     <div id='scoresheet' class=''>
 
     </div>
+    <div id='scoredisplay' class=''>
+
+    </div>
     <div id='overlay'>
 
 
@@ -62,7 +65,16 @@
             }
             return '';
         });
-
+        Handlebars.registerHelper('dynamicPartial', function(partialName, options) {
+            // Check if the partialName is defined and is a valid partial
+            if (Handlebars.partials[partialName]) {
+                // Include the specified partial
+                return new Handlebars.SafeString(Handlebars.partials[partialName](this));
+            } else {
+                // Handle the case where the specified partial is not found
+                return new Handlebars.SafeString('Partial not found');
+            }
+        });
         const log = (msg) => {
             let i = 'log_' + Object.keys(logList).length;
             logList[i] = msg;
@@ -215,14 +227,21 @@
             console.log(`I want refreshment`);
             window.location.reload()
         };
+        const setupDragger = (dr) => {
+            let d = $(`#${dr}`).find('.dragbar');
+//            console.log($(`#dr`))
+//            console.log(d)
+            d.off('click');
+            d.on('click', function () {
+                console.log('start the drag');
+            });
+        };
         const renderTemplate = (temp, targ, o) => {
             targ = '#' + targ;
             let ob = Object.assign({}, o);
             const compiledTemplate = Handlebars.templates[temp];
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');
-//            console.log('re-render');
-//            console.log(`renderTemplate ${temp} ${targ}`);
             $(targ).html(renderedHtml);
         };
         const getTemplate = () => {
@@ -232,8 +251,14 @@
             // record a state for the page to return to upon refresh
 //            console.log(`setState`);
 //            console.log(o);
-            localStorage.setItem(getUniqueStorageID('state'), JSON.stringify(o));
+            let st = JSON.stringify(o);
+//            console.log(`storing ${st}`);
+            localStorage.setItem(getUniqueStorageID('state'), st);
         };
+        const shareState = (o) => {
+            // in the case of PV voters, their votes are shared over the team, so set stored state for all team members via the server
+            socket.emit('shareState', {d: o, src: player.id});
+        }
         const updateState = () => {
             // return the page to its present state
 //            console.log(`updateState`);
@@ -260,6 +285,7 @@
             scoreUpdate();
         };
         const updateValues = (pl) => {
+//            console.log('pl');
 //            console.log(pl);
             if (pl) {
                 if (pl.hasOwnProperty(`teamObj`)) {
@@ -288,6 +314,11 @@
                     });
                     if (o.vals.length > 0) {
                         renderTemplate('scoresheet', 'scoresheet', o);
+                    }
+                    if (pl.teamObj.hasOwnProperty('scores')) {
+                        let o = Object.assign({partialName: 'erascores'}, pl.teamObj.scores.eras);
+                        renderTemplate('dragwin', 'scoredisplay', o);
+                        setupDragger('scoredisplay');
                     }
                 }
             }
@@ -629,10 +660,11 @@
         };
 
         const autoEnrollAllowed = () => {
+//            return true;
             return procVal(env.process.AUTO);
         };
         const allowAutoComplete = () => {
-            let m = 3;
+            let m = 2;
 //            return false;
             return env.session.round < m ? autoCompleteAllowed() : false;
         };
@@ -709,11 +741,10 @@
             }
         };
         const viewUpdate = () => {
-//            console.log(`viewUpdate`);
             clearTimeout(autoTO);
             socket.emit('getPlayerPack', (pp) => {
-//                console.log(`viewUpdate callback`);
-//                console.log(pp);
+                console.log(`getPlayerPack:`);
+                console.log(pp);
                 updateSession(pp.session);
                 enableScorePV(pp.session.round > 0);
                 $('.round').hide();
@@ -738,9 +769,7 @@
                             }
                         });
                     }
-//                    if (theDiv === 'allocation' && getInitProps().autoenroll) {
                     if (getInitProps().autoenroll && pp.session.round < 3 && player.isLead && player.teamObj.type === 1) {
-//                        let tot = 500 + (Math.random() * 1000);
                         let tot = (player.teamObj.id + 1) * 200;
                         clearTimeout(autoTO);
                         autoTO = setTimeout(pp.session.round === 1 ? autoCompleteAllocation : autoCompleteCollaboration, tot);
@@ -748,8 +777,9 @@
                 }
             });
         };
-        const onSessionUpdate = () => {
-//            console.log('==================== session update calls viewUpdate');
+        const onSessionUpdate = (s) => {
+            console.log('==================== session update calls viewUpdate');
+            console.log(s);
             viewUpdate();
         };
 
@@ -788,7 +818,8 @@
                     }
                     so.push(o);
                 });
-                setState(so);
+                shareState(so);
+//                setState(so);
             }
         };
         const initpv = () => {
@@ -1040,7 +1071,9 @@
             p.html(t);
         });
         socket.on('terminateSession', kickout);
-        socket.on('sessionUpdate', onSessionUpdate);
+        socket.on('sessionUpdate', (s) => {
+            onSessionUpdate(s);
+        });
         socket.on('newSession', onNewSession);
         socket.on('serverShutdown', serverShutdown);
         socket.on('ping', () => {
@@ -1064,7 +1097,12 @@
         socket.on('upateMaxVotes', (m) => {
 //            console.log('i heard the emission')
             updateMaxVotes(m)
-        })
+        });
+        socket.on('shareStored', (d) => {
+//            console.log('NEW')
+            setState(d);
+            updateState();
+        });
         window.showLog = getLogs;
         window.getRemain = getRemain;
         //
