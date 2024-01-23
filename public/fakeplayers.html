@@ -139,6 +139,10 @@
                 w.close();
             });
         };
+        const init = () => {
+            $('button').prop('disabled', true);
+            $('#launch').prop('disabled', false);
+        };
         buttgen.addEventListener('click', generate);
         buttgen10.addEventListener('click', generate10);
         buttgen70.addEventListener('click', generate70);
@@ -162,6 +166,7 @@
             regenerate();
         });
         regenerate();
+        init();
     </script>
     </body>
 </html>

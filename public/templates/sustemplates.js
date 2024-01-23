@@ -31,8 +31,9 @@ templates['dragwin'] = template({"compiler":[8,">= 4.3.0"],"main":function(conta
         return undefined
     };
 
-  return "<div class='dragbar'>\r\n    <div class='closer'>x</div>\r\n</div>\r\n"
-    + container.escapeExpression((lookupProperty(helpers,"dynamicPartial")||(depth0 && lookupProperty(depth0,"dynamicPartial"))||container.hooks.helperMissing).call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"partialName") : depth0),{"name":"dynamicPartial","hash":{},"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":4,"column":30}}}));
+  return "<div class='dragbar'>\n    <div class='closer'>x</div>\n</div>\n"
+    + container.escapeExpression((lookupProperty(helpers,"dynamicPartial")||(depth0 && lookupProperty(depth0,"dynamicPartial"))||container.hooks.helperMissing).call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"partialName") : depth0),{"name":"dynamicPartial","hash":{},"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":4,"column":30}}}))
+    + "\n";
 },"useData":true});
 templates['game'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -114,7 +115,7 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
         return undefined
     };
 
-  return "\n\n<table id='playerList'>\n    <tbody>\n        <tr><th>id</th><th>connected</th><th>enrolled</th><th>stakeholder</th><th>isLead</th><th>rounds</th><th></th></tr>\n"
+  return "\n\n<table id='playerList'>\n    <tbody>\n        <tr><th>id</th><th>connected</th><th class='allenrolled'>enrolled</th><th>stakeholder</th><th>isLead</th><th>rounds</th><th></th></tr>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"players") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":18,"column":17}}})) != null ? stack1 : "")
     + "    </tbody>\n</table>\n";
 },"useData":true});
@@ -148,7 +149,7 @@ templates['playlist'] = template({"1":function(container,depth0,helpers,partials
     + "'></div></td><td><div class='slideLink' id='slideLink_"
     + alias4(((helper = (helper = lookupProperty(helpers,"index") || (depth0 != null ? lookupProperty(depth0,"index") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"index","hash":{},"data":data,"loc":{"start":{"line":5,"column":92},"end":{"line":5,"column":101}}}) : helper)))
     + "'>"
-    + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":5,"column":103},"end":{"line":5,"column":112}}}) : helper)))
+    + ((stack1 = ((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":5,"column":103},"end":{"line":5,"column":114}}}) : helper))) != null ? stack1 : "")
     + "</div></td>\n    </tr>\n";
 },"2":function(container,depth0,helpers,partials,data) {
     return "highlight";
@@ -262,7 +263,7 @@ templates['sessionno'] = template({"compiler":[8,">= 4.3.0"],"main":function(con
     return "No session found\n";
 },"useData":true});
 templates['superuser'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "I AM THE SUPER USER\r\n<div class='controls'>\r\n<br>\r\n<button id='showSock'>show sockets</button>\r\n</div>";
+    return "I AM THE SUPER USER\n<div class='controls'>\n<br>\n<button id='showSock'>show sockets</button>\n</div>\n";
 },"useData":true});
 templates['teamview'] = template({"1":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -293,7 +294,7 @@ templates['layouts/backup'] = template({"compiler":[8,">= 4.3.0"],"main":functio
     return "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Default HB template</title>\n</head>\n\n<body>\n    <h3>Oh no</h3>\n    <p>Looks like you are trying use a Handlebars template which doesn't exist. This is the backup template.</p>\n</body>\n\n</html>\n";
 },"useData":true});
 templates['partials/dragwin'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div class='dragbar'>\r\n<div class='closer'>x</div>\r\n</div>";
+    return "<div class='dragbar'>\n<div class='closer'>x</div>\n</div>\n";
 },"useData":true});
 templates['partials/erascores'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "<p>"
@@ -307,11 +308,12 @@ templates['partials/erascores'] = template({"1":function(container,depth0,helper
         return undefined
     };
 
-  return "erascores: \r\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"era1") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":2,"column":38}}})) != null ? stack1 : "");
+  return "erascores:\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"era1") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":2,"column":38}}})) != null ? stack1 : "")
+    + "\n";
 },"useData":true});
 templates['partials/inner'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "This is the inner";
+    return "This is the inner\n";
 },"useData":true});
 templates['partials/playersBasic'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "Wow ";
@@ -352,7 +354,7 @@ templates['partials/publicvoices'] = template({"1":function(container,depth0,hel
         return undefined
     };
 
-  return "<p>OK, I am a Public Voices thing</p>\n<div class='round round3' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
+  return "<p>OK, I am a Public Voices thing</p>\n<div class='round round2' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n    <table>\n        <tbody>\n            <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n            "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":12},"end":{"line":7,"column":273}}})) != null ? stack1 : "")
@@ -517,17 +519,17 @@ templates['slides/slide_230_stakeholderscollab'] = template({"compiler":[8,">= 4
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"frame1full"),depth0,{"name":"frame1full","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "<div class='container'>\r\n    <div class=\"grid-container1\">\r\n        <div class=\"cell\">\r\n"
+    + "<div class='container'>\n    <div class=\"grid-container1\">\n        <div class=\"cell\">\n"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"stakeholder_card2"),(depth0 != null ? lookupProperty(depth0,"card_0") : depth0),{"name":"stakeholder_card2","data":data,"indent":"            ","helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "        </div>\r\n        <div class=\"cell\">\r\n"
+    + "        </div>\n        <div class=\"cell\">\n"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"stakeholder_card2"),(depth0 != null ? lookupProperty(depth0,"card_1") : depth0),{"name":"stakeholder_card2","data":data,"indent":"            ","helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "        </div>\r\n        <div class=\"cell\">\r\n"
+    + "        </div>\n        <div class=\"cell\">\n"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"stakeholder_card2"),(depth0 != null ? lookupProperty(depth0,"card_2") : depth0),{"name":"stakeholder_card2","data":data,"indent":"            ","helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "        </div>\r\n    </div>\r\n    <div class=\"grid-container2\">\r\n        <div class=\"cell\">\r\n"
+    + "        </div>\n    </div>\n    <div class=\"grid-container2\">\n        <div class=\"cell\">\n"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"stakeholder_card2"),(depth0 != null ? lookupProperty(depth0,"card_3") : depth0),{"name":"stakeholder_card2","data":data,"indent":"            ","helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "        </div>\r\n        <div class=\"cell\">\r\n"
+    + "        </div>\n        <div class=\"cell\">\n"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"stakeholder_card2"),(depth0 != null ? lookupProperty(depth0,"card_4") : depth0),{"name":"stakeholder_card2","data":data,"indent":"            ","helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "        </div>\r\n    </div>\r\n</div>\r\n";
+    + "        </div>\n    </div>\n</div>\n";
 },"usePartial":true,"useData":true});
 templates['slides/video'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -595,22 +597,28 @@ templates['slides/slide_partials/stakeholder_card2'] = template({"compiler":[8,"
 
   return "<div class='stakeholder_card' id='stakeholder_card_"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":1,"column":51},"end":{"line":1,"column":57}}}) : helper)))
-    + "'>\r\n    <div class='textarea'>\r\n        <div class='vertical-center'>\r\n            <div class='header'>\r\n                "
+    + "'>\n    <div class='textarea'>\n        <div class='vertical-center'>\n            <div class='header'>\n                "
     + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":5,"column":16},"end":{"line":5,"column":25}}}) : helper)))
-    + "\r\n            </div>\r\n        </div>\r\n        <div class='scorebox' id='st"
+    + "\n            </div>\n        </div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":8,"column":36},"end":{"line":8,"column":42}}}) : helper)))
-    + "_v1'></div>\r\n        <div class='scorebox' id='st"
+    + "_v1'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":9,"column":36},"end":{"line":9,"column":42}}}) : helper)))
-    + "_v2'></div>\r\n        <div class='scorebox' id='st"
+    + "_v2'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":10,"column":36},"end":{"line":10,"column":42}}}) : helper)))
-    + "_v3'></div>\r\n        <div class='scorebox' id='st"
+    + "_v3'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":11,"column":36},"end":{"line":11,"column":42}}}) : helper)))
-    + "_v4'></div>\r\n        <div class='scorebox' id='st"
+    + "_v4'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":12,"column":36},"end":{"line":12,"column":42}}}) : helper)))
-    + "_v5'></div>\r\n        <div class='scorebox' id='pv"
+    + "_v5'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":13,"column":36},"end":{"line":13,"column":42}}}) : helper)))
-    + "_v1'></div>\r\n        <div class='scorebox' id='pv"
+    + "_v1'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":36},"end":{"line":14,"column":42}}}) : helper)))
-    + "_v2'></div>\r\n    </div>\r\n</div>\r\n";
+    + "_v2'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='st"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":15,"column":36},"end":{"line":15,"column":42}}}) : helper)))
+    + "_vtotal'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox' id='pv"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":16,"column":36},"end":{"line":16,"column":42}}}) : helper)))
+    + "_vtotal'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n        <div class='scorebox total' id='score"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":17,"column":45},"end":{"line":17,"column":51}}}) : helper)))
+    + "'><span class='scoreboxsrc'></span><span class='scoreboxval'></span></div>\n    </div>\n</div>\n";
 },"useData":true});
 })();

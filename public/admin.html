@@ -30,9 +30,11 @@
         <button id='startSession'>Start Session</button>
         <button id='endSession'>End Session</button>
     </div>
+<!--
     <div class='controls' id='controlAssign'>
         <button id='assignTeams'>Assign Teams</button>
     </div>
+-->
     <div class='controls' id='controlPresentation'>
         <button id='togglePlaylist'>Toggle playlist</button>
         <button id='slidePrevious'>Previous slide</button>
@@ -95,6 +97,7 @@
             playlistOpen: false
         };
         let devTO = null;
+        let playersDetail = null;
         //
         const buttonSetup = () => {
             // Ping buttons
@@ -253,10 +256,12 @@
         };
         const startNewSession = () => {
             // key function - check for a saved admin password before running
+//            console.log('startNewSession');
             let av = sessionStorage.getItem(ADVER);
             if (av) {
                 socket.emit('requestLogin', 'ADMIN', av, (boo) => {
                     setSessionButtons(true);
+                    applyClasses();
                     socket.emit('startNewSession', function (s) {
                         getGameToStore();
                     });
@@ -294,6 +299,7 @@
         };
         const checkAssigned = (cb) => {
             socket.emit('getPlayersDetail', (pd) => {
+                playersDetail = pd;
                 let ass = Object.keys(pd).length === 0 ? null : true;
 //                console.log(`checkAssigned: ${Object.keys(pd).length}`);
                 for (var i in pd) {
@@ -382,6 +388,7 @@
         };
         const adminTerminateSession = () => {
             socket.emit('getPlayersDetail', (d) => {
+                playersDetail = d;
                 let p = 0;
                 for (var i in d) {
                     p += (d[i].enrolled ? 1 : 0);
@@ -435,12 +442,17 @@
 //            enableButton(id, false);
         };
         const startNextRound = () => {
-            console.log(`startNextRound`)
+//            console.log(`startNextRound`)
             if (env.session) {
-                console.log(env.session);
+//                console.log(env.session);
                 startRoundFunk(env.session.round + 1);
             }
         };
+        // specifc round events
+        const startRoundE1R1 = () => {
+            // era 1 round 1; Stakeholders self-allocate resources
+            socket.emit('initRound', 'e1r1');
+        }
         const onStartRound = (r) => {
 //            console.log(`i will start round ${r}`);
             $('.indr').removeClass('highlight');
@@ -490,54 +502,101 @@
         };
         const checkList = () => {
             // check to see if all players are enrolled & enroll them if not, then auto-start the game
-            console.log(`checkList: ${Boolean(env.session)} isDev: ${env.isDev} session: ${Boolean(env.session)}`)
+//            console.log(`checkList: ${Boolean(env.session)} isDev: ${env.isDev} session: ${Boolean(env.session)}`);
+//            console.log(`checkList, env:`)
+//            console.log(env)
 //            if (isAutoMode() && !Boolean(env.session)) {
-            if (env.isDev && !Boolean(env.session)) {
-//                debugger;
-//                console.log('on we go');
-                clearTimeout(devTO);
-                devTO = setTimeout(() => {
-                    socket.emit('getPlayerPack', (pp) => {
-                        let pd = Object.values(pp.playersDetail);
-//                        console.log(`checkList callback`);
-//                        console.log(pp.session);
-                        let ae = true;
+            if (env) {
+                if (env.isDev && !Boolean(env.session)) {
+    //                debugger;
+//                    console.log('on we go');
+                    clearTimeout(devTO);
+                    devTO = setTimeout(() => {
+                        socket.emit('getPlayerPack', (pp) => {
+                            let pd = Object.values(pp.playersDetail);
+//                            console.log(`checkList callback`);
+    //                        console.log(pp.session);
+    //                        console.log(`allEnrolled: ${allEnrolled}`);
+                            let ae = true;
 
-                        if (pd.length > 0) {
-                            let pae = procVal(env.process.AUTO);
-                            pd.forEach((p) => {
-                                if (!p.enrolled && pae) {
-//                                    console.log(`auto refresh ${p.id}`)
-                                    socket.emit('refreshPlayer', p.id);
-                                    ae = false;
+                            if (pd.length > 0) {
+                                // use AUTOENROL for enrollments - allows auto-enrolment without also allowing auto-completion
+                                let pae = procVal(env.process.AUTOENROL);
+//                                console.log(`pae ${pae}`);
+                                pd.forEach((p) => {
+                                    if (!p.enrolled && pae) {
+    //                                    console.log(`auto refresh ${p.id}`)
+                                        socket.emit('refreshPlayer', p.id);
+                                        ae = false;
+                                    }
+                                });
+                                // switch back to AUTO for team assignment
+                                pae = procVal(env.process.AUTO);
+                                if (ae && pp.session.round === 0 && pae) {
+    //                                console.log('all players enrolled, assign teams automatically');
+    //                                let pae = procVal(env.process.AUTO);
+                                    console.log(`this is the auto enroll bit: ${pae} (${typeof(pae)})`);
+                                    clearTimeout(devTO);
+                                    devTO = setTimeout(() => {
+    //                                    console.log(``);
+                                        assignTeams();
+                                    }, 1000);
                                 }
-                            });
-
-                            if (ae && pp.session.round === 0 && pae) {
-//                                console.log('all players enrolled, assign teams automatically');
-//                                let pae = procVal(env.process.AUTO);
-                                console.log(`this is the auto enroll bit: ${pae} (${typeof(pae)})`);
-                                clearTimeout(devTO);
-                                devTO = setTimeout(() => {
-//                                    console.log(``);
-                                    assignTeams();
-                                }, 1000);
                             }
-                        }
-                    })
+                        })
 
-                }, 500);
+                    }, 500);
+                }
+            }
+        };
+        const applyClasses = () => {
+            // enrolled
+//            console.log(`applyClasses`);
+//            console.log(playersDetail);
+            if (playersDetail) {
+                checkEnrollment(Object.values(playersDetail));
+//                let d = getListHeader('enrolled');
+//                d = d.add('.allenrolled');
+                let d = $('.allenrolled');
+                if (d) {
+                    d.removeClass('true');
+                    if (allEnrolled) {
+                        d.addClass('true');
+                    }
+                }
             }
         };
         const updatePlayersView = (p) => {
             if (currentDisplay === 'listPlayers') {
 //                console.log(`updatePlayersView`);
                 renderTemplate('playerList', 'controlPanel', {players: p});
+                applyClasses();
+//                let d = getListHeader('enrolled');
+//                d.removeClass('true');
+//                d.add('.allenrolled');
+//                checkEnrollment(p);
+//                if (allEnrolled) {
+//                    d.addClass('true');
+//                }
                 buttonSetup();
+            }
+        };
+        const checkEnrollment = (p) => {
+            // method needs a player list arg - I'm not querying the server for this level of functionality
+            if (p) {
+//                console.log(`checkEnrollment`);
+//                console.log(p);
+                allEnrolled = p.length > 0;
+                p.forEach((pl) => {
+                    if (!pl.enrolled) {
+                        allEnrolled = false;
+                    }
+                });
             }
         };
         const listPlayers = (s) => {
             socket.emit('getPlayersDetail', (d) => {
+                playersDetail = d;
                 if (env) {
                     let p = Object.values(d);
                     p = p.slice();
@@ -785,19 +844,18 @@
         };
         const setupEnrolButton = (force) => {
             return;
-            // replaced with the setupSessionButtons method
-            socket.emit('getPlayersDetail', (pd) => {
-//                console.log(pd);
-                let boo = true;
-                for (var p in pd) {
-                    if (p.stakeholder < 0) {
-                        boo = false;
-                        break;
-                    }
+        };
+        const getListHeader = (ID) => {
+            // return a header element from the playerList table based on ID
+            let a = $('#playerList').find('th');
+            let h = null;
+//            console.log(a.length);
+            a.each(function (i, e) {
+                if ($(e).text() === ID) {
+                    h = $(e);
                 }
-                enableButton(buttonAssignTeams, (force === undefined ? boo : force));
-//                console.log(`setupEnrolButton: ${boo}`);
             });
+            return h;
         };
         const enrollmentUpdate = (o) => {
 //            console.log(`enrollmentUpdate: ${o.allIn}`)
@@ -806,10 +864,16 @@
 //            enableButton(buttonAssignTeams, true);
 //            setupEnrolButton();
             allEnrolled = o.allIn;
+//            console.log('####')
+//            console.log(`enrollmentUpdate: ${allEnrolled}`);
+//            console.log(o);
             if (o.allIn) {
+//                d.addClass('true');
                 setTimeout(() => {
 //                    console.log('all players enrolled');
                 }, 500);
+            } else {
+//                d.removeClass('true');
             }
         };
         const onRequestSession = (o) => {
@@ -841,7 +905,6 @@
         const renderPlaylist = (cb) => {
             socket.emit('getPresentationPack', (p) => {
                 let cs = localStorage.getItem(env.gamedata.constants.presentation);
-//                console.log(p);
                 if (cs) {
                     cs = JSON.parse(cs);
                     cs = cs.currentSlide;
@@ -854,9 +917,9 @@
                 $('.slideLink').off('click');
                 $('.slideLink').on('click', function () {
                     let id = $(this).attr('id').split('_')[1];
-
                     socket.emit('gotoSlide', id);
                 });
+                applyClasses();
                 if (cb) {
                     cb(p);
                 }

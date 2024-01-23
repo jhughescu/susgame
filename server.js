@@ -403,8 +403,10 @@ const getTeamMembers = (id) => {
     if (typeof (id) === 'number') {
         // Number, assume this is a team ID and return all members with matching team id.
         Object.entries(playersDetail).forEach((te, i) => {
-            if (te[1].teamObj.id === id) {
-                t.push(te[1]);
+            if (te[1].teamObj.hasOwnProperty('id')) {
+                if (te[1].teamObj.id === id) {
+                    t.push(te[1]);
+                }
             }
 //            console.log(te.length);
         })
@@ -490,14 +492,14 @@ const logSession = () => {
     updateLogFile('session', session);
 };
 const allPlayersEnrolled = () => {
-    let allIn = true;
+    let allIn = Object.keys(playersDetail).length > 0;
     for (var i in playersDetail) {
         if (!playersDetail[i].enrolled) {
             allIn = false;
             break;
         }
     }
-    io.emit('enrollmentUpdate', {allIn: allIn});
+    io.emit('enrollmentUpdate', {allIn: allIn, count: Object.keys(playersDetail).length});
     return allIn;
 };
 const onRequestSession = (o) => {
@@ -540,6 +542,13 @@ const updatePresentationPack = () => {
 //    console.log(presentationdata);
     io.emit(`updatePresentationPack`, presentationdata);
 //    return presentationdata;
+};
+const presentationSlideRendered = (o) => {
+    // dev method = help to debug slide reset issue
+    if (process.env.DEBUG) {
+        console.log(`presentationSlideRendered: ${JSON.stringify(o)}`);
+    }
+//    console.log(process.env.DEBUG);
 };
 //
 const allocation1 = (o) => {
@@ -770,6 +779,38 @@ const roundIsComplete = () => {
     return ric;
 //    console.log(t.length, c.length);
 //    return t.length === c.length;
+};
+const initRound = (id) => {
+    // method uses an identifier (e.g. flag) to select a round from the gamedata
+    console.log(`initRound ${id}`);
+//    console.log(gamedata.rounds);
+    let rs = gamedata.rounds;
+    let rr = null;
+    rs.forEach((r, n) => {
+//        console.log(` - ${id}`);
+        for (var i in r) {
+//            console.log(i, r[i]);
+            if (r[i] === id) {
+                rr = n;
+            }
+        }
+    });
+    if (rr) {
+        console.log(`starting round ${rr}`);
+        startRound(rr);
+    } else {
+        console.log(`no round found for identifier ${id}`);
+    }
+    return rr;
+};
+const startRound = (r) => {
+//    console.log(`startRound ${r} ${process.env.NODE_ENV}`);
+//    console.log(`startRound ${r} ${process.env.AUTO}`);
+    if (session) {
+        session.setRound(r);
+        io.emit('onStartRound', r);
+        sessionUpdate();
+    }
 };
 let scoreReport = {};
 const applyScorePacket = (sp) => {
@@ -1419,7 +1460,7 @@ const reloadSlide = () => {
     io.emit('slideUpdate');
 };
 const gotoSlide = (s) => {
-    console.log(`goto ${s}`);
+    console.log(`gotoSlide ${s}`);
     io.emit('gotoSlide', s);
     io.emit('slideUpdate');
 };
@@ -1642,14 +1683,11 @@ io.on('connection', (socket) => {
         stStakeholderScore(o);
     });
     socket.on('startRound', (r) => {
-        console.log(`startRound ${r} ${process.env.NODE_ENV}`);
-        console.log(`startRound ${r} ${process.env.AUTO}`);
-//        console.log(ENV)
-        if (session) {
-            session.setRound(r);
-            io.emit('onStartRound', r);
-            sessionUpdate();
-        }
+        startRound(r);
+    });
+    socket.on('initRound', (id) => {
+        // initRound differs from startRound in that it takes an ID arg which specifies the round to initialise (via gamedata)
+        initRound(id);
     });
     socket.on('teamRoundComplete', (o) => {
 //        console.log(`teamRoundComplete event`);
@@ -1679,6 +1717,7 @@ io.on('connection', (socket) => {
     socket.on('slideReload', reloadSlide);
     socket.on('gotoSlide', gotoSlide);
     socket.on('setCurrentSlide', setCurrentSlide);
+    socket.on('presentationSlideRendered', presentationSlideRendered);
     //
     socket.on('clientDebug', (str) => {
         console.log(`client: ${str}`);

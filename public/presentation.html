@@ -64,14 +64,16 @@
         const showSlide = (id) => {
             currentSlide = prepSlide(slideList[id]);
 //            currentSlide.url = window.location.origin;
+//            console.log(`showSlide ${id}`);
             renderSlide(currentSlide.id, currentSlide);
-            console.log(currentSlide)
+//            console.log(currentSlide);
             storeInfo();
         };
         const refreshSlide = () => {
             let i = currentSlide.index;
             currentSlide = prepSlide(presentationData.slideList[i]);
             clearContent();
+//            console.log(`refresh ${id}`);
             renderSlide(currentSlide.id, currentSlide);
         };
         const previousSlide = () => {
@@ -87,6 +89,7 @@
             }
         };
         const repeater = () => {
+//            console.log(`repeater`);
             showSlide(0);
             window.location.reload();
             setTimeout(repeater, 1000);
@@ -133,7 +136,7 @@
                 i--;
             }
             socket.emit('getSession', (s) => {
-                console.log('I have the sesh');
+//                console.log('I have the sesh');
                 onSessionUpdate(s);
             });
         };
@@ -206,7 +209,6 @@
                     let card = null;
                     let totals = {st: 0, pv: 0, score: 0}
                     if (es) {
-                        console.log(`we have ${es.length} scores for ${t.title} (${t.id}):`);
                         card = $(`#stakeholder_card_${t.id}`);
                         let temp = 'TYPEBLANKDEST_vSRC';
                         es.forEach((sc) => {
@@ -244,12 +246,7 @@
                             });
                             tempRes = tempRes.replace('BLANK', '');
                             outo.dest = tempRes;
-                            console.log(outo);
                             totals[outo.type] += outo.val;
-
-//                            Object.entries(totals).forEach((v, id) => {
-//                                console.log(id, v);
-//                            });
                             if ($(`#${outo.dest}`).find('.scoreboxval').length > 0) {
                                 $(`#${outo.dest}`).find('.scoreboxval').html(outo.val);
                             }
@@ -257,7 +254,6 @@
                                 $(`#${outo.dest}`).find('.scoreboxsrc').html(`${outo.srcName}: `);
                             }
                         });
-//                        console.log(totals);
                         totals.score = totals.st * totals.pv;
                         Object.entries(totals).forEach((v) => {
                             let c = $(`#${v[0]}${t.id}_vtotal`);
@@ -274,9 +270,6 @@
                     }
                 });
             })
-                $('.stakeholder_card').each((c) => {
-//                    console.log(c);
-                });
         };
         const updateCardsV1 = () => {
             console.log('ashdk');
@@ -409,11 +402,9 @@
         };
         const renderSlide = (temp, o) => {
             let targ = `content`;
+            socket.emit('presentationSlideRendered', {slide: currentSlide.index, inframe: window.self !== window.top});
             renderTemplate(temp, targ, o);
             slideSpecificSetup();
-            if (o.hasOwnProperty('action')) {
-                //
-            }
         };
         const presentationUpdate = (p) => {
             presentationData = p;
@@ -431,9 +422,11 @@
             if (i) {
                 cs = i.currentSlide ? i.currentSlide : 0;
             }
+//            console.log(`init`);
             showSlide(cs);
         };
         const reset = () => {
+//            console.log(`reset`);
             showSlide(0);
         };
         socket.on('disconnect', () => {
@@ -441,7 +434,7 @@
             reset();
         });
         socket.on('connect', () => {
-            console.log(`presentation connect`);
+//            console.log(`presentation connect`);
             socket.emit('customDataEvent', clientData);
             socket.emit('getPresentationPack', (p) => {
                 presentationData = p;

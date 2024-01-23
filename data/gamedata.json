@@ -78,7 +78,7 @@
     },
     "rounds": [
         {"id": "null"},
-        {"id": "allocation", "teams": "mainTeams", "type": 1},
+        {"flag": "e1r1", "id": "allocation", "teams": "mainTeams", "type": 1},
         {"id": "publicvoices", "teams": "publicVoices", "type": 2},
         {"id": "collaboration_1", "teams": "mainTeams", "type": 1},
         {"id": "publicvoices", "teams": "publicVoices", "type": 2}
