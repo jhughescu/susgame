@@ -199,8 +199,6 @@
         };
         const updateCards = () => {
             let ref = {type: {1: 'st', 2: 'pv'}};
-            // adjust the team ID for PV teams (these have IDs of 5 & 6 but for rendering purposes use 1 and 2)
-            let type2Adj = gamedata.mainTeams.length;
             socket.emit('getTeams', (r) => {
                 r.forEach((t) => {
                     let es = t.scores.eras[`era${session.era}`];
@@ -270,108 +268,6 @@
                     }
                 });
             })
-        };
-        const updateCardsV1 = () => {
-            console.log('ashdk');
-            let ref = {type: {1: 'st', 2: 'pv'}};
-            // adjust the team ID for PV teams (these have IDs of 5 & 6 but for rendering purposes use 1 and 2)
-            let type2Adj = gamedata.mainTeams.length;
-            socket.emit('getTeams', (r) => {
-                r.forEach((t) => {
-                    let es = t.scores.eras[`era${session.era}`];
-                    let str = '';
-                    let d = '';
-                    let card = null;
-                    if (es) {
-                        console.log(`we have ${es.length} scores for ${t.title} (${t.id}):`);
-                        card = $(`#stakeholder_card_${t.id}`);
-                        let temp = 'TYPEBLANKDEST_vSRC';
-
-                        es.forEach((sc) => {
-                            let tempRes = temp.replace('DEST', t.id);
-                            let s = sc.split('_');
-                            let o = {};
-                            let outStr = 'score from ';
-                            let outo = {dest: null, val: null};
-                            Object.values(scoreMap).forEach((v, id) => {
-//                                console.log(`##########################################################`);
-                                if (id > 0 && Boolean(v)) {
-//                                    str = `${v}`;
-//                                    console.log(`v is ${v}`)
-                                    if (v === 'val') {
-                                        outo.val = s[id];
-                                    }
-                                    if (ref.hasOwnProperty(v)) {
-//                                        str += ` (${ref[v][s[id]]})`;
-//                                        console.log('sort out the type');
-//                                        console.log(s);
-//                                        console.log(ref[v]);
-
-                                        if (v === 'type') {
-//                                            console.log(`it is type time: ${ref[v][s[id]]}`);
-                                            tempRes = tempRes.replace('TYPE', ref[v][s[id]]);
-//                                            tempRes = tempRes.replace('TYPE', 'ref[v][s[id]]');
-                                        }
-//
-                                    } else if (v === 'id') {
-//                                        str += ` ${Object.values(gamedata.teams)[s[id]].title}`;
-                                        tempRes = tempRes.replace('SRC', s[id]);
-//                                        console.log()
-                                        if (Object.values(gamedata.teams)[s[id]].title === t.title) {
-                                            outStr += `itself (${s[id]})`;
-                                        } else {
-                                            outStr += `${Object.values(gamedata.teams)[s[id]].title} (${s[id]})`;
-                                        }
-                                    } else {
-//                                        str += ` ${s[id]}`;
-                                        outStr += `: ${s[id]}`;
-                                    }
-                                }
-                            });
-                            tempRes = tempRes.replace('BLANK', '');
-//                            console.log(outStr);
-//                            console.log(`st{{id}}_v1`);
-//                            console.log(`from : ${temp} to: ${tempRes}`);
-                            outo.dest = tempRes;
-                            console.log(outo);
-                            if ($(`#${outo.dest}`).length > 0) {
-                                $(`#${outo.dest}`).html(outo.val);
-                            }
-                            s[2] = parseInt(s[2]) + 1;
-//                            let out = temp.replace('TYPE', ref[scoreMap[1]][s[1]])
-                            let out = temp;
-                            out = out.replace('DEST', t.id);
-                            let team = parseInt(s[2]) - (parseInt(s[1]) === 2 ? type2Adj : 0);
-                            out = out.replace('SRC', team);
-                            out = out.replace('BLANK', '');
-//                                console.log(s);
-                            // NOTE: Team IDs are 1 - 6, so PV IDs are 5 and 6
-//                                console.log(` - ${out}`);
-//                                console.log(s);
-                            s.forEach((v, id) => {
-                                if (Boolean(scoreMap[id])) {
-
-                                    str = ` - ${scoreMap[id]}: ${v}`;
-                                    if (ref.hasOwnProperty(scoreMap[id])) {
-                                        str += ` (${ref[scoreMap[id]][v]})`;
-//                                            d = `${ref[scoreMap[id]][v]}${t.id}_v${v}`;
-                                    }
-//                                        console.log(str);
-//                                        str = `st{{id}}_v1`;
-//                                        console.log(str);
-                                }
-                            })
-                        });
-                    }
-
-                    if ($(`#stakeholder_card_${t.id}`).length) {
-
-                    }
-                });
-            })
-                $('.stakeholder_card').each((c) => {
-//                    console.log(c);
-                });
         };
         const updateSlide = (t) => {
             updateCards();

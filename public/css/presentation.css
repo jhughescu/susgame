@@ -85,6 +85,9 @@ body, html {
     height: 100%;
     background: linear-gradient(to bottom right, rgba(92, 131, 142, 0.23), rgba(33, 216, 216, 0.5));
 }
+
+
+/* ############################################## start frame1 ################################################ */
 .frame1full {
     width: 100%;
     height: 100%;
@@ -109,6 +112,9 @@ body, html {
     position: absolute;
     bottom: 0px;
 }
+/* ############################################## end frame1 ################################################ */
+
+
 .box {
 /*    width: 350px;*/
 /*    height: 100px;*/
@@ -147,48 +153,8 @@ body, html {
     width: 100%;
     height: 100%;
 }
-/*
 .frame2 {
-    display: grid;
-    grid-template-areas:
-        "top-left top top-right"
-        "left center right"
-        "bottom-left bottom bottom-right";
-    grid-template-rows: 500px 1fr 500px;
-    grid-template-columns: 500px 1fr 500px;
     height: 100%;
-    background-color: black;
-}
-.framecorner {
-    background-repeat: no-repeat;
-}
-.frame2 .top-left {
-    background-image: url(../assets/frame1_1.png);
-}
-.frame2 .top-right {
-    background-image: url(../assets/frame1_2.png);
-    background-position: right;
-}
-.frame2 .bottom-left {
-    background-image: url(../assets/frame1_3.png);
-}
-.frame2 .bottom-right {
-    background-image: url(../assets/frame1_4.png);
-    background-position: bottom;
-}
-*/
-.frame2 {
-/*
-    display: grid;
-    grid-template-areas:
-        "top-left top top-right"
-        "left center right"
-        "bottom-left bottom bottom-right";
-    grid-template-rows: 500px 1fr 500px;
-    grid-template-columns: 500px 1fr 500px;
-*/
-    height: 100%;
-/*    background-color: black;*/
 }
 .framecorner {
     background-repeat: no-repeat;
@@ -264,6 +230,10 @@ body, html {
     height: 100px;
     background-color: white;
 }
+
+
+
+/* ############################################## start stakeholder card ################################################ */
 .stakeholder_card {
 /*    background-color: red;*/
     width: 400px;
@@ -356,6 +326,10 @@ body, html {
     width: 30px;
     font-size: 2.6rem;
 }
+/* ############################################## end stakeholder card ################################################ */
+
+
+
 .centered {
     width: 50%;
 /*    height: 50%;*/

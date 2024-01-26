@@ -41,6 +41,7 @@ let sessionID = null;
 let connectedSockets = {};
 let playersBasic = {};
 let playersDetail = {};
+let socketMap = new Map();
 let playersMap = new Map();
 let session = null;
 let storedData = null;
@@ -333,15 +334,8 @@ const updatePlayersDetail = () => {
     let pd = playersDetail;
     sortPlayersDetail();
 //    console.log(`~~~~~~~~~~~~~~~~~~~~  updatePlayersDetail (${Object.keys(pd).length} players)`);
-//    console.log(storedData);
-//    console.log(playersDetail);
-//    console.log(playersMap);
     for (var i in pd) {
-//        console.log(pd[i]);
-//        console.log(pd[i].socketID);
-//        console.log(playersMap.get(pd[i].socketID).connected);
         pd[i].connected = playersMap.get(pd[i].socketID).connected;
-//        writeLogFile(`player-${pd[i].id}`, playersMap.get(pd[i].socketID));
     }
 };
 const updateSinglePlayerDetail = (id) => {
@@ -525,6 +519,7 @@ const terminateSession = () => {
     playersBasic = {};
     playersDetail = {};
     playersMap = new Map();
+    socketMap = new Map();
     sessionID = null;
     session = null;
     updateApp();
@@ -903,6 +898,7 @@ const getPlayerPack = (cb, sock) => {
         gamedata: gamedata,
         process: process.env
     }
+    console.log(`returning the playerPack, admin: ${o.admin}`)
     if (cb) {
         cb(o);
     }
@@ -1160,8 +1156,27 @@ const startNewSession = (cb) => {
     }
 };
 const setAdmin = (boo) => {
-//    console.log(`set admin to ${boo}`);
+//    console.log(`set admin to ${boo} ${typeof(boo)}`);
     admin = boo;
+};
+const resetAdmin = (pw, id) => {
+    console.log(`request to reset, ${pw}, ${pw === getPassword('ADMIN')}`);
+    if (pw === getPassword('ADMIN')) {
+        setAdmin(false);
+        let cs = connectedSockets;
+        for (var i in cs) {
+            if (cs[i].hasOwnProperty(`customData`)) {
+                if (cs[i].customData.hasOwnProperty(`activeAdmin`)) {
+                    cs[i].customData.activeAdmin = false;
+                    console.log(cs[i].customData);
+                    console.log(cs[i].id === id);
+                    cs[i].emit('test');
+                    cs[i].emit(cs[i].id === id ? 'takeover' : 'denialOfRegistration');
+
+                }
+            }
+        }
+    }
 };
 const processStoredGame = (d) => {
     storedData = d;
@@ -1198,13 +1213,37 @@ const processStoredGame = (d) => {
     io.emit('onStoredGameFound');
 //    writeLogFile('playersDetailUpdated', playersDetail, 'this is the playersDetail object after being updated with data retrieved from localStorage')
 };
-const pageTypeAdded = (t) => {
-//    console.log(`pageTypeAdded :${t}`);
-    if (t === 'admin') {
-//        clean = false;
-//        addFakePlayers();
-//        admin = true;
+const pageTypeAdded = (s) => {
+    let t = null;
+    let cs = connectedSockets;
+//    console.log(`${Object.keys(connectedSockets).length} sockets registered`);
+    if (s.hasOwnProperty('customData')) {
+        if (s.customData.hasOwnProperty('role')) {
+            r = s.customData.role;
+//            console.log(Object.values(connectedSockets).length);
+            if (r === 'admin') {
+                if (s.customData.activeAdmin !== false) {
+//                    console.log('check for existing admin page');
+                    for (var i in cs) {
+                        if (cs[i].hasOwnProperty('customData')) {
+                            if (cs[i].customData.hasOwnProperty('role')) {
+//                                console.log(`${JSON.stringify(cs[i].customData)} ${cs[i].id === s.id}`);
+//                                console.log(`compare to ${JSON.stringify(cs[i].customData)}`);
+                                // do not compare if self or if socket is not the active admin:
+                                if ((cs[i].id !== s.id) && cs[i].customData.activeAdmin !== false) {
+//                                    console.log('----- DUPLICATE');
+                                    s.emit('denialOfRegistration');
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    console.log('this is just the duplicate admin registering it is shit');
+                }
+            }
+        }
     }
+    console.log(`socketTypeAdded :${r}`);
 };
 const getGameData = (cb) => {
     cb(gamedata);
@@ -1460,7 +1499,7 @@ const reloadSlide = () => {
     io.emit('slideUpdate');
 };
 const gotoSlide = (s) => {
-    console.log(`gotoSlide ${s}`);
+//    console.log(`gotoSlide ${s}`);
     io.emit('gotoSlide', s);
     io.emit('slideUpdate');
 };
@@ -1495,7 +1534,10 @@ io.on('connection', (socket) => {
     socket.on('customDataEvent', (customData) => {
         socket.customData = customData;
 //        console.log(`socket connected with role ${socket.customData.role} ${socket.id}`);
-        pageTypeAdded(socket.customData.role);
+        pageTypeAdded(socket);
+//        pageTypeAdded(socket.customData.role);
+
+
 //        if () {}
     });
     socket.on('addNewPlayer', (o, callback) => {
@@ -1662,6 +1704,16 @@ io.on('connection', (socket) => {
     });
     socket.on('setAdmin', (boo) => {
         setAdmin(boo);
+    });
+    socket.on('resetAdminV2', (pw, cb) => {
+        console.log(`request to reset, ${pw}, ${pw === getPassword('ADMIN')}`);
+        if (pw === getPassword('ADMIN')) {
+            setAdmin(false);
+            cb();
+        }
+    });
+    socket.on('resetAdmin', (pw, id) => {
+        resetAdmin(pw, id);
     });
     socket.on('requestLogin', (type, pw, cb) => {
         if (cb) {
