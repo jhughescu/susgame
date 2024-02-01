@@ -1,7 +1,7 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 Handlebars.partials['dragwin'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div class='dragbar'>\r\n<div class='closer'>x</div>\r\n</div>";
+    return "<div class='dragbar'>\n<div class='closer'>x</div>\n</div>\n";
 },"useData":true});
 Handlebars.partials['erascores'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "<p>"
@@ -15,11 +15,12 @@ Handlebars.partials['erascores'] = template({"1":function(container,depth0,helpe
         return undefined
     };
 
-  return "erascores: \r\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"era1") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":2,"column":38}}})) != null ? stack1 : "");
+  return "erascores:\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"era1") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":0},"end":{"line":2,"column":38}}})) != null ? stack1 : "")
+    + "\n";
 },"useData":true});
 Handlebars.partials['inner'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "This is the inner";
+    return "This is the inner\n";
 },"useData":true});
 Handlebars.partials['playersBasic'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "Wow ";

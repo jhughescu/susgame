@@ -25,7 +25,12 @@ a:hover {
     font-weight: bold;
 }
 .button {
-    cursor: pointer;
+    cursor: pointer;cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background-color: inherit;
+    font-size: 18px;
+    text-align: center;
 }
 button:disabled {
     color: gray;
@@ -46,12 +51,6 @@ table.scorePV {
     position: absolute;
     top: 0px;
     right: 0px;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background-color: inherit;
-    font-size: 18px;
-    text-align: center;
 }
 
 #warning {

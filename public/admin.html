@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>*Admin</title>
     <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script src='js/libs/jquery-ui.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src='templates/sustemplates.js'></script>
@@ -21,7 +22,7 @@
     <p id='message'></p>
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
     <div id='status'><span></span><div class='closer'>x</div></div>
-    <div class='controls' id='controlSettings'>
+    <div class='controls' id='controlSettings' style='display: none;'>
         <button class='caution' id='toggleDev'>Toggle dev mode (<span id='devModeBoo'>boo</span>)</button>
         <button class='caution' id='setMax'>Set max votes</button>
         <input id='showMax' style='width: 40px;' type='number' value='10'>
@@ -41,7 +42,7 @@
         <button id='slideNext'>Next slide</button>
         <button id='slideReload'>Reload slide</button>
     </div>
-    <div class='controls' id='controlRounds'>
+    <div class='controls' id='controlRounds' style='display: none;'>
         <table><tbody>
             <tr>
                 <td>
@@ -62,8 +63,10 @@
         <button id='listPlayers'>List players</button>
         <button id='showScores'>Show scores</button>
     </div>
-    <div>
-        <iframe id='slideshow' src='' style='display: none;'></iframe>
+    <div class='dragger' id='slideshow' style='display: none;'>
+        <div class='button showtoggle'>_</div>
+        <div class='button closer'>x</div>
+        <iframe id='slideshowfr' src=''></iframe>
     </div>
     <div id='playlist'><div id='slidelist'></div></div>
     <div id='players'></div>
@@ -80,6 +83,7 @@
         const PINGBTN = `pingbtn-`;
         const RESETBTN = `resetbtn-`;
         const REFRESHBTN = `refreshbtn-`;
+        const LEADBTN = `leadbtn-`;
         const REMOVEBTN = `removebtn-`;
         const STORE_DISPLAY = 'currentDisplay';
         const STORE_ALL = 'currentState';
@@ -122,6 +126,20 @@
 //                        console.log(`refreshing ${id}`);
                         socket.emit('refreshPlayer', id);
                     }
+                });
+            });
+            // Make Lead buttons
+            b = document.getElementsByClassName('leadBtn');
+            [...b].forEach((bu) => {
+//                console.log('get clicked');
+                bu.addEventListener('click', (evt) => {
+                    let id = evt.target.id.replace(LEADBTN, '');
+//                    let r = confirm(`are you sure you want to make player ${id} the team lead?`);
+//                    if (r) {
+//                        console.log('removePlayer', id);
+                        makeTeamLead(id)
+
+//                    }
                 });
             });
             // Remove buttons
@@ -180,6 +198,9 @@
                 rv = false;
             }
             return rv;
+        };
+        const onAppError = (o) => {
+            alert(o.msg);
         };
         const isAutoMode = () => {
             let am = false;
@@ -264,6 +285,7 @@
                     applyClasses();
                     socket.emit('startNewSession', function (s) {
                         getGameToStore();
+//                        showPanel('sessionRounds');
                     });
                 })
             } else {
@@ -279,12 +301,10 @@
         };
         const assignTeamsFunk = () => {
             setupEnrolButton(false);
-//            getGameToStore();
             socket.emit('assignTeams', (t) => {
                 listPlayers();
                 enableRoundStart(1);
                 getGameToStore();
-
             });
         }
         const assignTeams = () => {
@@ -296,6 +316,31 @@
                     assignTeamsFunk();
                 }
             }
+        };
+        const makeTeamLead = (id) => {
+//            console.log(`if allowed, make ${id} the leader of their team`);
+            let ok = false;
+            socket.emit('getTeams', (t) => {
+                ok = t.length > 0;
+                if (ok) {
+                    socket.emit('getPlayer', id, (p) => {
+                        if (p.isLead) {
+                            alert(`player ${id} is already team lead`)
+                        } else if (!p.teamObj.hasLead) {
+                            alert('PV teams have no leads');
+                        } else {
+                            let c = confirm(`are you sure you want to make player ${id} the team lead?`);
+                            if (c) {
+                                socket.emit('makeTeamLead', id);
+                            }
+                        }
+                    });
+
+                } else {
+                    alert('cannot swap team leader before teams have been allocated')
+                }
+            })
+
         };
         const checkAssigned = (cb) => {
             socket.emit('getPlayersDetail', (pd) => {
@@ -326,7 +371,7 @@
 //            let s = o.s;
 //            let s = Object.assign(o.s, {});
             let s = o.hasOwnProperty('s') ? o.s : o;
-//            console.log('newSessionStarted');
+            console.log('newSessionStarted');
 //            console.log(o);
 //            console.log(s);
 
@@ -338,6 +383,7 @@
             setupEnrolButton(true);
             setupSessionControls();
             showPlayersView();
+            showRounds();
         }
         const playerDisplay = (p, i) => {
             var e = document.getElementById('players');
@@ -449,14 +495,24 @@
             }
         };
         // specifc round events
+        const rAssignTeams = () => {
+            console.log(`rAssignTeams`);
+            socket.emit('initRound', 'assignTeams');
+        };
         const startRoundE1R1 = () => {
             // era 1 round 1; Stakeholders self-allocate resources
             socket.emit('initRound', 'e1r1');
-        }
+        };
+        const startRoundE1R2 = () => {
+            // era 1 round 1; Stakeholders self-allocate resources
+            socket.emit('initRound', 'e1r2');
+        };
+        // specifc round events END
         const onStartRound = (r) => {
-//            console.log(`i will start round ${r}`);
+//            console.log(`i will start round ${r} and add highlight to #indr${r}`);
             $('.indr').removeClass('highlight');
             $(`#indr${r}`).addClass('highlight');
+            $(`.indr${r}`).addClass('highlight');
 //            enableButton(id, false);
         };
         const roundUpdate = (o) => {
@@ -565,6 +621,7 @@
                     }
                 }
             }
+            $('.dragger').draggable();
         };
         const updatePlayersView = (p) => {
             if (currentDisplay === 'listPlayers') {
@@ -739,17 +796,6 @@
                 showScores();
             }
             return;
-            /*
-            console.log('hup');
-            console.log(s);
-            console.log($('#controlPanel').find('.scorePV'));
-            if ($('#controlPanel').find('.scorePV').length > 0) {
-                let o = getScoreObject(s);
-                if (o.hasPV) {
-                    renderTemplate('scores', 'controlPanel', o);
-                }
-            }
-            */
         };
         const showScores = () => {
             socket.emit('getSession', (s) => {
@@ -775,11 +821,55 @@
             let ob = Object.assign({}, o);
             const compiledTemplate = Handlebars.templates[temp];
             const renderedHtml = compiledTemplate(ob);
-//            console.log(renderedHtml)
-//            console.log($(targ))
             $(targ).html('');
             $(targ).html(renderedHtml);
-//            console.log(`render template ${temp} ${targ} `);
+        };
+        const renderTemplateTRIAL = (temp, targ, o) => {
+            targ = '#' + targ;
+            // Fetch the template from the server
+            console.log('pre')
+            fetch(`/templates/${temp}.hbs`)
+                .then(response => response.text())
+                .then(templateSource => {
+                    console.log('post');
+                    // Compile the template
+                    const compiledTemplate = Handlebars.compile(templateSource);
+                    // Merge data objects if an optional object is provided
+                    const ob = o ? Object.assign({}, o) : {};
+                    const renderedHtml = compiledTemplate({slideList: [{type: 'boo', index: '0', title: 'mouse'}]});
+                    console.log(renderedHtml);
+                    // Update the target element with the rendered HTML
+                    $(targ).html('');
+                    $(targ).html(renderedHtml);
+                })
+                .catch(error => console.error('Error fetching or rendering template:', error));
+        };
+
+        const renderTemplateTRIALV2 = (temp, targ, o) => {
+            targ = '#' + targ;
+            // Fetch the template from the server
+            fetch(`/templates/${temp}.hbs`)
+                .then(response => response.text())
+                .then(templateSource => {
+                    // Compile the template
+                    const compiledTemplate = Handlebars.compile(templateSource);
+                    // Merge data objects if an optional object is provided
+                    const ob = o ? Object.assign({}, o) : {};
+                    // Render the template with the data
+                    console.log('########################')
+                    console.log(o)
+                    console.log(ob)
+                    console.log(ob.slideList)
+                    console.log(compiledTemplate);
+
+//                    const renderedHtml = compiledTemplate(ob);
+                    const renderedHtml = compiledTemplate({slideList: [{type: 'boo', index: '0', title: 'mouse'}]});
+                console.log(renderedHtml);
+                    // Update the target element with the rendered HTML
+                    $(targ).html('');
+                    $(targ).html(renderedHtml);
+                })
+                .catch(error => console.error('Error fetching or rendering template:', error));
         };
         const showWarning = (w) => {
             $('#warning_message').html(w);
@@ -788,7 +878,63 @@
         const closeWarning = () => {
             $('#warning').hide();
         };
+        const panelToggle = (b, force) => {
+            let p = b.parent();
+            let a = p.find('*');
+            console.log('the toggle')
+            a = a.not('.button');
+            if (a.is(':visible') || force === 'min') {
+                a.hide();
+                p.addClass('short');
+            } else {
+                a.show();
+                p.removeClass('short');
+            }
+        };
+        const setupPanel = (ip) => {
+            let p = $(`#${ip}`);
+            let pt = p.find('.showtoggle');
+            p.draggable();
+            pt.off('click');
+            pt.on('click', function () {
+                panelToggle($(this));
+            });
+//            console.log(p);
+//            console.log(pt);
+        };
+        const showPanel = (ip) => {
+            // if the requested panel exists, show it, otherwise create it
+            let p = $(`#${ip}`);
+            if (p.length) {
+                p.show();
+            } else {
+                $('body').append(`<div class='panel dragger' id='${ip}'><div class='pcontent' id='pcontent_${ip}'></div></div>`);
+//                debugger;
+                p = $(`#${ip}`);
+                p.css({top: '20px', left: '50px'});
+                setupPanel(ip);
+            }
+//            console.log(`showPanel`);
+//            console.log(p);
 
+            return p;
+        };
+        const showRounds = () => {
+//            console.log(`showRounds`);
+//            console.log(env);
+            if (env) {
+                if (env.session) {
+                    if (env.session.rounds) {
+                        let p = showPanel('sessionRounds');
+                        renderTemplate('rounds', `pcontent_sessionRounds`, Object.values(env.session.rounds).slice(1));
+                    }
+                }
+            } else {
+                // try again in a minute
+                setTimeout(showRounds, 1000)
+            }
+
+        }
         //
         //
         const getStoredGame = () => {
@@ -881,6 +1027,13 @@
                 getGameToStore();
             }
         };
+        const onSessionUpdate = (s) => {
+            console.log('we have a session update: ');
+            console.log(s);
+//            console.log(env);
+            env.session = env.session ? Object.assign(env.session, s) : s;
+            showRounds();
+        };
         const onServerShutdown = () => {
             console.log('SERVER SHUTTIING DOWN');
             getGameToStore();
@@ -902,6 +1055,73 @@
                 console.log(d)
 ;            })
         };
+        const getRoundFromProp = (p) => {
+            let r = null;
+            let rr = null;
+            if (env.hasOwnProperty('session')) {
+                if (env.session) {
+                    if (env.session.hasOwnProperty('rounds')) {
+                        r = env.session.rounds;
+                        for (var i in r) {
+    //                        console.log(r[i])
+                            for (var j in r[i]) {
+                                if (r[i][j] === p) {
+                                    rr = r[i];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return rr;
+        };
+        const slideLinkClick = (id, p) => {
+            // method requires p (presentation data) as it is called from an emit callback
+            let sl = p.slideList[id];
+            let allowed = true;
+            let msg = '';
+            let r = null;
+            let s = null;
+            if (sl.hasAction) {
+                if (env.session) {
+                    s = env.session;
+                    r = getRoundFromProp(sl.action);
+                    if (s.rounds[r.n - 1]) {
+                        if (!s.rounds[r.n - 1].complete) {
+                            allowed = false;
+                            msg = `previous round incomplete`;
+                        }
+                    }
+//                    console.log(`can we use this round?`);
+//                    console.log(r);
+                    if (r.complete) {
+                        allowed = false;
+                        msg = `this round already completed`;
+                    }
+                } else {
+                    allowed = false;
+                    msg = `session not started`;
+                }
+            }
+            if (allowed) {
+                if (sl.hasAction) {
+                    if (eval(r.action)) {
+//                        socket.emit('startRound', r.n, () => {
+                        socket.emit('initRound', r.action, () => {
+                        //   \/ duplicate method call? Possibly...
+                            eval(r.action)();
+//                            socket.emit('gotoSlide', id);
+                        });
+                    }
+                } else {
+//                    socket.emit('gotoSlide', id);
+                }
+//
+            } else {
+                alert(`cannot carry out this action - ${msg}`)
+            }
+            socket.emit('gotoSlide', id);
+        };
         const renderPlaylist = (cb) => {
             socket.emit('getPresentationPack', (p) => {
                 let cs = localStorage.getItem(env.gamedata.constants.presentation);
@@ -917,9 +1137,13 @@
                 $('.slideLink').off('click');
                 $('.slideLink').on('click', function () {
                     let id = $(this).attr('id').split('_')[1];
-                    socket.emit('gotoSlide', id);
+                    slideLinkClick(id, p);
                 });
                 applyClasses();
+//                console.log('the slideshow now');
+//                console.log($(`#slideshow`).find('.showtoggle'));
+//                $(`#slideshow`).find('.showtoggle').click();
+                panelToggle($(`#slideshow`).find('.showtoggle'), 'min')
                 if (cb) {
                     cb(p);
                 }
@@ -929,32 +1153,30 @@
             let pl = $('#playlist');
             let f = $('#slideshow');
             let viz = force === undefined ? pl.is(':visible') : force;
+//            console.log(`togglePlaylist ${viz}`);
             if (viz) {
                 pl.hide();
                 f.hide();
             } else {
-                f.attr('src', 'presentation.html')
+                f.find('iframe').attr('src', 'presentation.html')
                 pl.show();
                 f.show();
                 renderPlaylist();
-
+                setupPanel('slideshow');
+//                setTimeout(() => {location.reload()}, 5000)
             }
             updateStoreObj('playlistOpen', pl.is(':visible'));
         };
         const slideUpdate = () => {
             renderPlaylist((p) => {
-//                console.log('slideUpdate');
-//                console.log(p);
                 if (p.currentSlide) {
                     buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
                     buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
                     if (p.currentSlide.hasOwnProperty('action')) {
-//                        console.log(p.currentSlide.action);
-//                        console.log(this[p.currentSlide.action]);
                         if (eval(p.currentSlide.action)) {
-                            eval(p.currentSlide.action).call();
+                            // action knocked out, has been moved to main click
+//                            eval(p.currentSlide.action).call();
                         }
-//                        this[p.currentSlide.action].call();
                     }
                 }
             });
@@ -964,7 +1186,6 @@
         const initDisplay = (s) => {
             // return to current display state on refresh
             let sd = localStorage.getItem(STORE_DISPLAY);
-//            console.log(`initDisplay called: ${sd}`);
             if (sd) {
                 currentDisplay = sd;
                 switch (sd) {
@@ -980,16 +1201,18 @@
                 }
             }
             sd = getStoredVal('playlistOpen');
-//            console.log(sd);
+//            console.log(`initDisplay`);
+//            console.log(`${sd}`);
+            if (sd) {
+                togglePlaylist(false);
+            }
             slideUpdate();
             // if a session is currently active show the relevant round indicator etc:
             if (env.session) {
-//                console.log(env.session);
                 if (env.session.active) {
                     onStartRound(env.session.round);
                 }
             }
-//            togglePlaylist(!sd);
         };
         const setupSessionControls = () => {
 //            console.log(`setupSessionControls`);
@@ -1090,6 +1313,10 @@
             socket.emit('customDataEvent', clientData);
             document.title = document.title.replace(/\*/g, '');
             lockdown();
+            // lines below left for reference: do not auto-close duplicate windows as this prevents the possibility of takeover
+//            setTimeout(() => {
+//                window.close();
+//            }, 1000);
         };
         const lockdown = () => {
             showWarning('An active admin window is alredy open elsewhere, this page has been locked');
@@ -1132,7 +1359,7 @@
                         }
                         isDev = p.isDev;
                         env = Object.assign({}, p);
-                        activeAdmin = !env.admin;
+                        activeAdmin = !Boolean(env.admin);
 //                        clientData.activeAdmin = activeAdmin;
 //                        socket.emit('customDataEvent', clientData);
                         console.log(`activeAdmin: ${activeAdmin}`);
@@ -1142,9 +1369,6 @@
         //                    console.log(p);
                             initDisplay();
                             socket.emit('setAdmin', true);
-                        } else {
-//                            $('div').html('');
-//                            lockdown();
                         }
                     });
                 }
@@ -1197,6 +1421,9 @@
         socket.on('onPlayerConnect', (msg) => {
             onPlayerConnect(msg);
         });
+        socket.on('appError', (o) => {
+            onAppError(o);
+        });
         socket.on('onGetPlayers', (msg) => {
 //            console.log('I hear onGetPlayers')
             onGetPlayers(msg);
@@ -1235,6 +1462,9 @@
         });
         socket.on('terminateSession', terminateSession);
         socket.on('newSession', newSessionStarted);
+        socket.on('sessionUpdate', (s) => {
+            onSessionUpdate(s)
+        });
         socket.on('enrollmentUpdate', enrollmentUpdate);
         socket.on('onRequestSession', (o) => {
             onRequestSession(o);
@@ -1263,7 +1493,6 @@
         //
         socket.on('slideUpdate', () => {
             slideUpdate();
-
         });
 
         storedGame = getStoredGame();

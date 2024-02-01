@@ -214,6 +214,8 @@
             renderGameScreen();
         };
         const clearPersistence = () => {
+            localStorage.removeItem('susgame');
+//            localStorage.setItem(getUniqueStorageID('susgame'));
             localStorage.clear();
         };
         const kickout = () => {
@@ -636,6 +638,7 @@
 //            console.log(o);
             ls[o.targ] = o.v;
             localStorage.setItem(lid, ls);
+            console.log(`setting: ${lid}`);
             src.attr('disabled', true);
             vi.attr('disabled', true);
 //            socket.emit(toEmit, o);
@@ -1050,9 +1053,6 @@
         // End stakeholder
 
         // End type-specific code
-
-
-
 
         socket.on('onRequestSession', (boo) => {
             onRequestSession(boo);

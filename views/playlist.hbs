@@ -1,8 +1,8 @@
-list of slides:
+list of slides
 <table><tbody>
     {{#each slideList}}
     <tr class='{{#if isCurrent}}highlight{{/if}}'>
-    <td><div class='slideIcon {{type}}'></div></td><td><div class='slideLink' id='slideLink_{{index}}'>{{{title}}}</div></td>
+    <td><div class='slideIcon {{type}}'></div></td><td><div class='slideLink' id='slideLink_{{index}}'>{{{title}}}</div></td><td><div class='rInd rInd_{{hasAction}} indr{{actionID}}' id='indr{{actionID}}'></div></td>
     </tr>
     {{/each}}
 </tbody></table>

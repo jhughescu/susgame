@@ -18,9 +18,17 @@ const isDev = true;
 let debug = true;
 
 //app.engine('handlebars', exphbs.engine({defaultLayout: 'backup'}));
-app.engine('hbs', exphbs.engine({extname: '.hbs', defaultLayout: ''}));
+app.engine('hbs', exphbs.engine({
+    extname: '.hbs',
+    defaultLayout: '',
+    partialsDir: 'views/partials'
+}));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Serve static files from the "public" folder
+app.use(express.static('public'));
+
 
 const gameDataOut = 'gamedata.csv';
 const playerPrefix = 'player-';
@@ -46,7 +54,7 @@ let playersMap = new Map();
 let session = null;
 let storedData = null;
 let sessionArchive = [];
-let admin = null;
+let admin = false;
 let scorePackets = [];
 let scoreMap = [
     'round',
@@ -99,6 +107,7 @@ class Session {
     era;
     scores;
     round;
+    rounds;
     setAssigned(boo) {
         this.assigned = boo;
     }
@@ -304,6 +313,15 @@ const processPresentationData = (d) => {
         if (s.type === 'video') {
             s.src = `${d.videoEnv}${d.videoLinks[s.srcRef]}${d.videoSettings}`;
         }
+        s.hasAction = s.hasOwnProperty('action');
+        if (s.hasOwnProperty('action')) {
+//            console.log(`action: ${s.action}`);
+            let ar = getRoundFromProp(s.action);
+            if (ar) {
+                s.actionID = ar;
+//                console.log(` - resultant action: ${ar}`);
+            }
+        }
     }
     d.gamedata = gamedata;
     return d;
@@ -475,7 +493,7 @@ const requestSession = (o) => {
 const sessionUpdate = () => {
     // emit an event in the case of any update to the session
     io.emit('sessionUpdate', session);
-//    console.log('session');
+    console.log('emit sessionUpdate');
 //    console.log('session');
 //    console.log('session');
 //    console.log(session);
@@ -541,7 +559,7 @@ const updatePresentationPack = () => {
 const presentationSlideRendered = (o) => {
     // dev method = help to debug slide reset issue
     if (process.env.DEBUG) {
-        console.log(`presentationSlideRendered: ${JSON.stringify(o)}`);
+//        console.log(`presentationSlideRendered: ${JSON.stringify(o)}`);
     }
 //    console.log(process.env.DEBUG);
 };
@@ -716,7 +734,7 @@ const stStakeholderScore = (o) => {
 const teamRoundComplete = (o) => {
     if (session) {
         if (session.getRound() > 0) {
-//            console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
+            console.log(`teamRoundComplete, team: ${o.team}, round ${session.getRound()}`);
 //            console.log(o);
             let tid = `t${o.team}`;
             if (!session.scores[`round${session.getRound()}`].hasOwnProperty(tid)) {
@@ -775,37 +793,68 @@ const roundIsComplete = () => {
 //    console.log(t.length, c.length);
 //    return t.length === c.length;
 };
-const initRound = (id) => {
-    // method uses an identifier (e.g. flag) to select a round from the gamedata
-    console.log(`initRound ${id}`);
-//    console.log(gamedata.rounds);
+const getRoundFromProp = (id) => {
     let rs = gamedata.rounds;
     let rr = null;
     rs.forEach((r, n) => {
-//        console.log(` - ${id}`);
         for (var i in r) {
-//            console.log(i, r[i]);
             if (r[i] === id) {
                 rr = n;
             }
         }
     });
+    return rr;
+};
+const initRound = (id, cb) => {
+    // method uses an identifier (e.g. flag) to select a round from the gamedata
+    console.log(`initRound ${id}`);
+    console.log(`has callback? ${Boolean(cb)}`);
+    console.log(cb);
+    let rr = getRoundFromProp(id);
     if (rr) {
         console.log(`starting round ${rr}`);
         startRound(rr);
     } else {
         console.log(`no round found for identifier ${id}`);
     }
+    if (cb) {
+        console.log(`callback retrieves method`)
+        cb();
+    }
     return rr;
 };
-const startRound = (r) => {
-//    console.log(`startRound ${r} ${process.env.NODE_ENV}`);
-//    console.log(`startRound ${r} ${process.env.AUTO}`);
+const startRound = (r, cb) => {
+    console.log(` - startRound: ${r}`)
     if (session) {
-        session.setRound(r);
-        io.emit('onStartRound', r);
-        sessionUpdate();
+        let allowed = false;
+        let rs = session.rounds;
+        if (rs[r - 1]) {
+            allowed = rs[r - 1].complete
+        }
+        if (allowed) {
+            session.setRound(r);
+            rs[r].current = true;
+            rs[r - 1].current = false;
+            io.emit('onStartRound', r);
+            sessionUpdate();
+        } else {
+            io.emit('appError', {msg: `cannot start round ${r}, previous round incomplete`})
+        }
+    } else {
+        io.emit('appError', {msg: `cannot start round ${r}, no session currently active`})
     }
+    if (cb) {
+        cb();
+    }
+};
+const completeCurrentRound = () => {
+    console.log(`*********************************************** completeCurrentRound: ${session.round}`);
+    session.rounds[session.round].complete = true;
+    session.rounds[session.round].current = false;
+//    console.log(session.rounds);
+    console.log('CALL THE SESSION UPDATE')
+    sessionUpdate();
+//    session.rounds[session.round].complete = true;
 };
 let scoreReport = {};
 const applyScorePacket = (sp) => {
@@ -898,7 +947,7 @@ const getPlayerPack = (cb, sock) => {
         gamedata: gamedata,
         process: process.env
     }
-    console.log(`returning the playerPack, admin: ${o.admin}`)
+//    console.log(`returning the playerPack, admin: ${o.admin}`)
     if (cb) {
         cb(o);
     }
@@ -908,7 +957,9 @@ const getPlayer = (id, cb) => {
 //    console.log(`request to getPlayer ${id}`);
     let pl = getPlayerFromID(id);
 //    console.log(pl)
-    cb(pl);
+    if (cb) {
+        cb(pl);
+    }
 };
 const getGameMin = (cb) => {
     // Prepare & return a minimal game summary for localStorage
@@ -1056,6 +1107,22 @@ const removePlayer = (id) => {
 //        console.log(`no player with id ${id} in the playersDetail object`);
     }
 };
+const makeTeamLead = (id) => {
+//    console.log(`make ${id} the team leader`);
+    let pd = playersDetail;
+    let tm = gamedata.teams;
+    if (tm) {
+        if (pd) {
+            getTeamFromPlayer(id).team.forEach((t) => {
+                playersDetail[t].isLead = t === id;
+                refreshPlayer(t);
+            });
+            io.emit('playersUpdate', playersDetail);
+        }
+    } else {
+
+    }
+};
 const addNewPlayer = (o, socket, callback) => {
     let id = o.id;
     id = id.replace(gamedata.prefixes.player, '');
@@ -1130,16 +1197,23 @@ const startSession = () => {
 //    console.log(session);
     if (session === null) {
 //        if (!session.active) {
-            let sid = getSessionID();
-            app.get(`/sustain${getSessionID()}`, (req, res) => {
-                res.sendFile(path.join(__dirname, 'public', 'player.html'));
-            });
-            io.emit('newSession', {sid: sid});
-            console.log(`Hey, it's a new session, that's awesome`);
-            session = new Session(sid);
-            session.active = true;
-            session.setEra(getCurrentEra());
-            updateApp();
+        let sid = getSessionID();
+        app.get(`/sustain${getSessionID()}`, (req, res) => {
+            res.sendFile(path.join(__dirname, 'public', 'player.html'));
+        });
+        io.emit('newSession', {sid: sid});
+        console.log(`Hey, it's a new session, that's awesome`);
+        session = new Session(sid);
+        session.active = true;
+        session.setEra(getCurrentEra());
+        session.rounds = Object.assign({}, gamedata.rounds);
+        Object.values(session.rounds).forEach((r, id) => {
+            session.rounds[id].current = id === 0;
+            session.rounds[id].complete = id === 0;
+        });
+        updateApp();
+        sessionUpdate();
+//        io.emit('sessionUpdate', session);
 //            setInterval(updateTimer, 1000);
 //        }
     } else {
@@ -1160,7 +1234,7 @@ const setAdmin = (boo) => {
     admin = boo;
 };
 const resetAdmin = (pw, id) => {
-    console.log(`request to reset, ${pw}, ${pw === getPassword('ADMIN')}`);
+//    console.log(`request to reset, ${pw}, ${pw === getPassword('ADMIN')}`);
     if (pw === getPassword('ADMIN')) {
         setAdmin(false);
         let cs = connectedSockets;
@@ -1168,9 +1242,10 @@ const resetAdmin = (pw, id) => {
             if (cs[i].hasOwnProperty(`customData`)) {
                 if (cs[i].customData.hasOwnProperty(`activeAdmin`)) {
                     cs[i].customData.activeAdmin = false;
-                    console.log(cs[i].customData);
-                    console.log(cs[i].id === id);
+//                    console.log(cs[i].customData);
+//                    console.log(cs[i].id === id);
                     cs[i].emit('test');
+//                    console.log('a denial a denial');
                     cs[i].emit(cs[i].id === id ? 'takeover' : 'denialOfRegistration');
 
                 }
@@ -1216,34 +1291,33 @@ const processStoredGame = (d) => {
 const pageTypeAdded = (s) => {
     let t = null;
     let cs = connectedSockets;
-//    console.log(`${Object.keys(connectedSockets).length} sockets registered`);
     if (s.hasOwnProperty('customData')) {
         if (s.customData.hasOwnProperty('role')) {
             r = s.customData.role;
-//            console.log(Object.values(connectedSockets).length);
             if (r === 'admin') {
+//                console.log(`s.customData.activeAdmin: ${s.customData.activeAdmin} (${typeof(s.customData.activeAdmin)})`);
                 if (s.customData.activeAdmin !== false) {
-//                    console.log('check for existing admin page');
                     for (var i in cs) {
                         if (cs[i].hasOwnProperty('customData')) {
                             if (cs[i].customData.hasOwnProperty('role')) {
-//                                console.log(`${JSON.stringify(cs[i].customData)} ${cs[i].id === s.id}`);
-//                                console.log(`compare to ${JSON.stringify(cs[i].customData)}`);
                                 // do not compare if self or if socket is not the active admin:
-                                if ((cs[i].id !== s.id) && cs[i].customData.activeAdmin !== false) {
-//                                    console.log('----- DUPLICATE');
+                                if ((cs[i].id !== s.id) && cs[i].customData.activeAdmin !== false && cs[i].customData.role === 'admin') {
+//                                    console.log('this is the denial');
+//                                    console.log(s.id);
+//                                    console.log(cs[i].id);
+//                                    console.log(cs[i].customData);
                                     s.emit('denialOfRegistration');
                                 }
                             }
                         }
                     }
                 } else {
-                    console.log('this is just the duplicate admin registering it is shit');
+//                    console.log('this is just the duplicate admin registering it is not cool');
                 }
             }
         }
     }
-    console.log(`socketTypeAdded :${r}`);
+//    console.log(`socketTypeAdded :${r}`);
 };
 const getGameData = (cb) => {
     cb(gamedata);
@@ -1415,6 +1489,7 @@ const latecomer = (o) => {
     t.team.push(pid);
 };
 const assignTeams = (cb) => {
+    console.log(`assignTeams --------------------- GO`);
     let d = gamedata;
     let teams = d.teams;
     let max = getTeamMax();
@@ -1479,9 +1554,15 @@ const assignTeams = (cb) => {
     if (session){
         session.setAssigned(true);
     }
+    completeCurrentRound();
     updateLogFile('gamedata', gamedata);
     updateLogFile('playersDetail', playersDetail);
-    cb(gamedata.teams);
+    if (cb) {
+        cb(gamedata.teams);
+    }
+};
+const e1r1 = () => {
+    console.log('oooooooooooooooo aaaaaaaaaaaaaaaaaaaaaaaaah')
 };
 
 // Presentation code
@@ -1625,6 +1706,9 @@ io.on('connection', (socket) => {
 //        console.log(`I want to refresh stuff`);
         refreshPlayer(id);
     });
+    socket.on('makeTeamLead', (id) => {
+        makeTeamLead(id);
+    });
     socket.on('removePlayer', (id) => {
         removePlayer(id);
     });
@@ -1697,6 +1781,7 @@ io.on('connection', (socket) => {
         previewTeams(cb);
     });
     socket.on('assignTeams', (cb) => {
+//        console.log(`the assignTeams socket event`);
         assignTeams(cb);
     });
     socket.on('testEvent', (msg) => {
@@ -1734,12 +1819,12 @@ io.on('connection', (socket) => {
     socket.on('stStakeholderScore', (o) => {
         stStakeholderScore(o);
     });
-    socket.on('startRound', (r) => {
-        startRound(r);
+    socket.on('startRound', (r, cb) => {
+        startRound(r, cb);
     });
-    socket.on('initRound', (id) => {
+    socket.on('initRound', (id, cb) => {
         // initRound differs from startRound in that it takes an ID arg which specifies the round to initialise (via gamedata)
-        initRound(id);
+        initRound(id, cb);
     });
     socket.on('teamRoundComplete', (o) => {
 //        console.log(`teamRoundComplete event`);
@@ -1781,6 +1866,8 @@ io.on('connection', (socket) => {
     socket.on('getStatusMessages', (cb) => {
         cb(statusMessages);
     });
+
+
 });
 
 // Code to run when the server app shuts down:
@@ -1835,6 +1922,10 @@ app.get('/status', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'status.html'));
 });
 app.get('/test', (req, res) => {
+    const d = {title: 'awesome', answer: 'Oh hell yes'};
+    res.render('test', d);
+});
+app.get('/test2', (req, res) => {
     const d = {title: 'awesome', answer: 'Oh hell yes'};
     res.render('test', d);
 });
@@ -1909,6 +2000,11 @@ app.get('/fakes', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'fakeplayers.html'));
 });
 
+// Route to serve the Handlebars templates
+app.get('/templates/:templateName', (req, res) => {
+  const templateName = req.params.templateName;
+  res.render(`${templateName}`);
+});
 
 app.get('*', (req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', 'default.html'));

@@ -1,0 +1,7 @@
+Session rounds:
+<table><tbody>
+<tr><th></th><th></th><th>completed?</th></tr>
+{{#each this}}
+<tr><td>{{n}}</td><td class='{{#if current}}highlight{{/if}}'>{{id}}</td><td class='unticked {{#if complete}}ticked{{/if}}'>&#x2714;</td></tr>
+{{/each}}
+</tbody></table>

@@ -77,11 +77,12 @@
         "teams": "stakeholders"
     },
     "rounds": [
-        {"id": "null"},
-        {"flag": "e1r1", "id": "allocation", "teams": "mainTeams", "type": 1},
-        {"id": "publicvoices", "teams": "publicVoices", "type": 2},
-        {"id": "collaboration_1", "teams": "mainTeams", "type": 1},
-        {"id": "publicvoices", "teams": "publicVoices", "type": 2}
+        {"n": 0, "id": "null"},
+        {"n": 1, "flag": "rAssignTeams", "action": "assignTeams", "id": "assign"},
+        {"n": 2, "flag": "e1r1", "action": "startRoundE1R1", "id": "allocation", "teams": "mainTeams", "type": 1},
+        {"n": 3, "flag": "e1r2", "action": "startRoundE1R2", "id": "publicvoices", "teams": "publicVoices", "type": 2},
+        {"n": 4, "id": "collaboration_1", "teams": "mainTeams", "type": 1},
+        {"n": 5, "id": "publicvoices", "teams": "publicVoices", "type": 2}
     ],
     "actions": ["action 1", "action 2", "action 3", "action 4", "action 5"],
     "constants": {

@@ -201,6 +201,7 @@
             let ref = {type: {1: 'st', 2: 'pv'}};
             socket.emit('getTeams', (r) => {
                 r.forEach((t) => {
+//                    console.log('i have a teams');
                     let es = t.scores.eras[`era${session.era}`];
                     let str = '';
                     let d = '';
@@ -245,6 +246,7 @@
                             tempRes = tempRes.replace('BLANK', '');
                             outo.dest = tempRes;
                             totals[outo.type] += outo.val;
+                            console.log(outo)
                             if ($(`#${outo.dest}`).find('.scoreboxval').length > 0) {
                                 $(`#${outo.dest}`).find('.scoreboxval').html(outo.val);
                             }
@@ -270,6 +272,7 @@
             })
         };
         const updateSlide = (t) => {
+//            console.log('updateSlide')
             updateCards();
             if ($('.stakeholder_card').length > 0) {
                 // update the cards

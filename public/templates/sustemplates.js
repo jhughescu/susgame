@@ -104,8 +104,10 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":14,"column":48},"end":{"line":14,"column":54}}}) : helper)))
     + "'>ping</button>\n        <button class='refreshBtn' id='refreshbtn-"
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":15,"column":50},"end":{"line":15,"column":56}}}) : helper)))
-    + "'>refresh</button>\n        <button class='removeBtn' id='removebtn-"
-    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":16,"column":48},"end":{"line":16,"column":54}}}) : helper)))
+    + "'>refresh</button>\n        <button class='leadBtn' id='leadbtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":16,"column":44},"end":{"line":16,"column":50}}}) : helper)))
+    + "'>make lead</button>\n        <button class='removeBtn' id='removebtn-"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":17,"column":48},"end":{"line":17,"column":54}}}) : helper)))
     + "'>remove</button></td>\n        </tr>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -116,7 +118,7 @@ templates['playerList'] = template({"1":function(container,depth0,helpers,partia
     };
 
   return "\n\n<table id='playerList'>\n    <tbody>\n        <tr><th>id</th><th>connected</th><th class='allenrolled'>enrolled</th><th>stakeholder</th><th>isLead</th><th>rounds</th><th></th></tr>\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"players") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":18,"column":17}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"players") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":8},"end":{"line":19,"column":17}}})) != null ? stack1 : "")
     + "    </tbody>\n</table>\n";
 },"useData":true});
 templates['playersBasic'] = template({"1":function(container,depth0,helpers,partials,data) {
@@ -150,7 +152,13 @@ templates['playlist'] = template({"1":function(container,depth0,helpers,partials
     + alias4(((helper = (helper = lookupProperty(helpers,"index") || (depth0 != null ? lookupProperty(depth0,"index") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"index","hash":{},"data":data,"loc":{"start":{"line":5,"column":92},"end":{"line":5,"column":101}}}) : helper)))
     + "'>"
     + ((stack1 = ((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":5,"column":103},"end":{"line":5,"column":114}}}) : helper))) != null ? stack1 : "")
-    + "</div></td>\n    </tr>\n";
+    + "</div></td><td><div class='rInd rInd_"
+    + alias4(((helper = (helper = lookupProperty(helpers,"hasAction") || (depth0 != null ? lookupProperty(depth0,"hasAction") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"hasAction","hash":{},"data":data,"loc":{"start":{"line":5,"column":151},"end":{"line":5,"column":164}}}) : helper)))
+    + " indr"
+    + alias4(((helper = (helper = lookupProperty(helpers,"actionID") || (depth0 != null ? lookupProperty(depth0,"actionID") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"actionID","hash":{},"data":data,"loc":{"start":{"line":5,"column":169},"end":{"line":5,"column":181}}}) : helper)))
+    + "' id='indr"
+    + alias4(((helper = (helper = lookupProperty(helpers,"actionID") || (depth0 != null ? lookupProperty(depth0,"actionID") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"actionID","hash":{},"data":data,"loc":{"start":{"line":5,"column":191},"end":{"line":5,"column":203}}}) : helper)))
+    + "'></div></td>\n    </tr>\n";
 },"2":function(container,depth0,helpers,partials,data) {
     return "highlight";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -161,9 +169,42 @@ templates['playlist'] = template({"1":function(container,depth0,helpers,partials
         return undefined
     };
 
-  return "list of slides:\n<table><tbody>\n"
+  return "list of slides\n<table><tbody>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"slideList") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":4},"end":{"line":7,"column":13}}})) != null ? stack1 : "")
     + "</tbody></table>\n";
+},"useData":true});
+templates['rounds'] = template({"1":function(container,depth0,helpers,partials,data) {
+    var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "<tr><td>"
+    + alias4(((helper = (helper = lookupProperty(helpers,"n") || (depth0 != null ? lookupProperty(depth0,"n") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"n","hash":{},"data":data,"loc":{"start":{"line":5,"column":8},"end":{"line":5,"column":13}}}) : helper)))
+    + "</td><td class='"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"current") : depth0),{"name":"if","hash":{},"fn":container.program(2, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":29},"end":{"line":5,"column":60}}})) != null ? stack1 : "")
+    + "'>"
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":5,"column":62},"end":{"line":5,"column":68}}}) : helper)))
+    + "</td><td class='unticked "
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"complete") : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":93},"end":{"line":5,"column":122}}})) != null ? stack1 : "")
+    + "'>&#x2714;</td></tr>\r\n";
+},"2":function(container,depth0,helpers,partials,data) {
+    return "highlight";
+},"4":function(container,depth0,helpers,partials,data) {
+    return "ticked";
+},"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "Session rounds:\r\n<table><tbody>\r\n<tr><th></th><th></th><th>completed?</th></tr>\r\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":6,"column":9}}})) != null ? stack1 : "")
+    + "</tbody></table>";
 },"useData":true});
 templates['scores'] = template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -290,6 +331,20 @@ templates['teamview'] = template({"1":function(container,depth0,helpers,partials
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"team") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":2,"column":4},"end":{"line":5,"column":13}}})) != null ? stack1 : "")
     + "</div>\n";
 },"useData":true});
+templates['test'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "I am the test template on the server\r\n<p>Here is the data: "
+    + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"title","hash":{},"data":data,"loc":{"start":{"line":2,"column":21},"end":{"line":2,"column":30}}}) : helper)))
+    + "</p>\r\n<p>"
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"inner"),depth0,{"name":"inner","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + "</p>";
+},"usePartial":true,"useData":true});
 templates['layouts/backup'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Default HB template</title>\n</head>\n\n<body>\n    <h3>Oh no</h3>\n    <p>Looks like you are trying use a Handlebars template which doesn't exist. This is the backup template.</p>\n</body>\n\n</html>\n";
 },"useData":true});

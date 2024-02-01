@@ -12,7 +12,31 @@ button, input {
 .inactive {
     opacity: 0.5;
 }
-
+.panel {
+    width: 200px;
+    height: 100px;
+    position: absolute;
+    background-color: black;
+}
+.pcontent {
+    position: absolute;
+    top: 30px;
+}
+.panel#sessionRounds {
+    width: 300px;
+    height: 200px;
+}
+#sessionRounds .unticked {
+    display: none;
+}
+#sessionRounds td {
+    padding-right: 10px;
+}
+#sessionRounds .ticked {
+    display: block;
+    color: green;
+    text-align: center;
+}
 #status {
     display: none;
     position: fixed;
@@ -65,11 +89,26 @@ button, input {
 .caution span {
     background-color: inherit;
 }
-iframe {
-    width: 600px;
-    height: 400px;
-}
 /* Presentation stuff */
+#slideshow {
+    position: absolute;
+    top: 20px;
+    right: 420px;
+    width: 600px;
+    height: 430px;
+    background-color: black;
+    background-size: 30px 30px;
+    background-repeat: no-repeat;
+}
+#slideshow.short {
+    height: 30px;
+}
+#slideshow iframe {
+    position: relative;
+    top: 30px;
+    width: 100%;
+    height: calc(100% - 30px);
+}
 #playlist {
     display: none;
     position: fixed;
@@ -77,7 +116,7 @@ iframe {
     right: 10px;
     width: 400px;
     height: calc(100% - 30px);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(29, 28, 28, 0.8);
     box-shadow: -4px 4px rgba(0, 0, 0, 0.44);
 }
 .slideLink {
@@ -97,5 +136,20 @@ iframe {
     background-repeat: no-repeat;
     background-size: contain;
 /*    background-position: 0px;*/
+}
+.rInd {
+    /* indicates whether a slide action is currently in progress */
+/*    position: absolute;*/
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: red;
+    display: none;
+}
+.rInd.highlight {
+    background-color: green;
+}
+.rInd_true {
+    display: block;
 }
 /* End of presentation stuff */
