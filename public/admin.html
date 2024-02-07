@@ -526,6 +526,9 @@
                 enableRoundStart(o.round + 1);
                 updateStatus(`round ${o.round} completed`);
             }
+            console.log(`roundUpdate`);
+            console.log(o);
+            showRounds();
         };
         const buttonSetupNONEED = () => {
             let b = document.getElementsByClassName('pingBtn');
@@ -881,7 +884,7 @@
         const panelToggle = (b, force) => {
             let p = b.parent();
             let a = p.find('*');
-            console.log('the toggle')
+//            console.log('the toggle')
             a = a.not('.button');
             if (a.is(':visible') || force === 'min') {
                 a.hide();
@@ -893,14 +896,32 @@
         };
         const setupPanel = (ip) => {
             let p = $(`#${ip}`);
-            let pt = p.find('.showtoggle');
-            p.draggable();
-            pt.off('click');
-            pt.on('click', function () {
-                panelToggle($(this));
-            });
-//            console.log(p);
-//            console.log(pt);
+            if (p.length > 1) {
+                alert(`warning - duplicate panel created (${ip})`);
+            } else {
+                let pt = p.find('.showtoggle');
+                let storeID = `panel_${ip}`;
+//                console.log('memory?');
+                if (localStorage.getItem(storeID)) {
+                    let sto = JSON.parse(localStorage.getItem(storeID));
+//                    console.log('yes');
+                    p.css({left: `${sto.x}px`, top: `${sto.y}px`})
+                }
+                let storeOb = {};
+                p.draggable({
+                    stop: function (ev, ui) {
+                        storeOb.x = $(this).position().left;
+                        storeOb.y = $(this).position().top;
+                        localStorage.setItem(storeID, JSON.stringify(storeOb));
+                    }
+                });
+                pt.off('click');
+                pt.on('click', function () {
+                    panelToggle($(this));
+                });
+    //            console.log(p);
+    //            console.log(pt);
+            }
         };
         const showPanel = (ip) => {
             // if the requested panel exists, show it, otherwise create it
@@ -914,14 +935,9 @@
                 p.css({top: '20px', left: '50px'});
                 setupPanel(ip);
             }
-//            console.log(`showPanel`);
-//            console.log(p);
-
             return p;
         };
         const showRounds = () => {
-//            console.log(`showRounds`);
-//            console.log(env);
             if (env) {
                 if (env.session) {
                     if (env.session.rounds) {
@@ -944,13 +960,16 @@
             }
             return storedGame;
         };
+        let storeDelay = null;
         const storeGame = (g) => {
             let sg = JSON.stringify(g);
-//            console.log(`game stored now: ${sg}`);
             localStorage.setItem('susgame', sg);
-//            console.log(`storeGame emits storedGameUpdated`);
-            socket.emit('storedGameUpdated', g);
-//            console.log(`storedGame called`);
+            clearTimeout(storeDelay);
+            // Use delay to limit emissions of storedGameUpdated - each one causes player refresh. Roll back in case of errors
+            storeDelay = setTimeout(() => {
+                socket.emit('storedGameUpdated', g);
+            }, 500);
+//            socket.emit('storedGameUpdated', g);
             listPlayers();
         };
         const getGameToStore = () => {
@@ -1468,6 +1487,7 @@
         socket.on('enrollmentUpdate', enrollmentUpdate);
         socket.on('onRequestSession', (o) => {
             onRequestSession(o);
+            console.log('fish and chips');
         });
         socket.on('onStatusUpdate', (s) => {
             onStatusUpdate(s);
@@ -1476,8 +1496,9 @@
             denialOfRegistration();
         });
         socket.on('takeover', takeover);
-        socket.on('test', () => {
+        socket.on('test', (o) => {
             console.log('testing testing');
+            console.log(o);
         })
         //
         socket.on('scoreUpdateNoooooo', updateScores);

@@ -11,11 +11,12 @@
     <script src='templates/sustemplates.js'></script>
     <script src='templates/suspartials.js'></script>
     <link rel='stylesheet' href='css/basics.css'>
+    <link rel='stylesheet' href='css/portal-app-styles-v1.css'>
     <link rel='stylesheet' href='css/player.css'>
 </head>
 
 <body>
-    <h1>Sustainability Game</h1>
+<!--    <h1>Sustainability Game</h1>-->
     <div id='warning'><span id='warning_message'>close this stuff down</span> <div class='closer'>x</div></div>
     <div class='info_box' id='info_multiplier'>
         <p>multiplier</p>
@@ -45,11 +46,15 @@
 
 
     </div>
+    <div id='links'>
+
+    </div>
     <div id='insertion'></div>
 
     <script>
         const socket = io();
         let butt = null;
+        let bbutt = null;
         let txt = null;
         let staticID = null;
         let env = null;
@@ -108,6 +113,7 @@
             let h = '';
             if (window.location.hash && isDev) {
                 if (window.location.hash.substr(0, 1) === '#') {
+//                    debugger;
                     h = window.location.hash.replace('#', '');
                     if (h.indexOf('?', 0) > -1) {
                         h = h.split('?')[0];
@@ -131,6 +137,7 @@
             let id = 'player-' + Math.round(Math.random() * 1000);
             if (window.location.hash) {
                 if (window.location.hash.substr(0, 1) === '#') {
+//                    debugger;
                     id = id.replace('-', '-' + window.location.hash.replace('#', '') + '-');
                     if (id.indexOf('?', 0) > -1) {
                         id = id.split('?')[0];
@@ -211,6 +218,7 @@
 //            console.log(`gameInit`);
             // this code is open to abuse, replace it with insertion of template HTML
             let sessionID = txt.value;
+//            console.log(`gameInit`);
             renderGameScreen();
         };
         const clearPersistence = () => {
@@ -226,7 +234,7 @@
             renderTemplate('kickedout', 'insertion');
         };
         const refreshMe = () => {
-            console.log(`I want refreshment`);
+//            console.log(`I want refreshment`);
             window.location.reload()
         };
         const setupDragger = (dr) => {
@@ -245,6 +253,10 @@
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');
             $(targ).html(renderedHtml);
+            return $(targ);
+        };
+        const clearTemplate = (targ) => {
+            $(`#${targ}`).html('');
         };
         const getTemplate = () => {
 
@@ -256,6 +268,10 @@
             let st = JSON.stringify(o);
 //            console.log(`storing ${st}`);
             localStorage.setItem(getUniqueStorageID('state'), st);
+        };
+        const getState = () => {
+            let st = localStorage.getItem(getUniqueStorageID('state'));
+            return JSON.parse(st);
         };
         const shareState = (o) => {
             // in the case of PV voters, their votes are shared over the team, so set stored state for all team members via the server
@@ -325,12 +341,40 @@
                 }
             }
         };
+        const renderHolding = () => {
+            renderTemplate('holding', 'insertion');
+        };
+        const renderLink = (id) => {
+            $('#insertion').hide();
+            $('#links').show();
+            let ct = renderTemplate(id, 'links');
+            ct.find('.home_btn').off('click');
+            ct.find('.home_btn').on('click', () => {
+                clearTemplate('links');
+                $('#insertion').show();
+                $('#links').hide();
+            });
+        };
+        const getCurrentRound = () => {
+            let cr = null;
+            let r = env.session.rounds;
+            Object.values(r).forEach((rr) => {
+                if (rr.current) {
+                    cr = rr;
+                }
+            });
+            return cr;
+        };
         const renderGameScreen = () => {
+            console.log(`renderGameScreen`);
+//            debugger;
             let o = {
                 playerID: staticID
             };
+//            console.log(`r game screen`)
             socket.emit('getPlayerPack', (o) => {
                 let steak = player.stakeholderID;
+                let template = false;
                 player = prepPlayer(o.playersDetail[getMinID()]);
                 if (o.session.assigned) {
                     if (player.stakeholderID > -1) {
@@ -340,14 +384,22 @@
                             document.title = `* ${document.title}`
                         }
                     }
+                } else {
+                    player.partialName = 'waiting';
                 }
                 player = Object.assign(env.gamedata, player);
                 player = finalisePlayer(player);
+                if (getCurrentRound() && player.teamObj) {
+                    player.currentRoundComplete = player.teamObj.rounds.indexOf(`r${getCurrentRound().n}`, 0) > -1;
+                    player.pageState = getState();
+                }
                 if (steak !== player.stakeholderID) {
                     // Only render if the stakeholder has changed -  may need to add other conditions later
+                    template = 'game';
                     renderTemplate('game', 'insertion', player);
                     updateState();
                 }
+//                console.log(`REGS steak: ${steak} stakeholderID ${player.stakeholderID} o.session.assigned: ${o.session.assigned} template: ${template} partial: ${player.partialName}`);
             });
         };
         const onNewSession = () => {
@@ -411,6 +463,7 @@
 //            console.log(`init, id: ${id}`)
         };
         let currentState = null;
+
         const refreshViewCallback = (p) => {
 //            console.log(`refreshViewCallback`);
             let id = getMinID();
@@ -428,11 +481,12 @@
                 }
             }
             if (p.sessionID) {
+//                console.log(`here is a session, enrolled ${enrolled}`)
                 if (enrolled) {
+//                    console.log(`refreshViewCallback`)
                     renderGameScreen();
                 } else {
                     if ($('#insertion').find('#login').length === 0) {
-                        console.log('render the login');
                         // only render the login if it isn't already there
                         renderTemplate('newlogin', 'insertion', {
                             value: p.isDev ? p.sessionID : ''
@@ -440,6 +494,7 @@
                     }
                 }
             } else {
+//                console.log('no sesh');
                 renderTemplate('intro', 'insertion');
             }
         };
@@ -681,7 +736,7 @@
                 let min = Math.floor(vt / div);
                 let over = vt - (min * div);
                 let a = Array.from({length: div}, () => min);
-                console.log(vt, min, over);
+//                console.log(vt, min, over);
                 while (over > 0) {
                     a[Math.floor(Math.random() * a.length)] += 1;
                     over--;
@@ -703,7 +758,7 @@
         const autoCompleteAllocation = () => {
             if (allowAutoComplete()) {
 //                console.log(`I will autoCompleteAllocation`);
-                let sel = $('#actionSelect');
+                let sel = $('#action-choice');
                 let desc = $('#actionDesc');
                 let val = $('#allocateVal');
                 if (sel.length === 0 || desc.length === 0 || val.length === 0) {
@@ -711,7 +766,7 @@
                     return;
                 }
                 if (!Boolean(sel.val()) && !Boolean(desc.val()) && !Boolean(val.val())) {
-                    let op = $('#actionSelect option');
+                    let op = $('#action-choice option');
                     let ri = Math.ceil(Math.random() * (op.length - 1));
                     let ro = op.eq(ri);
                     sel.val(ro.val());
@@ -746,8 +801,6 @@
         const viewUpdate = () => {
             clearTimeout(autoTO);
             socket.emit('getPlayerPack', (pp) => {
-                console.log(`getPlayerPack:`);
-                console.log(pp);
                 updateSession(pp.session);
                 enableScorePV(pp.session.round > 0);
                 $('.round').hide();
@@ -756,6 +809,7 @@
                     $('.round').hide();
                     $(`#${theDiv}`).show();
                     $(`.round${pp.session.round}`).show();
+                    console.log(`viewUpdate, theDiv: ${theDiv}, pp.session.round: ${pp.session.round}`)
                     updateState();
                     let s = localStorage.getItem(lid);
                     if (s) {
@@ -838,24 +892,16 @@
         };
         // MAJOR function; should be reorganised & split up:
         const renderVotes = (p) => {
-//            console.log(`renderVotes`);
-//            console.log(p);
             if (!p.hasOwnProperty(`teamObj`)) {
                 return;
             }
             let v = p.teamObj.votes;
-//            let m = p.teamObj.multiplier;
-//            let t = parseInt(v) * parseInt(m);
-//            console.log(v, m, t);
-            let rc = player.teamObj.votes === 0;
+//            let rc = player.teamObj.votes === 0;
             debugServer(`renderVotes called`);
             $('#votes').html(v);
-//            $('.multiplier').html(m);
-//            $('.totalscore').html(t);
             max = v;
             let c = 0;
             vv.each((i, el) => {
-//                console.log(i, $(el).attr('id'), $(el).prop('disabled'), $(el).is(':visible'));
                 c+= $(el).prop('disabled') && $(el).is(':visible') ? 1 : 0;
                 if (!$(el).prop('disabled')) {
                     validateVote(el);
@@ -864,30 +910,20 @@
 //            console.log(`${c} out of ${vv.length}`);
             // condition: input boxes exist, are all filled and no round score already held
             let boxes = c === vv.length && vv.length > 0;
-            let newRound = player.teamObj.rounds.toString().indexOf(env.session.round) < 0;
-            let remain = Boolean(player.teamObj.votes);
-            let isLead = player.isLead;
-            let isType = player.teamObj.type === env.gamedata.rounds[env.session.round].type;
+            let newRound = false;
+            let remain = false;
             /* isType checks to see if this player can score in this round */
+            let isType = false;
+            let isLead = false;
+            if (player.teamObj) {
+                newRound = player.teamObj.rounds.toString().indexOf(env.session.round) < 0;
+                remain = Boolean(player.teamObj.votes);
+                isType = player.teamObj.type === env.gamedata.rounds[env.session.round].type;
+                isLead = player.isLead;
+            }
+
             let ok = ((boxes && newRound) || (!remain && newRound)) && isLead && isType;
-            ///*
-//            if (env.session.round === 3) {
-//                console.log(` ===== renderVotes: ${ok} round ${env.session.round}`);
-//            }
-            /*
-            console.log(`boxes: ${boxes}`);
-            console.log(`newRound: ${newRound}`);
-            console.log(`remain: ${remain}`);
-            console.log(`isLead: ${isLead}`);
-            console.log(`isType: ${isType}`);
-            */
-            //*/
-//            console.log(player.teamObj.votes);
-//            console.log(player.teamObj.rounds.toString().indexOf(env.session.round) < 0);
-//            console.log(env.session.round)
             if (ok) {
-//                console.log('EMIT');
-//                console.log(p);
                 socket.emit('teamRoundComplete', {team: p.teamObj.id, player: p.id})
             }
             if (v <= 0) {
@@ -897,10 +933,14 @@
             }
         };
         const updatePlayer = (p) => {
-            if (JSON.stringify(player.teamObj) !== JSON.stringify(p.teamObj)) {
-//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
-                Object.assign(player.teamObj, p.teamObj);
-//                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+            console.log(player.teamObj);
+            console.log(p.teamObj);
+            if (player.teamObj) {
+                if (JSON.stringify(player.teamObj) !== JSON.stringify(p.teamObj)) {
+    //                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+                    Object.assign(player.teamObj, p.teamObj);
+    //                console.log(JSON.parse(JSON.stringify(player.teamObj)));
+                }
             }
         };
         const scoreUpdate = (o) => {
@@ -960,6 +1000,7 @@
             })
         };
         const initst = () => {
+//            console.log(`setupStakeholder`);
             $('body').addClass(player.teamObj.stub)
             $('body').addClass(player.isLead ? 'lead' : 'member')
             lid = `st-${getID().split('?')[0]}-vote`;
@@ -991,42 +1032,82 @@
             // Allocation - non-collaborative self-allocation of resources
             let ab = $('#buttonAllocate');
             let av = $('#allocateVal');
-            let as = $('#actionSelect');
+            let as = $('#action-choice');
             let ad = $('#actionDesc');
+            //
+            // post-Greg START
+            let avi = $('.resources-btn');
+            avi.off('click');
+            let tempV = 0;
+            const aviClick = (b) => {
+                let vv = b ? (b.attr('id').indexOf('plus', 0) > 0 ? 1 : -1) : 0;
+                if ((tempV + vv >= 0) && (tempV + vv <= max)) {
+                    tempV += vv;
+                }
+                $('#vote_btn_minus').prop('disabled', tempV === 0);
+                $('#vote_btn_plus').prop('disabled', tempV === max);
+                $('.tempV').html(tempV);
+            };
+            aviClick();
+            avi.on('click', function () {
+                aviClick($(this));
+            });
+            let lg = $('#link_global');
+            let lc = $('#link_connecton');
+            let links = lg.add(lc);
+//            console.log(links);
+            links.each(function (l, id) {
+                $(id).off('click');
+                $(id).on('click', function () {
+                    renderLink($(this).attr('id').split('_')[1]);
+                });
+
+            });
+
+            // post-Greg END
+            //
+            ab.off('click');
             ab.on('click', function () {
 //                console.log(`I am the click`);
-                if (Boolean(as.val()) && Boolean(av.val()) && Boolean(ad.val())) {
-                    if (av.val() < 1) {
-                        alert('value must be more than 0');
+                let v1 = as.val();
+                let v2 = av.val();
+                let v3 = ad.val();
+
+                v2 = tempV;
+                for (var n = 1; n < 4; n++) {
+                    console.log(`v${n}: ${eval('v' + n)}`);
+                }
+//                console.log(v1);
+//                console.log(v2, Boolean(v2));
+//                console.log(v3);
+                if (Boolean(v1) /*&& Boolean(v2)*/ && Boolean(v3)) {
+                    if (parseInt(v2) < 1) {
+                        alert('Resource allocation must be more than 0');
                     } else {
                         let c = getInitProps().autoenroll ? true :  confirm('are you sure?');
                         if (c) {
-//                            registerScore(player.id, player.teamObj.id, 'action_name', as.val());
-                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_name', val: as.val()});
-//                            registerScore(player.id, player.teamObj.id, 'action_desc', ad.val());
-                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_desc', val: ad.val()});
-//                            registerScore(player.id, player.teamObj.id, 'vote', parseInt(av.val()));
-                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'vote', val: parseInt(av.val()), roundComplete: true});
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_name', val: v1});
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'action_desc', val: v3});
+                            registerScore2({src: player.id, targ: player.teamObj.id, valID: 'vote', val: parseInt(v2), roundComplete: true});
                             let sto = {
-                                allocateVal: av.val(),
-                                actionDesc: ad.val(),
-                                actionSelect: as.val(),
+                                allocateVal: v2,
+                                actionDesc: v3,
+                                'action-choice': v1,
                                 buttonAllocate: ''
                             };
                             setState(sto);
                             let o = {
                                 src: player.id,
                                 t: player.teamObj.id,
-                                action_name: as.val(),
-                                action_desc: ad.val(),
-                                resource: parseInt(av.val())
+                                action_name: v1,
+                                action_desc: v3,
+                                resource: parseInt(v2)
                             };
                             ab.attr('disabled', true);
                             av.attr('disabled', true);
                             as.attr('disabled', true);
                             ad.attr('disabled', true);
-    //                        scoreUpdate(o);
-    //                        socket.emit('allocation1', o);
+                            $('.resources-btn').attr('disabled', true);
                         }
                     }
                 } else {
@@ -1072,6 +1153,7 @@
         });
         socket.on('terminateSession', kickout);
         socket.on('sessionUpdate', (s) => {
+            console.log(`onSessionUpdate`)
             onSessionUpdate(s);
         });
         socket.on('newSession', onNewSession);
@@ -1102,6 +1184,9 @@
 //            console.log('NEW')
             setState(d);
             updateState();
+        });
+        socket.on('chips', () => {
+            console.log('can i have chips?');
         });
         window.showLog = getLogs;
         window.getRemain = getRemain;

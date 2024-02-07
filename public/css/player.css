@@ -24,12 +24,47 @@
    -o-animation: flickerAnimation 1s infinite;
     animation: flickerAnimation 1s infinite;
 }
+
+/* enhancements to Greg stuff START */
+.big-button a:disabled {
+    background-color: red;
+}
+.resources-btn:disabled {
+    background-color: #39414d;
+    cursor: default;
+}
+.link_main {
+    cursor: pointer;
+}
+/* enhancements to Greg stuff END */
+
 *{
-    font-family: monospace;
+/*    font-family: monospace;*/
+}
+
+html{
+    background-color: white;
+    color: black;
+}
+body {
+    background-color: white;
 }
 
 body.small_enterprise.lead {
 /*    background-color: green;*/
+}
+
+#links {
+    position: absolute;
+    display: none;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+/*    height: 100%;*/
+/*    min-height: 100%;*/
+/*    background-color: rgba(255, 0, 0, 0.51);*/
+/*    overflow-y: scroll;*/
+/*    pointer-events: auto;*/
 }
 
 #overlay #wrapper{
@@ -90,6 +125,7 @@ textarea {
     text-align: right;
 }
 #scoredisplay {
+    display: none;
     position: absolute;
     top: 100px;
     right: 10px;

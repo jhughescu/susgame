@@ -23,6 +23,9 @@ templates['admin'] = template({"1":function(container,depth0,helpers,partials,da
     + ((stack1 = lookupProperty(helpers,"with").call(alias1,(depth0 != null ? lookupProperty(depth0,"playersBasic") : depth0),{"name":"with","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":25,"column":12},"end":{"line":25,"column":60}}})) != null ? stack1 : "")
     + "\n        </div>\n    </div>\n\n\n    <script>\n        const socket = io();\n        const PINGBTN = `pingbtn-`;\n        const RESETBTN = `resetbtn-`;\n\n        socket.on('connect', () => {\n            socket.emit('nowIAmTheMaster');\n        });\n        socket.on('onPlayerConnect', (msg) => {\n            onPlayerConnect(msg);\n        });\n        socket.on('onGetPlayers', (msg) => {\n//            console.log('I hear onGetPlayers')\n            onGetPlayers(msg);\n        });\n        socket.on('onGetPlayerIDs', (msg) => {\n//            console.log('I hear onGetPlayerIDs')\n            onGetPlayerIDs(msg);\n        });\n        socket.on('updatePlayers', (arr) => {\n//            console.log('I hear updatePlayers')\n            onGetPlayerIDs(arr);\n        });\n        socket.on('newPlayer', (players) => {\n            newPlayer(players);\n        });\n        const buttonSetup = () => {\n            let b = document.getElementsByClassName('pingBtn');\n            [...b].forEach((bu) => {\n                bu.addEventListener('click', (evt) => {\n                    let id = evt.target.id.replace(PINGBTN, '');\n                    socket.emit('playerPing', id);\n                });\n            });\n            b = document.getElementsByClassName('resetBtn');\n            [...b].forEach((bu) => {\n                bu.addEventListener('click', (evt) => {\n                    let id = evt.target.id.replace(RESETBTN, '');\n                    socket.emit('playerReset', id);\n                });\n            });\n        };\n        let ssb = document.getElementById('startSession');\n        ssb.addEventListener('click', (evt) => {\n            console.log('cow');\n            socket.emit('startNewSession', function (s) {\n                console.log('mooooooooooooooooooooo');\n            });\n        });\n        let esb = document.getElementById('endSession');\n        esb.addEventListener('click', (evt) => {\n            socket.emit('adminTerminateSession');\n        });\n        const playerDisplay = (p, i) => {\n            var e = document.getElementById('players');\n            var s = '';\n            s += `<div class='${p.active ? 'active' : 'inactive'}'>${p.id} <button class=\"pingBtn\" id=\"${PINGBTN}${p.id}\">Ping</button>`;\n            s += `<button class=\"resetBtn\" id=\"${RESETBTN}${p.id}\">Reset</button></div>`;\n            e.innerHTML += s;\n        };\n        const clearPlayers = () => {\n            document.getElementById('players').innerHTML = ``;\n        };\n        const onPlayerConnect = (msg) => {\n            document.getElementById('message').innerHTML += `<p>player ${msg} has connected</p>`;\n        };\n        const onGetPlayers = (arr) => {\n//            console.log('onGetPlayers');\n//            console.log(arr);\n            clearPlayers();\n            document.getElementById('players').innerHTML = '<b>players:</b>';\n            for (var i = 0; i < arr.length; i++) {\n                playerDisplay(arr[i], i);\n//                console.log(players);\n//                console.log(arr[i]);\n            }\n            buttonSetup();\n        };\n        const onGetPlayerIDsOld = (arr) => {\n            console.log('onGetPlayerIDs');\n            console.log(arr);\n            clearPlayers();\n            document.getElementById('players').innerHTML = '<b>players:</b>';\n            for (var i = 0; i < arr.length; i++) {\n                playerDisplay(arr[i], i);\n//                console.log(players);\n                console.log(arr[i]);\n            }\n            buttonSetup();\n        };\n        const newPlayer = (id) => {\n            socket.emit('getPlayerIDs');\n        };\n        const updateSession = () => {\n            socket.emit('updateSession');\n        };\n        window.updateSession = updateSession;\n        socket.emit('getPlayerIDs');\n//        socket.emit('getPlayers');\n\n    </script>\n</body>\n\n</html>\n";
 },"usePartial":true,"useData":true});
+templates['connecton'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"nav-header-container\">\r\n	<div class=\"back-btn-title-bar title-bar-blue\">\r\n		<a class=\"back-btn home_btn\" href=\"#\" title=\"Previous page\"><img alt=\"Previous page icon\" src=\"assets/backButton.svg\"/></a>\r\n	</div>\r\n</div>\r\n\r\n	<!-- Main Content -->\r\n<div class=\"menu-container\">\r\n	<div class=\"header-img\">\r\n		<img alt=\"Company logo\" src=\"assets/GlobalNewsConnectOnLogos-02.svg\"/>\r\n	</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"gov-bg\" alt=\"team icon\" src=\"assets/icons_GOVwhite 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Government</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Government\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"icm-bg\" alt=\"team icon\" src=\"assets/icons_ICMwhite 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Individual Change Maker</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Individual Change Maker\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n	<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"web-bg\" alt=\"team icon\" src=\"assets/icons_WEBwhite 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Well-Established Buisness</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Well-Established Buisness\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"cso-bg\" alt=\"team icon\" src=\"assets/icons_CSOwhite 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Civil Society Organisation</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Civil Society Organisation\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"se-bg\" alt=\"team icon\" src=\"assets/icons_SEwhite 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Small Enterprise</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Small Enterprise\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"pv1-bg\" alt=\"team icon\" src=\"assets/icons_PV1white 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Public Voice 1</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Public Voice 1\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"team-menu\">\r\n	<div class=\"team-link\">\r\n		<div class=\"team-link-icon\">\r\n			<img class=\"pv2-bg\" alt=\"team icon\" src=\"assets/icons_PV2white 1.svg\"/>\r\n		</div>\r\n		<div class=\"team-link-info\">\r\n			<h2>Team name</h2>\r\n			<h3>Public Voice 2</h3>\r\n		</div>\r\n		<div class=\"team-link-next\">\r\n			<a href=\"#\" title=\"Go to Public Voice 2\"><img alt=\"Next page icon\" src=\"assets/next.svg\"/></a>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>";
+},"useData":true});
 templates['dragwin'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -43,6 +46,22 @@ templates['game'] = template({"compiler":[8,">= 4.3.0"],"main":function(containe
         return undefined
     };
 
+  return "<div id='debuginfo' style='display: none;'><p id='playerID'>PlayerID: "
+    + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":1,"column":70},"end":{"line":1,"column":76}}}) : helper)))
+    + "</p></div>\r\n<div id='game'>\r\n<!--    <p id='team'>Team: <span>"
+    + alias4(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":3,"column":33},"end":{"line":3,"column":48}}}) : helper)))
+    + "</span></p>-->\r\n    <div id='activity'>\r\n    "
+    + alias4((lookupProperty(helpers,"playerPartial")||(depth0 && lookupProperty(depth0,"playerPartial"))||alias2).call(alias1,(depth0 != null ? lookupProperty(depth0,"partialName") : depth0),(depth0 != null ? lookupProperty(depth0,"ob") : depth0),{"name":"playerPartial","hash":{},"data":data,"loc":{"start":{"line":5,"column":4},"end":{"line":5,"column":36}}}))
+    + "\r\n    </div>\r\n</div>\r\n";
+},"useData":true});
+templates['gamev1'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
   return "<div id='game'>\n    <!--    <p>This is the player client, it requires a master before it can init</p>    -->\n    <p id='stakeholder'></p>\n    <p id='playerID'>PlayerID: "
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":4,"column":31},"end":{"line":4,"column":37}}}) : helper)))
     + "</p>\n    <p id='team'>Team: <span>"
@@ -51,7 +70,16 @@ templates['game'] = template({"compiler":[8,">= 4.3.0"],"main":function(containe
     + alias4((lookupProperty(helpers,"playerPartial")||(depth0 && lookupProperty(depth0,"playerPartial"))||alias2).call(alias1,(depth0 != null ? lookupProperty(depth0,"partialName") : depth0),(depth0 != null ? lookupProperty(depth0,"ob") : depth0),{"name":"playerPartial","hash":{},"data":data,"loc":{"start":{"line":10,"column":4},"end":{"line":10,"column":36}}}))
     + "\n    </div>\n</div>\n";
 },"useData":true});
+templates['global'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"nav-header-container\">\r\n	<div class=\"back-btn-title-bar title-bar-red\">\r\n		<a class=\"back-btn home_btn\" href=\"#\" title=\"Previous page\"><img alt=\"Previous page icon\" src=\"assets/backButton.svg\"/></a>\r\n		<h1>GlobalTimes</h1>\r\n	</div>\r\n	<div class=\"headline-title\">\r\n		<h2>2030</h2>\r\n		<p>HEADLINES</p>\r\n	</div>\r\n</div>\r\n		<!-- Main Content -->\r\n	\r\n<div class=\"article-container\">\r\n	<div class=\"article-img\">\r\n		<img alt=\"\" src=\"assets/Article1-img-100.jpg\"/>\r\n	</div>\r\n	<div class=\"article-headline\">\r\n		<h3>Governments threaten to deploy army as occupy retail movement escalates</h3>\r\n		<p>12 hours ago</p>\r\n	</div>\r\n</div>\r\n<div class=\"article-container\">\r\n	<div class=\"article-img\">\r\n		<img alt=\"\" src=\"assets/Article2-img-100.jpg\"/>\r\n	</div>\r\n	<div class=\"article-headline\">\r\n		<h3>Eco-protection laws cause mass evictions</h3>\r\n		<p>5 hours ago</p>\r\n	</div>\r\n</div>\r\n<div class=\"article-container\">\r\n	<div class=\"article-img\">\r\n		<img alt=\"\" src=\"assets/Article3-img-100.jpg\"/>\r\n	</div>\r\n	<div class=\"article-headline\">\r\n		<h3>Poisoned by plastic and unable to afford health care</h3>\r\n		<p>4 hours ago</p>\r\n	</div>\r\n</div>\r\n<div class=\"article-container\">\r\n	<div class=\"article-img\">\r\n		<img alt=\"\" src=\"assets/Article4-img-100.jpg\"/>\r\n	</div>\r\n	<div class=\"article-headline\">\r\n		<h3>Highest recorded referendums in a single year</h3>\r\n		<p>2 hours ago</p>\r\n	</div>\r\n</div>\r\n";
+},"useData":true});
+templates['holding'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"header\">\r\n		  <h1>Welcome to your travel portal</h1>\r\n\r\n		<div class=\"header-grad-overlay\"></div>\r\n\r\n</div>\r\n	<!-- Main Content -->\r\n\r\n<div class=\"main-content center\">\r\n		<h2>The session will begin shortly.</h2>\r\n		<p>Please wait while we connect all the players.</p>\r\n\r\n</div>";
+},"useData":true});
 templates['intro'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"header\">\r\n		  <h1>Welcome to your travel portal</h1>\r\n\r\n		<div class=\"header-grad-overlay\"></div>\r\n\r\n</div>\r\n	<!-- Main Content -->\r\n\r\n<div class=\"main-content center\">\r\n		<h2>You are here to figure things out.</h2>\r\n		<p>How can your sector adapt and thrive as part of successful decarbonisation pathways?</p>\r\n		<p>You will be accompanied by AI Caroline throughout your journey. She will make herself known shortly.</p>\r\n\r\n</div>";
+},"useData":true});
+templates['intro_v1'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "Welcome to the sustainability game. There is currently no active session, please wait here.\n";
 },"useData":true});
 templates['kickedout'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -65,12 +93,12 @@ templates['newlogin'] = template({"compiler":[8,">= 4.3.0"],"main":function(cont
         return undefined
     };
 
-  return "<div id='login'>\n    <p>If you have a session ID you can enter it here to join the session</p>\n    <input type='text' id='seshnum' placeholder='enter code...' value='"
-    + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"value") || (depth0 != null ? lookupProperty(depth0,"value") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"value","hash":{},"data":data,"loc":{"start":{"line":3,"column":71},"end":{"line":3,"column":80}}}) : helper)))
-    + "' oninput='validate'><button id='enter'>Join session</button>\n</div>\n<script>\n    validate = (inp) => {\n        inp.value = inp.value.replace(/[^0-9]/g, '');\n    };\n    requestSession = () => {\n        let o = {session: txt.val().replace(/ /gm, ''), player: staticID};\n//        console.log('request session:');\n//        console.log(o);\n        socket.emit('requestSession', o);\n    };\n    butt = $('#enter');\n    txt = $('#seshnum');\n    butt.on('click', () => {\n        requestSession();\n    });\n    txt.on('keydown', (ev) => {\n        if (ev.keyCode === '13') {\n            requestSession();\n        }\n    });\n    txt.focus();\n//    if (getInitProps().autoenroll) {\n    if (autoEnrollAllowed()) {\n        console.log('auto enroll this');\n        let d = 1000 + (Math.random() * 2000);\n        d = 100;\n//        setTimeout(requestSession, d);\n        requestSession();\n    }\n</script>\n";
+  return "<div class=\"header\">\n		  <h1>Welcome to your travel portal</h1>\n\n		<div class=\"header-grad-overlay\"></div>\n\n</div>\n	<!-- Main Content -->\n\n<div class=\"main-content center\">\n		<h2>You are here to figure things out.</h2>\n		<p>How can your sector adapt and thrive as part of successful decarbonisation pathways?</p>\n		<p>You will be accompanied by AI Caroline throughout your journey. She will make herself known shortly.</p>\n	<!-- Start Button -->\n	<div class=\"big-button\" id='big_start_button'>\n			<a>START</a>\n	</div>\n\n</div>\n<div id='login'>\n<!--    <p>If you have a session ID you can enter it here to join the session</p>-->\n    <input type='text' id='seshnum' placeholder='enter code...' value='"
+    + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"value") || (depth0 != null ? lookupProperty(depth0,"value") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"value","hash":{},"data":data,"loc":{"start":{"line":21,"column":71},"end":{"line":21,"column":80}}}) : helper)))
+    + "' oninput='validate'><button id='enter'>Join session</button>\n</div>\n<script>\n    validate = (inp) => {\n        inp.value = inp.value.replace(/[^0-9]/g, '');\n    };\n    requestSession = () => {\n        let o = {session: txt.val().replace(/ /gm, ''), player: staticID};\n//        console.log('request session:');\n//        console.log(o);\n        socket.emit('requestSession', o);\n    };\n    butt = $('#enter');\n    \n    bbutt = $('#big_start_button');\n    butt = butt.add(bbutt);\n    txt = $('#seshnum');\n    butt.on('click', () => {\n        requestSession();\n    });\n    txt.on('keydown', (ev) => {\n        if (ev.keyCode === '13') {\n            requestSession();\n        }\n    });\n    txt.focus();\n//    if (getInitProps().autoenroll) {\n    if (autoEnrollAllowed()) {\n        console.log('auto enroll this');\n        let d = 1000 + (Math.random() * 2000);\n        d = 100;\n//        setTimeout(requestSession, d);\n        requestSession();\n    }\n</script>\n";
 },"useData":true});
 templates['outtro'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "Thank you for participating, the session has now ended. Please close this browser window to exit.\n";
+    return "<div class=\"header\">\n		  <h1>Thank you for participating</h1>\n\n		<div class=\"header-grad-overlay\"></div>\n\n</div>\n	<!-- Main Content -->\n\n<div class=\"main-content center\">\n		<h2>The session has now ended.</h2>\n		<p>Please close this browser window to leave the game.</p>\n\n</div>";
 },"useData":true});
 templates['playerList'] = template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -189,7 +217,7 @@ templates['rounds'] = template({"1":function(container,depth0,helpers,partials,d
     + alias4(((helper = (helper = lookupProperty(helpers,"id") || (depth0 != null ? lookupProperty(depth0,"id") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":5,"column":62},"end":{"line":5,"column":68}}}) : helper)))
     + "</td><td class='unticked "
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"complete") : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":93},"end":{"line":5,"column":122}}})) != null ? stack1 : "")
-    + "'>&#x2714;</td></tr>\r\n";
+    + "'>&#x2714;</td></tr>\n";
 },"2":function(container,depth0,helpers,partials,data) {
     return "highlight";
 },"4":function(container,depth0,helpers,partials,data) {
@@ -202,9 +230,9 @@ templates['rounds'] = template({"1":function(container,depth0,helpers,partials,d
         return undefined
     };
 
-  return "Session rounds:\r\n<table><tbody>\r\n<tr><th></th><th></th><th>completed?</th></tr>\r\n"
+  return "Session rounds:\n<table><tbody>\n<tr><th></th><th></th><th>completed?</th></tr>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),depth0,{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":6,"column":9}}})) != null ? stack1 : "")
-    + "</tbody></table>";
+    + "</tbody></table>\n";
 },"useData":true});
 templates['scores'] = template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -339,11 +367,11 @@ templates['test'] = template({"compiler":[8,">= 4.3.0"],"main":function(containe
         return undefined
     };
 
-  return "I am the test template on the server\r\n<p>Here is the data: "
+  return "I am the test template on the server\n<p>Here is the data: "
     + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"title","hash":{},"data":data,"loc":{"start":{"line":2,"column":21},"end":{"line":2,"column":30}}}) : helper)))
-    + "</p>\r\n<p>"
+    + "</p>\n<p>"
     + ((stack1 = container.invokePartial(lookupProperty(partials,"inner"),depth0,{"name":"inner","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "</p>";
+    + "</p>\n";
 },"usePartial":true,"useData":true});
 templates['layouts/backup'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Default HB template</title>\n</head>\n\n<body>\n    <h3>Oh no</h3>\n    <p>Looks like you are trying use a Handlebars template which doesn't exist. This is the backup template.</p>\n</body>\n\n</html>\n";
@@ -409,7 +437,7 @@ templates['partials/publicvoices'] = template({"1":function(container,depth0,hel
         return undefined
     };
 
-  return "<p>OK, I am a Public Voices thing</p>\n<div class='round round2' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
+  return "<p>You are a representative of the Public Voices group</p>\n<div class='round round2' id='publicvoicesNO'>\n    <div>Votes remaining: <span id='votes' class='highlight'>"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"votes") : stack1), depth0))
     + "</span></div>\n    <table>\n        <tbody>\n            <tr><td><b>id</b></td><td><b>title</b></td><td></td></tr>\n            "
     + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"mainTeams") : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":7,"column":12},"end":{"line":7,"column":273}}})) != null ? stack1 : "")
@@ -419,6 +447,65 @@ templates['partials/stactions'] = template({"compiler":[8,">= 4.3.0"],"main":fun
     return "";
 },"useData":true});
 templates['partials/stakeholder'] = template({"1":function(container,depth0,helpers,partials,data) {
+    return "			<img alt='Leader badge' class='icon-badge' src='assets/Leader.svg'/>\r\n";
+},"3":function(container,depth0,helpers,partials,data) {
+    return "		<p>You have been assigned the role of team leader for this round. This means that only you will be able to submit your team’s move decisions.</p>\r\n";
+},"5":function(container,depth0,helpers,partials,data) {
+    return "        <p>You are team member for this round. Only your team leader will be able to submit your team’s move decisions.</p>\r\n";
+},"7":function(container,depth0,helpers,partials,data) {
+    var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "<!-- allocation section -->\r\n<div class='round' id='allocation'>\r\n   \r\n    <!-- OLD VERSION -->\r\n<!--    <div id='oldstuff'>-->\r\n    <!--\r\n    <div id='oldstuff' style='display: none;'>\r\n    <select id='actionSelect'>\r\n    <option value=''>Select an option...</option>\r\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(alias1,(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(8, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":47,"column":4},"end":{"line":49,"column":13}}})) != null ? stack1 : "")
+    + "    </select>\r\n    <br>\r\n    <div id='input-container'>\r\n        <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    </div>\r\n    <br>\r\n    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateAllocation(this)' type='number'>\r\n    <button class='buttonAllocate' id='buttonAllocate'>Submit</button>\r\n    </div>\r\n    -->\r\n    \r\n    <!-- NEW VERSION -->\r\n    <label for='action-choice'>Action choice</label>\r\n    <select id='action-choice' name='action-choice'>\r\n    <option value=''>Select an option...</option>\r\n"
+    + ((stack1 = lookupProperty(helpers,"each").call(alias1,(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(10, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":65,"column":4},"end":{"line":67,"column":13}}})) != null ? stack1 : "")
+    + "    </select>\r\n    \r\n    <label for='move-description'>Move description</label>\r\n    <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    <label for='move-description'>Resources</label>\r\n    <div class='resources-container'>\r\n        <div class='resources-score'>\r\n            <p><span class='tempV'>0</span>/<span>10</span></p>\r\n        </div>\r\n        <div class='resources-buttons'>\r\n            <button class='resources-btn' id='vote_btn_minus'><i class='fa fa-minus'></i></button>\r\n            <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>\r\n        </div>\r\n    </div>\r\n    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>\r\n<!--    <button type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>SUBMIT</button>-->\r\n    \r\n</div>\r\n";
+},"8":function(container,depth0,helpers,partials,data) {
+    var alias1=container.lambda, alias2=container.escapeExpression;
+
+  return "        <option value='"
+    + alias2(alias1(depth0, depth0))
+    + "'>"
+    + alias2(alias1(depth0, depth0))
+    + "</option>\r\n";
+},"10":function(container,depth0,helpers,partials,data) {
+    var alias1=container.lambda, alias2=container.escapeExpression;
+
+  return "    <option value='"
+    + alias2(alias1(depth0, depth0))
+    + "'>"
+    + alias2(alias1(depth0, depth0))
+    + "</option>\r\n";
+},"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.lambda, alias3=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return "<div class='represent-header'>\r\n	<div class='represent-info center'>\r\n		<h1>You Represent</h1>\r\n		<div class='icon-badge-box'>\r\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":3},"end":{"line":7,"column":19}}})) != null ? stack1 : "")
+    + "            <img class='represent-icon "
+    + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"abbr") : stack1), depth0))
+    + "-bg' alt='Team icon' src='assets/icons_"
+    + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"abbrCap") : stack1), depth0))
+    + "white 1.svg'/>\r\n		</div>\r\n		<h2>"
+    + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"lead") : stack1), depth0))
+    + "</h2>\r\n		<p>("
+    + alias3(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":11,"column":6},"end":{"line":11,"column":21}}}) : helper)))
+    + ")</p>\r\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data,"loc":{"start":{"line":12,"column":2},"end":{"line":16,"column":15}}})) != null ? stack1 : "")
+    + "	</div>\r\n	\r\n</div>\r\n	<!-- Main Content -->\r\n<div class='main-content' style='display: block;'>\r\n	<div class='grid-container'>\r\n		<div class='grid-item-span-all link_main' id='link_resources'>\r\n			<h3>Resources</h3>\r\n		</div>\r\n		<div class='grid-item-2 link_main' id='link_global'>\r\n            <img alt='Global Times Headlines logo' src='assets/GlobalNewsConnectOnLogos-01.svg'/>\r\n		</div>\r\n		<div class='grid-item-3 link_main' id='link_connecton'>\r\n		    <img alt='Connect On logo' src='assets/GlobalNewsConnectOnLogos-02.svg'/>\r\n		</div>\r\n		<div class='grid-item-span-all link_main' id='link_yourmove'>\r\n			<h3>Your move</h3>\r\n		</div>\r\n	</div>\r\n</div>\r\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":37,"column":0},"end":{"line":86,"column":7}}})) != null ? stack1 : "")
+    + "\r\n<script>\r\n    setupStakeholder();\r\n</script>";
+},"useData":true});
+templates['partials/stakeholderV1'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "Lead";
 },"3":function(container,depth0,helpers,partials,data) {
     return "Member";
@@ -490,6 +577,9 @@ templates['partials/stakeholder'] = template({"1":function(container,depth0,help
 },"useData":true});
 templates['partials/unassigned'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "Oh no, I am NOT ASSIGNED\n";
+},"useData":true});
+templates['partials/waiting'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"header\">\r\n		  <h1>Welcome to your travel portal</h1>\r\n\r\n		<div class=\"header-grad-overlay\"></div>\r\n\r\n</div>\r\n	<!-- Main Content -->\r\n\r\n<div class=\"main-content center\">\r\n		<h2>Please wait, teams will be assigned shortly.</h2>\r\n\r\n</div>";
 },"useData":true});
 templates['slides/slide_010_intro'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -596,8 +686,8 @@ templates['slides/video'] = template({"compiler":[8,">= 4.3.0"],"main":function(
 
   return "<div class='wrapper video'>\n    <div id='vidDiv'>\n        <iframe id='vidFrame' src=\""
     + alias4(((helper = (helper = lookupProperty(helpers,"src") || (depth0 != null ? lookupProperty(depth0,"src") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"src","hash":{},"data":data,"loc":{"start":{"line":3,"column":35},"end":{"line":3,"column":42}}}) : helper)))
-    + "\" style=\"border: 0px;\" allowfullscreen allow=\"autoplay\" title='"
-    + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":3,"column":105},"end":{"line":3,"column":114}}}) : helper)))
+    + "\" style=\"border: 0px; overflow: hidden;\" allowfullscreen allow=\"autoplay\" title='"
+    + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":3,"column":123},"end":{"line":3,"column":132}}}) : helper)))
     + "' aria-label=\"Panopto Embedded Video Player\"></iframe>\n    </div>\n</div>\n\n\n\n\n";
 },"useData":true});
 templates['slides/slide_partials/frame1'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {

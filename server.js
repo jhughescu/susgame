@@ -286,6 +286,7 @@ const processGameData = (d) => {
     d.mainTeams = [];
     for (var i in t) {
         t[i].stub = t[i].title.toLowerCase().replace(/ /gm, '_');
+        t[i].abbrCap = t[i].abbr.toUpperCase();
         for (var j in f) {
             if (!t[i].hasOwnProperty(j)) {
                 t[i][j] = f[j];
@@ -493,7 +494,7 @@ const requestSession = (o) => {
 const sessionUpdate = () => {
     // emit an event in the case of any update to the session
     io.emit('sessionUpdate', session);
-    console.log('emit sessionUpdate');
+//    console.log('emit sessionUpdate');
 //    console.log('session');
 //    console.log('session');
 //    console.log(session);
@@ -514,7 +515,10 @@ const allPlayersEnrolled = () => {
     io.emit('enrollmentUpdate', {allIn: allIn, count: Object.keys(playersDetail).length});
     return allIn;
 };
+let sRequests = 0;
 const onRequestSession = (o) => {
+//    console.log(`onRequestSession: ${sRequests++}`)
+//    console.log(o)
     let p = playersDetail[o.player.replace(playerPrefix, '')];
     if (p) {
         p.enrolled = o.success;
@@ -522,15 +526,17 @@ const onRequestSession = (o) => {
     if (o.success) {
         updatePlayersBasic();
 //        console.log(`success, what sbout the session?`);
-//        console.log(session);
         if (session.assigned) {
 //            console.log('session is already assigned, this one goes into the public voices group');
-//            console.log(o);
             latecomer(o);
         }
     }
     o.allIn = allPlayersEnrolled();
-    io.emit('onRequestSession', o);
+//    io.emit('onRequestSession', o);
+    emitToAdmin('onRequestSession', o);
+    if (p) {
+        emitToPlayer(p.id, 'onRequestSession', o);
+    }
 };
 const terminateSession = () => {
     sessionArchive.push({playersDetail: playersDetail});
@@ -788,7 +794,7 @@ const roundIsComplete = () => {
             }
         }
     });
-//    console.log(`roundIsComplete (r${r})? ${ric}`);
+    console.log(`roundIsComplete (r${r})? ${ric}`);
     return ric;
 //    console.log(t.length, c.length);
 //    return t.length === c.length;
@@ -904,6 +910,13 @@ const applyScorePacket = (sp) => {
                     te.teamObj.votes -= Math.abs(parseInt(sp.val));
                 }
             });
+//            gamedata.teams = Object.assign(gamedata.teams, t);
+//            updateLogFile('theteams', t, 'teams in the server');
+//            console.log(typeof(t), t.hasOwnProperty('length'));
+            t.forEach((tt) => {
+//                console.log(tt.teamObj.title);
+                gamedata.teams[`t${tt.teamObj.id}`] = Object.assign(gamedata.teams[`t${tt.teamObj.id}`], tt.teamObj);
+            });
         }
         // update the team members for targ
         Object.values(gamedata.teams)[sp.targ].team.forEach((p, i) => {
@@ -920,10 +933,14 @@ const applyScorePacket = (sp) => {
             complete: roundIsComplete(),
             scorePacket: sp
         });
+        if (roundIsComplete()) {
+            completeCurrentRound();
+        }
         sessionUpdate();
         statusUpdate(sp);
         onPlayersUpdate();
         updateLogFile('playersDetail', playersDetail, `applyScorePacket`);
+//        updateLogFile('justthegamedata', gamedata, `testing testing`);
     }
 };
 //
@@ -1064,6 +1081,7 @@ const sortPlayersDetail = () => {
 };
 const pingPlayer = (id) => {
     let pl = playersDetail[id];
+//    console.log(`pingPlayer, id: ${id}`);
     if (pl) {
         if (playersMap.has(pl.socketID)) {
             playersMap.get(pl.socketID).emit('ping');
@@ -1072,6 +1090,30 @@ const pingPlayer = (id) => {
         }
     } else {
 //        console.log(`no player with id ${id} in the playersDetail object`);
+    }
+};
+const emitToPlayer = (id, str, o) => {
+//    console.log(`emitToPlayer, id: ${id}, str ${str}`);
+    let pl = playersDetail[id];
+    let oo = {};
+    if (o) {
+        oo = Object.assign({}, o);
+    }
+    if (pl) {
+        if (playersMap.has(pl.socketID)) {
+            playersMap.get(pl.socketID).emit(str, oo);
+        }
+    }
+};
+const emitToAdmin = (str, o) => {
+    let a = getAdmin();
+    let oo = {};
+    if (o) {
+        oo = Object.assign({}, o);
+    }
+    if (a) {
+//        a.emit('test', {str: `testing testing`});
+        a.emit(str, oo);
     }
 };
 const refreshPlayer = (id) => {
@@ -1242,16 +1284,25 @@ const resetAdmin = (pw, id) => {
             if (cs[i].hasOwnProperty(`customData`)) {
                 if (cs[i].customData.hasOwnProperty(`activeAdmin`)) {
                     cs[i].customData.activeAdmin = false;
-//                    console.log(cs[i].customData);
-//                    console.log(cs[i].id === id);
                     cs[i].emit('test');
-//                    console.log('a denial a denial');
                     cs[i].emit(cs[i].id === id ? 'takeover' : 'denialOfRegistration');
 
                 }
             }
         }
     }
+};
+const getAdmin = () => {
+    let a = null;
+    let cs = connectedSockets;
+    for (var i in cs) {
+        if (cs[i].hasOwnProperty(`customData`)) {
+            if (cs[i].customData.hasOwnProperty(`activeAdmin`)) {
+                a = cs[i];
+            }
+        }
+    }
+    return a;
 };
 const processStoredGame = (d) => {
     storedData = d;
@@ -1285,6 +1336,7 @@ const processStoredGame = (d) => {
 //        console.log('No playerDetail obejcts updated');
     }
     playersBasic = Object.assign({}, d.p);
+//    consoleLog(`EMIT ONSTOREDGAMEFOUND`);
     io.emit('onStoredGameFound');
 //    writeLogFile('playersDetailUpdated', playersDetail, 'this is the playersDetail object after being updated with data retrieved from localStorage')
 };

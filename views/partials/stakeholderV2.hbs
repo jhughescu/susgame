@@ -38,16 +38,27 @@
 <!-- allocation section -->
 <div class='round' id='allocation'>
 
-    {{#if currentRoundComplete}}
-    <div class="your-move-2">
-		<h2>Action choice</h2>
-		<p>{{pageState.action-choice}}</p>
-		<h2>Move description</h2>
-		<p>{{pageState.actionDesc}}</p>
-		<h2>Resources</h2>
-		<p>{{pageState.allocateVal}}</p>
-	</div>
-    {{else}}
+    <!-- OLD VERSION -->
+<!--    <div id='oldstuff'>-->
+    <!--
+    <div id='oldstuff' style='display: none;'>
+    <select id='actionSelect'>
+    <option value=''>Select an option...</option>
+    {{#each actions}}
+        <option value='{{this}}'>{{this}}</option>
+    {{/each}}
+    </select>
+    <br>
+    <div id='input-container'>
+        <textarea id='actionDesc' placeholder='Add description here...'></textarea>
+    </div>
+    <br>
+    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateAllocation(this)' type='number'>
+    <button class='buttonAllocate' id='buttonAllocate'>Submit</button>
+    </div>
+    -->
+
+    <!-- NEW VERSION -->
     <label for='action-choice'>Action choice</label>
     <select id='action-choice' name='action-choice'>
     <option value=''>Select an option...</option>
@@ -69,7 +80,8 @@
         </div>
     </div>
     <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>
-    {{/if}}
+<!--    <button type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>SUBMIT</button>-->
+
 </div>
 {{/if}}
 

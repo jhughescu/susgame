@@ -3,41 +3,52 @@
         "t0": {
             "id": 0,
             "title": "Government",
+            "lead": "Teresa Nay",
             "displayColour": "#0099C4",
             "displayColour": "#0099C4",
+            "abbr": "gov",
             "actions": ["Be radical", "Be conservative", "Follow others", "Disengage", "Uprise"]
         },
         "t1": {
             "id": 1,
             "title": "Individual Change Maker",
+            "lead": "Alex Gogetum OBE",
             "displayColour": "#633e88",
             "displayColour": "#95C11F",
+            "abbr": "icm",
             "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise"]
         },
         "t2": {
             "id": 2,
             "title": "Well-established Business",
+            "lead": "Alan Sugar",
             "displayColour": "#95C11F",
             "displayColour": "#633E8C",
+            "abbr": "web",
             "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Throw a tantrum", "Yell at everyone"]
         },
         "t3": {
             "id": 3,
             "title": "Civil Society Organisation",
+            "lead": "Greta Thunberg",
             "displayColour": "#F6C310",
             "displayColour": "#D1356F",
+            "abbr": "cso",
             "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Yell at someone", "Throw a tantrum"]
         },
         "t4": {
             "id": 4,
             "title": "Small Enterprise",
+            "lead": "Elon Musk",
             "displayColour": "#D1356F",
             "displayColour": "#F6C310",
+            "abbr": "se",
             "actions": ["Be radical", "Be conservative", "Follow others", "Pick fights", "Uprise", "Ignore everyone"]
         },
         "t5": {
             "id": 5,
             "title": "Public Voices 1",
+            "abbr": "pv1",
             "active": -1,
             "likes": true,
             "weight": 3,
@@ -48,6 +59,7 @@
         "t6": {
             "id": 6,
             "title": "Public Voices 2",
+            "abbr": "pv1",
             "active": -1,
             "likes": true,
             "weight": 3,

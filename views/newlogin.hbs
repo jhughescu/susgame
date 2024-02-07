@@ -1,5 +1,23 @@
+<div class="header">
+		  <h1>Welcome to your travel portal</h1>
+
+		<div class="header-grad-overlay"></div>
+
+</div>
+	<!-- Main Content -->
+
+<div class="main-content center">
+		<h2>You are here to figure things out.</h2>
+		<p>How can your sector adapt and thrive as part of successful decarbonisation pathways?</p>
+		<p>You will be accompanied by AI Caroline throughout your journey. She will make herself known shortly.</p>
+	<!-- Start Button -->
+	<div class="big-button" id='big_start_button'>
+			<a>START</a>
+	</div>
+
+</div>
 <div id='login'>
-    <p>If you have a session ID you can enter it here to join the session</p>
+<!--    <p>If you have a session ID you can enter it here to join the session</p>-->
     <input type='text' id='seshnum' placeholder='enter code...' value='{{value}}' oninput='validate'><button id='enter'>Join session</button>
 </div>
 <script>
@@ -13,6 +31,9 @@
         socket.emit('requestSession', o);
     };
     butt = $('#enter');
+
+    bbutt = $('#big_start_button');
+    butt = butt.add(bbutt);
     txt = $('#seshnum');
     butt.on('click', () => {
         requestSession();
