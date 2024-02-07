@@ -115,6 +115,7 @@ textarea {
     text-align: center;
 }
 #scoresheet {
+    display: none;
     position: fixed;
     top: 10px;
     right: 10px;
