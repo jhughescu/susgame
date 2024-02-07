@@ -260,7 +260,11 @@ const getScoreString = (p) => {
     let ttarg = Object.values(gamedata.teams)[p.targ];
     let tsrc = getTeamFromPlayer(p.src);
 //    console.log(`allocation? ${ttarg.id === tsrc.id}`);
-    return `${p.valID} set to ${p.val} for ${ttarg.title} ${ttarg.id === tsrc.id ? '(allocation)' : ''}`;
+    let ss = '';
+    if (tsrc) {
+        ss = `${p.valID} set to ${p.val} for ${ttarg.title} ${ttarg.id === tsrc.id ? '(allocation)' : ''}`;
+    }
+    return ss;
 };
 const statusUpdate = (s) => {
 //    console.log(`statusUpdate, ${typeof(m)}`);
@@ -393,16 +397,15 @@ const getTeamFromPlayer = (p) => {
 
     } else if (typeof(p) === 'string') {
         Object.values(gamedata.teams).forEach((tm) => {
-            let obj = tm.team.reduce(function(acc, cur, i) {
-              acc[cur] = i;
-              return acc;
-            }, {});
-            if (obj.hasOwnProperty(p)) {
-//                console.log(`team for ${p} found:`);
-//                console.log(tm);
-                t = tm;
+            if (tm.hasOwnProperty('team')) {
+                let obj = tm.team.reduce(function(acc, cur, i) {
+                  acc[cur] = i;
+                  return acc;
+                }, {});
+                if (obj.hasOwnProperty(p)) {
+                    t = tm;
+                }
             }
-
         });
     } else if (typeof(p) === 'object') {
 
@@ -494,7 +497,8 @@ const requestSession = (o) => {
 const sessionUpdate = () => {
     // emit an event in the case of any update to the session
     io.emit('sessionUpdate', session);
-//    console.log('emit sessionUpdate');
+    io.emit('testPres');
+    console.log('emit sessionUpdate');
 //    console.log('session');
 //    console.log('session');
 //    console.log(session);

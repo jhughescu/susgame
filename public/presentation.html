@@ -172,6 +172,7 @@
             }
         };
         const updateCard1 = (c, p, v) => {
+            console.log(`updateCard1`)
             let card = $(`#stakeholder_card_${c}`);
             let prop = card.find(`.${p}`);
             prop.html(v);
@@ -182,8 +183,8 @@
             }
         };
         const onSessionUpdate = (s) => {
-//            console.log('session updated:');
-//            console.log(s);
+            console.log('session updated:');
+            console.log(s);
             if (s) {
                 session = s;
                 updateSlide();
@@ -246,7 +247,7 @@
                             tempRes = tempRes.replace('BLANK', '');
                             outo.dest = tempRes;
                             totals[outo.type] += outo.val;
-//                            console.log(outo)
+                            console.log(outo)
                             if ($(`#${outo.dest}`).find('.scoreboxval').length > 0) {
                                 $(`#${outo.dest}`).find('.scoreboxval').html(outo.val);
                             }
@@ -371,10 +372,17 @@
             updateCard1(o.t, 'resource', o.resource);
         });
         socket.on('sessionUpdate', (s) => {
+            console.log('it must it must')
             onSessionUpdate(s);
 //            updateSlide();
 
-        })
+        });
+        socket.on('testPres', (s) => {
+            console.log('just the test')
+//            onSessionUpdate(s);
+//            updateSlide();
+
+        });
 
     </script>
 </body>
