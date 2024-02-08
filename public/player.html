@@ -365,6 +365,17 @@
             });
             return cr;
         };
+        const scrollTo = (d) => {
+            // condition: only PV players or team leads should use this
+            let canScroll = player.type === 2 || player.isLead;
+//            console.log(`can I scroll? ${canScroll}`);
+            if (canScroll) {
+                let t = d === undefined ? $(document).height() : d.position().top;
+                $('html, body').animate({
+                    scrollTop: t
+                }, 1000);
+            }
+        };
         const renderGameScreen = () => {
             console.log(`renderGameScreen`);
 //            debugger;
@@ -397,6 +408,7 @@
                     // Only render if the stakeholder has changed -  may need to add other conditions later
                     template = 'game';
                     renderTemplate('game', 'insertion', player);
+
                     updateState();
                 }
 //                console.log(`REGS steak: ${steak} stakeholderID ${player.stakeholderID} o.session.assigned: ${o.session.assigned} template: ${template} partial: ${player.partialName}`);
@@ -805,10 +817,12 @@
                 enableScorePV(pp.session.round > 0);
                 $('.round').hide();
                 if (pp.session.round > 0) {
-                    let theDiv = env.gamedata.rounds[pp.session.round].id.split('_')[0];
+//                    let theDiv = env.gamedata.rounds[pp.session.round].id.split('_')[0];
+                    let theDiv = $(`.round${pp.session.round}`);
                     $('.round').hide();
-                    $(`#${theDiv}`).show();
-                    $(`.round${pp.session.round}`).show();
+//                    $(`#${theDiv}`).show();
+                    theDiv.show();
+                    scrollTo(theDiv);
                     console.log(`viewUpdate, theDiv: ${theDiv}, pp.session.round: ${pp.session.round}`)
                     updateState();
                     let s = localStorage.getItem(lid);
@@ -1153,7 +1167,7 @@
         });
         socket.on('terminateSession', kickout);
         socket.on('sessionUpdate', (s) => {
-            console.log(`onSessionUpdate`)
+//            console.log(`onSessionUpdate`)
             onSessionUpdate(s);
         });
         socket.on('newSession', onNewSession);

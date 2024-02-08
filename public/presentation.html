@@ -185,11 +185,13 @@
         const onSessionUpdate = (s) => {
             console.log('session updated:');
             console.log(s);
+            let roundToRender = 2;
             if (s) {
                 session = s;
                 updateSlide();
                 if (s.scores) {
-                    let r = s.scores.round_1;
+                    let r = s.scores[`round_${roundToRender}`];
+                    console.log(r);
                     if (r) {
                         r.forEach((v) => {
                             updateCard1(v.targ, v.valID, v.val);
@@ -247,7 +249,7 @@
                             tempRes = tempRes.replace('BLANK', '');
                             outo.dest = tempRes;
                             totals[outo.type] += outo.val;
-                            console.log(outo)
+//                            console.log(outo);
                             if ($(`#${outo.dest}`).find('.scoreboxval').length > 0) {
                                 $(`#${outo.dest}`).find('.scoreboxval').html(outo.val);
                             }

@@ -84,8 +84,8 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
         return undefined
     };
 
-  return "<!-- allocation section -->\r\n<div class='round' id='allocation'>\r\n   \r\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"currentRoundComplete") : depth0),{"name":"if","hash":{},"fn":container.program(8, data, 0),"inverse":container.program(10, data, 0),"data":data,"loc":{"start":{"line":41,"column":4},"end":{"line":72,"column":11}}})) != null ? stack1 : "")
+  return "<!-- allocation section -->\r\n<div class='round round2' id='allocation'>\r\n\r\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"currentRoundComplete") : depth0),{"name":"if","hash":{},"fn":container.program(8, data, 0),"inverse":container.program(10, data, 0),"data":data,"loc":{"start":{"line":42,"column":4},"end":{"line":73,"column":11}}})) != null ? stack1 : "")
     + "</div>\r\n";
 },"8":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -111,8 +111,8 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
     };
 
   return "    <label for='action-choice'>Action choice</label>\r\n    <select id='action-choice' name='action-choice'>\r\n    <option value=''>Select an option...</option>\r\n"
-    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":54,"column":4},"end":{"line":56,"column":13}}})) != null ? stack1 : "")
-    + "    </select>\r\n    \r\n    <label for='move-description'>Move description</label>\r\n    <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    <label for='move-description'>Resources</label>\r\n    <div class='resources-container'>\r\n        <div class='resources-score'>\r\n            <p><span class='tempV'>0</span>/<span>10</span></p>\r\n        </div>\r\n        <div class='resources-buttons'>\r\n            <button class='resources-btn' id='vote_btn_minus'><i class='fa fa-minus'></i></button>\r\n            <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>\r\n        </div>\r\n    </div>\r\n    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>\r\n";
+    + ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(11, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":55,"column":4},"end":{"line":57,"column":13}}})) != null ? stack1 : "")
+    + "    </select>\r\n\r\n    <label for='move-description'>Move description</label>\r\n    <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    <label for='move-description'>Resources</label>\r\n    <div class='resources-container'>\r\n        <div class='resources-score'>\r\n            <p><span class='tempV'>0</span>/<span>10</span></p>\r\n        </div>\r\n        <div class='resources-buttons'>\r\n            <button class='resources-btn' id='vote_btn_minus'><i class='fa fa-minus'></i></button>\r\n            <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>\r\n        </div>\r\n    </div>\r\n    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>\r\n";
 },"11":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
@@ -141,9 +141,9 @@ Handlebars.partials['stakeholder'] = template({"1":function(container,depth0,hel
     + alias3(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":11,"column":6},"end":{"line":11,"column":21}}}) : helper)))
     + ")</p>\r\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data,"loc":{"start":{"line":12,"column":2},"end":{"line":16,"column":15}}})) != null ? stack1 : "")
-    + "	</div>\r\n	\r\n</div>\r\n	<!-- Main Content -->\r\n<div class='main-content' style='display: block;'>\r\n	<div class='grid-container'>\r\n		<div class='grid-item-span-all link_main' id='link_resources'>\r\n			<h3>Resources</h3>\r\n		</div>\r\n		<div class='grid-item-2 link_main' id='link_global'>\r\n            <img alt='Global Times Headlines logo' src='assets/GlobalNewsConnectOnLogos-01.svg'/>\r\n		</div>\r\n		<div class='grid-item-3 link_main' id='link_connecton'>\r\n		    <img alt='Connect On logo' src='assets/GlobalNewsConnectOnLogos-02.svg'/>\r\n		</div>\r\n		<div class='grid-item-span-all link_main' id='link_yourmove'>\r\n			<h3>Your move</h3>\r\n		</div>\r\n	</div>\r\n</div>\r\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":37,"column":0},"end":{"line":74,"column":7}}})) != null ? stack1 : "")
-    + "\r\n<script>\r\n    setupStakeholder();\r\n</script>";
+    + "	</div>\r\n\r\n</div>\r\n	<!-- Main Content -->\r\n<div class='main-content' style='display: block;'>\r\n	<div class='grid-container'>\r\n		<div class='grid-item-span-all link_main' id='link_resources'>\r\n			<h3>Resources</h3>\r\n		</div>\r\n		<div class='grid-item-2 link_main inactive' id='link_global'>\r\n            <img alt='Global Times Headlines logo' src='assets/GlobalNewsConnectOnLogos-01.svg'/>\r\n		</div>\r\n		<div class='grid-item-3 link_main' id='link_connecton'>\r\n		    <img alt='Connect On logo' src='assets/GlobalNewsConnectOnLogos-02.svg'/>\r\n		</div>\r\n<!--		<div class='grid-item-span-all link_main' id='link_yourmove'>-->\r\n		<div class='grid-item-span-all title'>\r\n			<h3>Your move</h3>\r\n		</div>\r\n	</div>\r\n</div>\r\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":38,"column":0},"end":{"line":75,"column":7}}})) != null ? stack1 : "")
+    + "\r\n<script>\r\n    setupStakeholder();\r\n</script>\r\n";
 },"useData":true});
 Handlebars.partials['stakeholderV1'] = template({"1":function(container,depth0,helpers,partials,data) {
     return "Lead";
@@ -216,11 +216,11 @@ Handlebars.partials['stakeholderV1'] = template({"1":function(container,depth0,h
     + "\n<script>\n    setupStakeholder();\n</script>\n";
 },"useData":true});
 Handlebars.partials['stakeholderV2'] = template({"1":function(container,depth0,helpers,partials,data) {
-    return "			<img alt='Leader badge' class='icon-badge' src='assets/Leader.svg'/>\r\n";
+    return "			<img alt='Leader badge' class='icon-badge' src='assets/Leader.svg'/>\n";
 },"3":function(container,depth0,helpers,partials,data) {
-    return "		<p>You have been assigned the role of team leader for this round. This means that only you will be able to submit your team’s move decisions.</p>\r\n";
+    return "		<p>You have been assigned the role of team leader for this round. This means that only you will be able to submit your team’s move decisions.</p>\n";
 },"5":function(container,depth0,helpers,partials,data) {
-    return "        <p>You are team member for this round. Only your team leader will be able to submit your team’s move decisions.</p>\r\n";
+    return "        <p>You are team member for this round. Only your team leader will be able to submit your team’s move decisions.</p>\n";
 },"7":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -229,11 +229,11 @@ Handlebars.partials['stakeholderV2'] = template({"1":function(container,depth0,h
         return undefined
     };
 
-  return "<!-- allocation section -->\r\n<div class='round' id='allocation'>\r\n   \r\n    <!-- OLD VERSION -->\r\n<!--    <div id='oldstuff'>-->\r\n    <!--\r\n    <div id='oldstuff' style='display: none;'>\r\n    <select id='actionSelect'>\r\n    <option value=''>Select an option...</option>\r\n"
+  return "<!-- allocation section -->\n<div class='round' id='allocation'>\n\n    <!-- OLD VERSION -->\n<!--    <div id='oldstuff'>-->\n    <!--\n    <div id='oldstuff' style='display: none;'>\n    <select id='actionSelect'>\n    <option value=''>Select an option...</option>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(alias1,(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(8, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":47,"column":4},"end":{"line":49,"column":13}}})) != null ? stack1 : "")
-    + "    </select>\r\n    <br>\r\n    <div id='input-container'>\r\n        <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    </div>\r\n    <br>\r\n    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateAllocation(this)' type='number'>\r\n    <button class='buttonAllocate' id='buttonAllocate'>Submit</button>\r\n    </div>\r\n    -->\r\n    \r\n    <!-- NEW VERSION -->\r\n    <label for='action-choice'>Action choice</label>\r\n    <select id='action-choice' name='action-choice'>\r\n    <option value=''>Select an option...</option>\r\n"
+    + "    </select>\n    <br>\n    <div id='input-container'>\n        <textarea id='actionDesc' placeholder='Add description here...'></textarea>\n    </div>\n    <br>\n    Assign a value: <input class='allocateVal' id='allocateVal' style='width: 40px;' oninput='validateAllocation(this)' type='number'>\n    <button class='buttonAllocate' id='buttonAllocate'>Submit</button>\n    </div>\n    -->\n\n    <!-- NEW VERSION -->\n    <label for='action-choice'>Action choice</label>\n    <select id='action-choice' name='action-choice'>\n    <option value=''>Select an option...</option>\n"
     + ((stack1 = lookupProperty(helpers,"each").call(alias1,(depth0 != null ? lookupProperty(depth0,"actions") : depth0),{"name":"each","hash":{},"fn":container.program(10, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":65,"column":4},"end":{"line":67,"column":13}}})) != null ? stack1 : "")
-    + "    </select>\r\n    \r\n    <label for='move-description'>Move description</label>\r\n    <textarea id='actionDesc' placeholder='Add description here...'></textarea>\r\n    <label for='move-description'>Resources</label>\r\n    <div class='resources-container'>\r\n        <div class='resources-score'>\r\n            <p><span class='tempV'>0</span>/<span>10</span></p>\r\n        </div>\r\n        <div class='resources-buttons'>\r\n            <button class='resources-btn' id='vote_btn_minus'><i class='fa fa-minus'></i></button>\r\n            <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>\r\n        </div>\r\n    </div>\r\n    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>\r\n<!--    <button type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>SUBMIT</button>-->\r\n    \r\n</div>\r\n";
+    + "    </select>\n\n    <label for='move-description'>Move description</label>\n    <textarea id='actionDesc' placeholder='Add description here...'></textarea>\n    <label for='move-description'>Resources</label>\n    <div class='resources-container'>\n        <div class='resources-score'>\n            <p><span class='tempV'>0</span>/<span>10</span></p>\n        </div>\n        <div class='resources-buttons'>\n            <button class='resources-btn' id='vote_btn_minus'><i class='fa fa-minus'></i></button>\n            <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>\n        </div>\n    </div>\n    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>\n<!--    <button type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>SUBMIT</button>-->\n\n</div>\n";
 },"8":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
@@ -241,7 +241,7 @@ Handlebars.partials['stakeholderV2'] = template({"1":function(container,depth0,h
     + alias2(alias1(depth0, depth0))
     + "'>"
     + alias2(alias1(depth0, depth0))
-    + "</option>\r\n";
+    + "</option>\n";
 },"10":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
@@ -249,7 +249,7 @@ Handlebars.partials['stakeholderV2'] = template({"1":function(container,depth0,h
     + alias2(alias1(depth0, depth0))
     + "'>"
     + alias2(alias1(depth0, depth0))
-    + "</option>\r\n";
+    + "</option>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.lambda, alias3=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -258,26 +258,26 @@ Handlebars.partials['stakeholderV2'] = template({"1":function(container,depth0,h
         return undefined
     };
 
-  return "<div class='represent-header'>\r\n	<div class='represent-info center'>\r\n		<h1>You Represent</h1>\r\n		<div class='icon-badge-box'>\r\n"
+  return "<div class='represent-header'>\n	<div class='represent-info center'>\n		<h1>You Represent</h1>\n		<div class='icon-badge-box'>\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":3},"end":{"line":7,"column":19}}})) != null ? stack1 : "")
     + "            <img class='represent-icon "
     + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"abbr") : stack1), depth0))
     + "-bg' alt='Team icon' src='assets/icons_"
     + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"abbrCap") : stack1), depth0))
-    + "white 1.svg'/>\r\n		</div>\r\n		<h2>"
+    + "white 1.svg'/>\n		</div>\n		<h2>"
     + alias3(alias2(((stack1 = (depth0 != null ? lookupProperty(depth0,"teamObj") : depth0)) != null ? lookupProperty(stack1,"lead") : stack1), depth0))
-    + "</h2>\r\n		<p>("
+    + "</h2>\n		<p>("
     + alias3(((helper = (helper = lookupProperty(helpers,"stakeholder") || (depth0 != null ? lookupProperty(depth0,"stakeholder") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(alias1,{"name":"stakeholder","hash":{},"data":data,"loc":{"start":{"line":11,"column":6},"end":{"line":11,"column":21}}}) : helper)))
-    + ")</p>\r\n"
+    + ")</p>\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data,"loc":{"start":{"line":12,"column":2},"end":{"line":16,"column":15}}})) != null ? stack1 : "")
-    + "	</div>\r\n	\r\n</div>\r\n	<!-- Main Content -->\r\n<div class='main-content' style='display: block;'>\r\n	<div class='grid-container'>\r\n		<div class='grid-item-span-all link_main' id='link_resources'>\r\n			<h3>Resources</h3>\r\n		</div>\r\n		<div class='grid-item-2 link_main' id='link_global'>\r\n            <img alt='Global Times Headlines logo' src='assets/GlobalNewsConnectOnLogos-01.svg'/>\r\n		</div>\r\n		<div class='grid-item-3 link_main' id='link_connecton'>\r\n		    <img alt='Connect On logo' src='assets/GlobalNewsConnectOnLogos-02.svg'/>\r\n		</div>\r\n		<div class='grid-item-span-all link_main' id='link_yourmove'>\r\n			<h3>Your move</h3>\r\n		</div>\r\n	</div>\r\n</div>\r\n"
+    + "	</div>\n\n</div>\n	<!-- Main Content -->\n<div class='main-content' style='display: block;'>\n	<div class='grid-container'>\n		<div class='grid-item-span-all link_main' id='link_resources'>\n			<h3>Resources</h3>\n		</div>\n		<div class='grid-item-2 link_main' id='link_global'>\n            <img alt='Global Times Headlines logo' src='assets/GlobalNewsConnectOnLogos-01.svg'/>\n		</div>\n		<div class='grid-item-3 link_main' id='link_connecton'>\n		    <img alt='Connect On logo' src='assets/GlobalNewsConnectOnLogos-02.svg'/>\n		</div>\n		<div class='grid-item-span-all link_main' id='link_yourmove'>\n			<h3>Your move</h3>\n		</div>\n	</div>\n</div>\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,(depth0 != null ? lookupProperty(depth0,"isLead") : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":37,"column":0},"end":{"line":86,"column":7}}})) != null ? stack1 : "")
-    + "\r\n<script>\r\n    setupStakeholder();\r\n</script>";
+    + "\n<script>\n    setupStakeholder();\n</script>\n";
 },"useData":true});
 Handlebars.partials['unassigned'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     return "Oh no, I am NOT ASSIGNED\n";
 },"useData":true});
 Handlebars.partials['waiting'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div class=\"header\">\r\n		  <h1>Welcome to your travel portal</h1>\r\n\r\n		<div class=\"header-grad-overlay\"></div>\r\n\r\n</div>\r\n	<!-- Main Content -->\r\n\r\n<div class=\"main-content center\">\r\n		<h2>Please wait, teams will be assigned shortly.</h2>\r\n\r\n</div>";
+    return "<div class=\"header\">\n		  <h1>Welcome to your travel portal</h1>\n\n		<div class=\"header-grad-overlay\"></div>\n\n</div>\n	<!-- Main Content -->\n\n<div class=\"main-content center\">\n		<h2>Please wait, teams will be assigned shortly.</h2>\n\n</div>\n";
 },"useData":true});
 })();

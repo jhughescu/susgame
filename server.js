@@ -312,8 +312,11 @@ const processPresentationData = (d) => {
         s.index = i;
         s.hasSession = Boolean(session);
         if (session) {
-            let id = session.id.toString();
-            s.code = `${id.substr(0, 3)} ${id.substr(3, 3)} ${id.substr(6, 3)}`
+            console.log(session)
+            if (session.id) {
+                let id = session.id.toString();
+                s.code = `${id.substr(0, 3)} ${id.substr(3, 3)} ${id.substr(6, 3)}`;
+            }
         }
         if (s.type === 'video') {
             s.src = `${d.videoEnv}${d.videoLinks[s.srcRef]}${d.videoSettings}`;
@@ -504,6 +507,39 @@ const sessionUpdate = () => {
 //    console.log(session);
     logSession();
 };
+const resetSession = () => {
+    let s = Object.assign({}, session);
+    if (s) {
+        // set era to 0
+        s.era = 0;
+        // set active to false;
+        s.active = false;
+        // force reset to true
+        s.reset = true;
+        // go through scores object, blank everything (object/array)
+        if (s.hasOwnProperty('scores')) {
+            Object.entries(s.scores).forEach((c, i) => {
+                console.log(c[0]);
+                if (c[1].hasOwnProperty('length')) {
+                    s.scores[c[0]] = [];
+                } else {
+                    s.scores[c[0]] = {};
+                }
+            });
+        }
+        // set round to 0
+        s.round = 0;
+        // run through rounds, set each to complete: false, current: false
+        if (s.hasOwnProperty('rounds')) {
+            Object.values(s.rounds).forEach((r, i) => {
+                s.rounds[i].current = false;
+                s.rounds[i].complete = false;
+            });
+        }
+        updateLogFile('sessionAfterReset', s);
+        session = s;
+    }
+}
 const logSession = () => {
 //    console.log(`logSession`);
     updateLogFile('session', session);
@@ -542,6 +578,7 @@ const onRequestSession = (o) => {
         emitToPlayer(p.id, 'onRequestSession', o);
     }
 };
+
 const terminateSession = () => {
     sessionArchive.push({playersDetail: playersDetail});
     playersBasic = {};
@@ -549,9 +586,13 @@ const terminateSession = () => {
     playersMap = new Map();
     socketMap = new Map();
     sessionID = null;
+    updateLogFile('sessionAtEnd', session);
+    resetSession();
+    sessionUpdate();
     session = null;
     updateApp();
     io.emit('terminateSession');
+    sessionUpdate();
 };
 //
 const getPresentationPack = (cb) => {

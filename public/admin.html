@@ -88,6 +88,7 @@
         const STORE_DISPLAY = 'currentDisplay';
         const STORE_ALL = 'currentState';
         const ADVER = 'adminVerifier';
+        const showPresPreview = false;
         let clientData = {role: 'admin'};
         let storedGame = null;
         let allEnrolled = null;
@@ -285,8 +286,8 @@
                     applyClasses();
                     socket.emit('startNewSession', function (s) {
                         getGameToStore();
-//                        showPanel('sessionRounds');
                     });
+                    resetSlideshow();
                 })
             } else {
                 alert('session ended, please refresh to log in again')
@@ -496,7 +497,7 @@
         };
         // specifc round events
         const rAssignTeams = () => {
-            console.log(`rAssignTeams`);
+//            console.log(`rAssignTeams`);
             socket.emit('initRound', 'assignTeams');
         };
         const startRoundE1R1 = () => {
@@ -1047,8 +1048,8 @@
             }
         };
         const onSessionUpdate = (s) => {
-            console.log('we have a session update: ');
-            console.log(s);
+//            console.log('we have a session update: ');
+//            console.log(s);
 //            console.log(env);
             env.session = env.session ? Object.assign(env.session, s) : s;
             showRounds();
@@ -1111,8 +1112,6 @@
                             msg = `previous round incomplete`;
                         }
                     }
-//                    console.log(`can we use this round?`);
-//                    console.log(r);
                     if (r.complete) {
                         allowed = false;
                         msg = `this round already completed`;
@@ -1125,11 +1124,9 @@
             if (allowed) {
                 if (sl.hasAction) {
                     if (eval(r.action)) {
-//                        socket.emit('startRound', r.n, () => {
                         socket.emit('initRound', r.action, () => {
                         //   \/ duplicate method call? Possibly...
                             eval(r.action)();
-//                            socket.emit('gotoSlide', id);
                         });
                     }
                 } else {
@@ -1177,12 +1174,13 @@
                 pl.hide();
                 f.hide();
             } else {
-                f.find('iframe').attr('src', 'presentation.html')
+                if (showPresPreview) {
+                    f.find('iframe').attr('src', 'presentation.html');
+                    f.show();
+                    setupPanel('slideshow');
+                }
                 pl.show();
-                f.show();
                 renderPlaylist();
-                setupPanel('slideshow');
-//                setTimeout(() => {location.reload()}, 5000)
             }
             updateStoreObj('playlistOpen', pl.is(':visible'));
         };
@@ -1198,6 +1196,13 @@
                         }
                     }
                 }
+            });
+        };
+        const resetSlideshow = () => {
+            console.log('reset the show')
+            socket.emit('getPresentationPack', (p) => {
+                slideLinkClick(0, p);
+                console.log(`click the link`);
             });
         };
 
@@ -1518,7 +1523,7 @@
 
         storedGame = getStoredGame();
 //        $('button').prop('disabled', true);
-        console.log('the init');
+//        console.log('the init');
         init();
 
         window.updateSession = updateSession;

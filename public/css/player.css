@@ -36,6 +36,16 @@
 .link_main {
     cursor: pointer;
 }
+.link_main.inactive {
+    cursor: auto;
+    opacity: 0.5;
+}
+.grid-item-span-all.title {
+    padding: 0px;
+    font-size: 2em;
+    font-weight: bold;
+/*    background-color: ;*/
+}
 /* enhancements to Greg stuff END */
 
 *{
