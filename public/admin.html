@@ -287,7 +287,8 @@
                     socket.emit('startNewSession', function (s) {
                         getGameToStore();
                     });
-                    resetSlideshow();
+                    // don't reset the slideshow here - a classromm activity may be underway prior to the session beginning
+//                    resetSlideshow();
                 })
             } else {
                 alert('session ended, please refresh to log in again')
@@ -460,6 +461,7 @@
             $('#status').hide();
             onStartRound(-1);
             updatePlayersView();
+            endSlideshow();
         };
         const enableRoundStart = (n) => {
             // Allow a given round to be triggered
@@ -1136,11 +1138,20 @@
             } else {
                 alert(`cannot carry out this action - ${msg}`)
             }
+//            console.log(`requesting slide ${id}`);
+            storeSlideInfo(id);
             socket.emit('gotoSlide', id);
+        };
+        const storeSlideInfo = (id) => {
+            let storeOb = {};
+            storeOb.currentSlide = id;
+            localStorage.setItem(env.gamedata.constants.presentation, JSON.stringify(storeOb));
         };
         const renderPlaylist = (cb) => {
             socket.emit('getPresentationPack', (p) => {
                 let cs = localStorage.getItem(env.gamedata.constants.presentation);
+//                console.log(`the stored data: `)
+//                console.log(cs)
                 if (cs) {
                     cs = JSON.parse(cs);
                     cs = cs.currentSlide;
@@ -1156,10 +1167,9 @@
                     slideLinkClick(id, p);
                 });
                 applyClasses();
-//                console.log('the slideshow now');
-//                console.log($(`#slideshow`).find('.showtoggle'));
-//                $(`#slideshow`).find('.showtoggle').click();
-                panelToggle($(`#slideshow`).find('.showtoggle'), 'min')
+                panelToggle($(`#slideshow`).find('.showtoggle'), 'min');
+//                console.log(`dunne the show yes`);
+//                console.log(p);
                 if (cb) {
                     cb(p);
                 }
@@ -1186,6 +1196,8 @@
         };
         const slideUpdate = () => {
             renderPlaylist((p) => {
+//                console.log(`slideUpdate, yes? ${Boolean(p.currentSlide)}`);
+//                console.log(p);
                 if (p.currentSlide) {
                     buttonSlidePrevious.attr('disabled', p.currentSlide.index === 0);
                     buttonSlideNext.attr('disabled', p.currentSlide.index === (p.slideList.length - 1));
@@ -1203,6 +1215,14 @@
             socket.emit('getPresentationPack', (p) => {
                 slideLinkClick(0, p);
                 console.log(`click the link`);
+            });
+        };
+        const endSlideshow = () => {
+            console.log('end the show')
+            socket.emit('getPresentationPack', (p) => {
+                slideLinkClick(p.slideList.length - 1, p);
+                console.log(`what happens at the end?`);
+//                console.log(p);
             });
         };
 
@@ -1518,6 +1538,7 @@
         });
         //
         socket.on('slideUpdate', () => {
+//            console.log(`slideUpdate, no arg`);
             slideUpdate();
         });
 

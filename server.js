@@ -1677,7 +1677,7 @@ const reloadSlide = () => {
     io.emit('slideUpdate');
 };
 const gotoSlide = (s) => {
-//    console.log(`gotoSlide ${s}`);
+    console.log(`gotoSlide ${s}`);
     io.emit('gotoSlide', s);
     io.emit('slideUpdate');
 };

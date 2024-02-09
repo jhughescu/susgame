@@ -42,8 +42,9 @@
         let session = null
         let scoreMap = [];
         const storeInfo = () => {
-            storeOb.currentSlide = currentSlide.index;
-            localStorage.setItem(STOREID, JSON.stringify(storeOb));
+            // Moved to admin acreen so it can run completely independent of the presentation
+//            storeOb.currentSlide = currentSlide.index;
+//            localStorage.setItem(STOREID, JSON.stringify(storeOb));
         };
         const getInfo = () => {
             return JSON.parse(localStorage.getItem(STOREID));
@@ -172,7 +173,7 @@
             }
         };
         const updateCard1 = (c, p, v) => {
-            console.log(`updateCard1`)
+//            console.log(`updateCard1`)
             let card = $(`#stakeholder_card_${c}`);
             let prop = card.find(`.${p}`);
             prop.html(v);
@@ -183,15 +184,15 @@
             }
         };
         const onSessionUpdate = (s) => {
-            console.log('session updated:');
-            console.log(s);
+//            console.log('session updated:');
+//            console.log(s);
             let roundToRender = 2;
             if (s) {
                 session = s;
                 updateSlide();
                 if (s.scores) {
                     let r = s.scores[`round_${roundToRender}`];
-                    console.log(r);
+//                    console.log(r);
                     if (r) {
                         r.forEach((v) => {
                             updateCard1(v.targ, v.valID, v.val);
