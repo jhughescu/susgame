@@ -12,6 +12,7 @@ body, html {
 .intro {
     text-transform: uppercase;
     color: white;
+    font-size: 2.5rem;
 }
 #content {
     position: absolute;

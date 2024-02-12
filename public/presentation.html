@@ -295,6 +295,8 @@
             targ = '#' + targ;
             let ob = Object.assign({}, o);
             const compiledTemplate = Handlebars.templates[temp];
+//            console.log(temp)
+//            console.log(compiledTemplate)
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');
             $(targ).html(renderedHtml);

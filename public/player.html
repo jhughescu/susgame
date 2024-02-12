@@ -842,12 +842,17 @@
             console.log(`get currentRound from storage: ${currentRound}, isNewRound? ${inr}`);
             return inr;
         };
-
+        const resetPVForm = () => {
+            // poor method, used here for speed - find a btter way
+            $('.voteVal').val('');
+        };
         const viewUpdate = () => {
             clearTimeout(autoTO);
             socket.emit('getPlayerPack', (pp) => {
                 updateSession(pp.session);
-                enableScorePV(pp.session.round > 0);
+                if (pp.session) {
+                    enableScorePV(pp.session.round > 0);
+                }
                 $('.round').hide();
                 if (pp.session.round > 0) {
 //                    let theDiv = env.gamedata.rounds[pp.session.round].id.split('_')[0];
@@ -863,8 +868,9 @@
                         // we only run this check after teams have been assigned
                         if (player.teamObj.type === 2 && isNewRound(pp.session.round)) {
                             // for PV votes, clear the stored state so that a second round can be activated
-                            console.log(`this is a new round and I am a PV - reset!`);
+//                            console.log(`this is a new round and I am a PV - reset!`);
                             resetState();
+                            resetPVForm();
                             // the reload below is inelegant and causes uneccessary reloads, re-render the templete instead
 //                            location.reload();
                         }
@@ -908,8 +914,10 @@
         const submitMultiplier = function (src, toEmit) {
             const vi = src.parent().find('.voteVal');
             const viz = vi.is(':visible');
-//            console.log(vi.val(), max, viz);
-            if (vi.val() > max) {
+            console.log(vi.val(), max, viz, env.session.round);
+            if (env.session.round < 5 && parseInt(vi.val()) === max) {
+                alert('please save some resources for the next round (you can submit 0)');
+            } else if (vi.val() > max) {
                 alert(`sorry, you only have ${max} votes left`);
             } else {
     //            console.log(`viz: ${viz}`);
@@ -1149,6 +1157,9 @@
                 if (Boolean(v1) /*&& Boolean(v2)*/ && Boolean(v3)) {
                     if (parseInt(v2) < 1) {
                         alert('Resource allocation must be more than 0');
+                    } else if (parseInt(v2) === max && env.session.round === 2) {
+                        // NOTE: the above conditional assumes r2 is the first allocation round. This number should be replaced with a conditional function.
+                        alert('please avoid using all of your resources in this round');
                     } else {
                         let c = getInitProps().autoenroll ? true :  confirm('are you sure?');
                         if (c) {
