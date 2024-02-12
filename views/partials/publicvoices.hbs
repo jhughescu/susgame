@@ -1,5 +1,17 @@
-<p>You are a representative of the Public Voices group</p>
-<div class='round round3' id='publicvoicesNO'>
+<div class='represent-header'>
+	<div class='represent-info center'>
+		<h1>You Represent</h1>
+		<div class='icon-badge-box'>
+			<img class='represent-icon {{teamObj.abbr}}-bg' alt='Team icon' src='assets/icons_{{teamObj.abbrCap}}white 1.svg'/>
+		</div>
+		<h2>{{teamObj.title}}</h2>
+		<p>You are a representative of the {{teamObj.title}} group</p>
+	</div>
+
+</div>
+
+
+<div class='round round3 round5' id='publicvoicesNO'>
     <div>Votes remaining: <span id='votes' class='highlight'>{{teamObj.votes}}</span></div>
     <table>
         <tbody>

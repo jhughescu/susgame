@@ -94,6 +94,8 @@
             // De-comment the below line with care, it results in heavy server load if many clients are connected
 //            socket.emit('clientDebug', str);
         };
+        // currentRound can be used to trigger an event when the round changes
+        let currentRound = null;
 //        class ScoreReport
         //
         const onRequestSession = (o) => {
@@ -276,7 +278,10 @@
         const shareState = (o) => {
             // in the case of PV voters, their votes are shared over the team, so set stored state for all team members via the server
             socket.emit('shareState', {d: o, src: player.id});
-        }
+        };
+        const resetState = () => {
+            localStorage.removeItem(getUniqueStorageID('state'));
+        };
         const updateState = () => {
             // return the page to its present state
 //            console.log(`updateState`);
@@ -365,15 +370,36 @@
             });
             return cr;
         };
+        const isInView = (elem) => {
+            let iiv = false;
+//            console.log(elem)
+//            console.log(elem.length)
+//            console.log($(elem).is(':visible'))
+//            console.log('ooododod')
+            if ($(elem).is(':visible')) {
+                var viewportTop = $(window).scrollTop();
+                var viewportBottom = viewportTop + $(window).height();
+                var elemTop = $(elem).offset().top;
+                var elemBottom = elemTop + $(elem).height();
+                iiv = elemBottom > viewportTop && elemTop < viewportBottom;
+            }
+            return iiv;
+        }
         const scrollTo = (d) => {
             // condition: only PV players or team leads should use this
-            let canScroll = player.type === 2 || player.isLead;
-//            console.log(`can I scroll? ${canScroll}`);
-            if (canScroll) {
+            let canScroll = (player.type === 2 || player.isLead) && d.position();
+//            console.log(`can I scroll? ${canScroll}, buttonInView? ${isInView('.buttonSubmit')}`);
+//            console.log(isInView('#buttonSubmit'));
+            if (canScroll && !isInView('.buttonSubmit')) {
                 let t = d === undefined ? $(document).height() : d.position().top;
+//                console.log($('html').offset());
+//                console.log($('body').offset());
+//                console.log(`we WILL scroll`);
                 $('html, body').animate({
                     scrollTop: t
                 }, 1000);
+            } else {
+//                console.log(`no need to scroll today`);
             }
         };
         const renderGameScreen = () => {
@@ -810,6 +836,13 @@
                 console.log(`updateSession called but no change detected`);
             }
         };
+        const isNewRound = (r) => {
+            currentRound = parseInt(localStorage.getItem(getUniqueStorageID('currentRound')));
+            let inr = currentRound !== parseInt(r);
+            console.log(`get currentRound from storage: ${currentRound}, isNewRound? ${inr}`);
+            return inr;
+        };
+
         const viewUpdate = () => {
             clearTimeout(autoTO);
             socket.emit('getPlayerPack', (pp) => {
@@ -823,7 +856,21 @@
 //                    $(`#${theDiv}`).show();
                     theDiv.show();
                     scrollTo(theDiv);
-                    console.log(`viewUpdate, theDiv: ${theDiv}, pp.session.round: ${pp.session.round}`)
+//                    console.log();
+//                    console.log(`viewUpdate, theDiv: ${theDiv}, pp.session.round: ${pp.session.round}, new round? ${isNewRound(pp.session.round)}`);
+//                    console.log(`new round? ${isNewRound(pp.session.round)}`);
+                    if (player.teamObj) {
+                        // we only run this check after teams have been assigned
+                        if (player.teamObj.type === 2 && isNewRound(pp.session.round)) {
+                            // for PV votes, clear the stored state so that a second round can be activated
+                            console.log(`this is a new round and I am a PV - reset!`);
+                            resetState();
+                            // the reload below is inelegant and causes uneccessary reloads, re-render the templete instead
+//                            location.reload();
+                        }
+                    }
+//                    currentRound = parseInt(pp.session.round);
+                    localStorage.setItem(getUniqueStorageID('currentRound'), parseInt(pp.session.round));
                     updateState();
                     let s = localStorage.getItem(lid);
                     if (s) {
@@ -848,9 +895,13 @@
                 }
             });
         };
+        const onRoundUpdate = (o) => {
+//            console.log(`onRoundUpdate`);
+//            console.log(o);
+        };
         const onSessionUpdate = (s) => {
-            console.log('==================== session update calls viewUpdate');
-            console.log(s);
+//            console.log('==================== session update calls viewUpdate');
+//            console.log(s);
             viewUpdate();
         };
 
@@ -895,6 +946,7 @@
         };
         const initpv = () => {
             debugServer('initialise a Public Voice');
+            console.log(`this is when the PV is initialised`);
             lid = `pv-${getID().split('?')[0]}-vote`;
             vb = $('.buttonVote');
             vv = $('.voteVal');
@@ -947,8 +999,8 @@
             }
         };
         const updatePlayer = (p) => {
-            console.log(player.teamObj);
-            console.log(p.teamObj);
+//            console.log(player.teamObj);
+//            console.log(p.teamObj);
             if (player.teamObj) {
                 if (JSON.stringify(player.teamObj) !== JSON.stringify(p.teamObj)) {
     //                console.log(JSON.parse(JSON.stringify(player.teamObj)));
@@ -1003,8 +1055,8 @@
         // Stakeholder
         const registerScore2 = (o) => {
             socket.emit('getNewScorePacket2', o);
-            console.log('getNewScorePacket2');
-            console.log(o);
+//            console.log('getNewScorePacket2');
+//            console.log(o);
         }
         const registerScore = (src, targ, valID, val) => {
             console.log(`registerScore`, src, targ, valID, val);
@@ -1129,7 +1181,44 @@
                 }
 
             });
+            // collaborative votes
+            let cButt = $('.buttonCollaborate');
+            cButt.off('click');
+            cButt.on('click', function () {
+//                console.log($(this));
+                let d = $(this).attr('id');
+                let id = parseInt(d.split('_')[1]);
+                let v = $(`#collabVal_${id}`);
+                if (v.val().length === 0) {
+                    alert('you must enter a numeric value (this can be zero)');
+                } else {
+                    $(this).prop('disabled', true);
+                    v.prop('disabled', true);
 
+                    let a = [];
+                    let st = JSON.parse(localStorage.getItem(getUniqueStorageID('state')));
+                    let all = true;
+                    $('.collabVal').each(function (i, vo) {
+                        if ($(this).val().length === 0) {
+                            all = false;
+                        }
+                        o = {
+                            option: $(this).attr('id'),
+                            button: `buttonCollaborate_${$(this).attr('id').split('_')[1]}`,
+                            val: $(this).val(),
+                            disabled: d.split('_')[1] === $(this).attr('id').split('_')[1]
+                        }
+                        if (st) {
+                            if (st.hasOwnProperty('length')) {
+                                o.disabled = st[i].disabled ? true : o.disabled;
+                            }
+                        }
+                        a.push(o);
+                    });
+                    registerScore2({src: player.id, targ: id, valID: 'vote', val: parseInt(v.val()), roundComplete: all});
+                    setState(a);
+                }
+            });
             viewUpdate();
         };
         const setupStakeholder = () => {
@@ -1198,6 +1287,9 @@
 //            console.log('NEW')
             setState(d);
             updateState();
+        });
+        socket.on('roundUpdate', (o) => {
+            onRoundUpdate(o);
         });
         socket.on('chips', () => {
             console.log('can i have chips?');

@@ -507,8 +507,16 @@
             socket.emit('initRound', 'e1r1');
         };
         const startRoundE1R2 = () => {
-            // era 1 round 1; Stakeholders self-allocate resources
+            // era 1 round 2; 1st PV vote
             socket.emit('initRound', 'e1r2');
+        };
+        const startRoundE1R3 = () => {
+            // era 1 round 3; Stakeholders collaborate
+            socket.emit('initRound', 'e1r3');
+        };
+        const startRoundE1R4 = () => {
+            // era 1 round 4; 2nd PV vote
+            socket.emit('initRound', 'e1r4');
         };
         // specifc round events END
         const onStartRound = (r) => {
@@ -1050,8 +1058,8 @@
             }
         };
         const onSessionUpdate = (s) => {
-//            console.log('we have a session update: ');
-//            console.log(s);
+            console.log('we have a session update: ');
+            console.log(s);
 //            console.log(env);
             env.session = env.session ? Object.assign(env.session, s) : s;
             showRounds();
@@ -1108,6 +1116,8 @@
                 if (env.session) {
                     s = env.session;
                     r = getRoundFromProp(sl.action);
+                    console.log(sl.action);
+//                    console.log(sl.action);
                     if (s.rounds[r.n - 1]) {
                         if (!s.rounds[r.n - 1].complete) {
                             allowed = false;
@@ -1422,7 +1432,7 @@
             if (!cb) {
                 console.log('needs a callback');
             } else {
-                let pw = prompt('eat jelly?');
+                let pw = prompt('Please enter the admin password');
                 socket.emit('requestLogin', 'ADMIN', pw, (boo) => {
                     cb(boo);
 //                    console.log(`boo ${boo} ${typeof(boo)}`);

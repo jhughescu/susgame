@@ -312,7 +312,7 @@ const processPresentationData = (d) => {
         s.index = i;
         s.hasSession = Boolean(session);
         if (session) {
-            console.log(session)
+//            console.log(session)
             if (session.id) {
                 let id = session.id.toString();
                 s.code = `${id.substr(0, 3)} ${id.substr(3, 3)} ${id.substr(6, 3)}`;
@@ -536,6 +536,29 @@ const resetSession = () => {
                 s.rounds[i].complete = false;
             });
         }
+        // Also reset the team objects, which have a 'rounds' string and a 'scores.eras' object
+        let t = gamedata.teams;
+        updateLogFile('teamsBeforeReset', t);
+        Object.values(t).forEach((te, i) => {
+            let nt = t[`t${i}`];
+            if (te.hasOwnProperty('rounds')) {
+                nt.rounds = "";
+            }
+            if (te.hasOwnProperty('scores')) {
+                if (te.scores.hasOwnProperty('eras')) {
+                    Object.values(te.scores.eras).forEach((e, id) => {
+                        nt.scores.eras[`era${(id + 1)}`] = [];
+                    });
+                }
+            }
+            if (te.hasOwnProperty('votes')) {
+                nt.votes = gamedata.defaults.votes;
+            }
+            if (te.hasOwnProperty('votesReceived')) {
+                nt.votesReceived = 0;
+            }
+        });
+        updateLogFile('teamsAfterReset', t);
         updateLogFile('sessionAfterReset', s);
         session = s;
     }

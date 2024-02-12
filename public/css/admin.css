@@ -13,6 +13,9 @@ button, input {
 .inactive {
     opacity: 0.5;
 }
+.highlight {
+    color: yellow;
+}
 .panel {
     width: 200px;
     height: 100px;
@@ -146,6 +149,7 @@ button, input {
     border-radius: 50%;
     background-color: red;
     display: none;
+    opacity: 0;
 }
 .rInd.highlight {
     background-color: green;

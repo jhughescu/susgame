@@ -69,11 +69,21 @@
             <button class='resources-btn' id='vote_btn_plus'><i class='fa fa-plus'></i></button>
         </div>
     </div>
-    <input type='submit' value='SUBMIT' class='buttonAllocate' id='buttonAllocate'>
+    <input type='submit' value='SUBMIT' class='buttonSubmit buttonAllocate' id='buttonAllocate'>
     {{/if}}
 </div>
 {{/if}}
-
+<div class='round round4' id='collaboration'>
+<!--OK, this is the collab vote-->
+<div>Votes remaining: <span id='votes' class='highlight resources'>{{teamObj.votes}}</span></div>
+    <table><tbody>
+        {{#each mainTeams}}
+        {{#if isMyTeam}}{{else}}
+        <tr><td>{{id}}</td><td>{{title}}</td><td><input class='collabVal' id='collabVal_{{id}}' style='width: 40px;' oninput='validateVote(this)' type='number' value=''><button class='buttonCollaborate buttonSubmit' id='buttonCollaborate_{{id}}'>Submit</button></td></tr>
+        {{/if}}
+        {{/each}}
+    </tbody></table>
+</div>
 <script>
     setupStakeholder();
 </script>

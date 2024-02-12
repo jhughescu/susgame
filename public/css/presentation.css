@@ -253,9 +253,14 @@ body, html {
 }
 .stakeholder_card .scorebox {
     text-align: left;
-    font-size: 1.4em;
+    font-size: 1.0em;
     width: 100%;
     color: #cccccc;
+    background-color: black;
+}
+.stakeholder_card .subtotal{
+    padding-top: 6px;
+    font-size: 1.3em;
 }
 .stakeholder_card .scorebox .scoreboxval{
     color: cyan;
@@ -263,7 +268,7 @@ body, html {
 .stakeholder_card .total {
     padding-top: 10px;
     color: white;
-    font-size: 1.8em;
+    font-size: 1.6em;
 }
 .stakeholder_card .background {
     position: relative;

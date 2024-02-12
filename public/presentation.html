@@ -70,6 +70,11 @@
 //            console.log(currentSlide);
             storeInfo();
         };
+        // Below var should be altered later to derive info rather than state it explicitly
+        const valMap = {
+            st: 'stakeholder',
+            pv: 'public voices'
+        }
         const refreshSlide = () => {
             let i = currentSlide.index;
             currentSlide = prepSlide(presentationData.slideList[i]);
@@ -263,11 +268,13 @@
                             let c = $(`#${v[0]}${t.id}_vtotal`);
                             if (c.length) {
                                 c.find('.scoreboxval').html(v[1]);
-                                c.find('.scoreboxsrc').html(`${v[0]} total: `);
+                                c.find('.scoreboxsrc').html(`${valMap[v[0]]} total: `);
+//                                console.log(`${v[0]} total: `);
                             }
                         });
                         let c = $(`#score${t.id}`);
                         if (c.length) {
+//                            console.log(totals.score);
                             c.find('.scoreboxval').html(totals.score);
                             c.find('.scoreboxsrc').html(`score: `);
                         }
@@ -306,6 +313,8 @@
         const renderSlide = (temp, o) => {
             let targ = `content`;
             socket.emit('presentationSlideRendered', {slide: currentSlide.index, inframe: window.self !== window.top});
+            console.log(`renderSlide ${temp}`);
+            console.log(o);
             renderTemplate(temp, targ, o);
             slideSpecificSetup();
         };
