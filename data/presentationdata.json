@@ -3,7 +3,7 @@
         {"id": "slide_010_intro", "title": "Introduction", "viewtype": "fullscreen1", "header": "Sustainability Game"},
         {"id": "video", "type": "video", "srcRef": "v1", "title": "Entrance Soundscape"},
         {"id": "video", "type": "video", "srcRef": "v2", "title": "Welcome"},
-        {"id": "slide_020_entry", "title": "Address/session", "viewtype": "fullscreen1", "url": "null", "code": "null"},
+        {"id": "slide_020_entry", "title": "Address/session (no session? Use 'Reload slide' button)", "viewtype": "fullscreen1", "url": "null", "code": "null"},
         {"id": "slide_110_stakeholders", "title": "Assign Teams (wait for <span class='allenrolled'>full enrolment</span>)", "viewtype": "frame1", "action": "rAssignTeams"},
         {"id": "video", "type": "video", "srcRef": "v3", "title": "Resources"},
         {"id": "video", "type": "video", "srcRef": "v4", "title": "PVPlayers"},
