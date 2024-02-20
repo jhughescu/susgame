@@ -1384,10 +1384,10 @@
         };
         const onConnect = () => {
             setTimeout(() => {
+                console.log(`onConnect in the admin`);
                 // timeout allows 'verified' to be set before connection method
                 console.log(`admin connect, verified? ${verified}`);
                 if (verified) {
-
                     enableButton('endSession', false);
                     enableButton('startSession', false);
                     storedGame = getStoredGame();
@@ -1470,6 +1470,7 @@
 
         socket.on('connect', () => {
 //            loginRequest();
+            console.log('onnn cnnnect');
             onConnect();
         });
         socket.on('onPlayerConnect', (msg) => {

@@ -1,2 +1,3 @@
 handlebars views/ -f public/templates/sustemplates.js -e hbs
+handlebars views/slides/ -f public/templates/slidetemplates.js -e hbs
 handlebars views/partials/ -f public/templates/suspartials.js -e hbs -p

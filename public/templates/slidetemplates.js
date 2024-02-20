@@ -12,7 +12,7 @@ templates['slide_010_intro'] = template({"compiler":[8,">= 4.3.0"],"main":functi
     + alias4(((helper = (helper = lookupProperty(helpers,"header") || (depth0 != null ? lookupProperty(depth0,"header") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"header","hash":{},"data":data,"loc":{"start":{"line":6,"column":11},"end":{"line":6,"column":21}}}) : helper)))
     + "</p>\r\n    </div>\r\n    <div class=\"container intro "
     + alias4(((helper = (helper = lookupProperty(helpers,"viewtype") || (depth0 != null ? lookupProperty(depth0,"viewtype") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"viewtype","hash":{},"data":data,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":44}}}) : helper)))
-    + "\">\r\n    Welcome, the session will begin shortly\r\n    </div>\r\n</div>\r\n";
+    + "\">\r\n    Welcome, the session will begin shortly\n    </div>\r\n</div>\r\n";
 },"useData":true});
 templates['slide_010_outro'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -22,11 +22,11 @@ templates['slide_010_outro'] = template({"compiler":[8,">= 4.3.0"],"main":functi
         return undefined
     };
 
-  return "<div class='wrapper intro'>\r\n    <div id='circle-wrapper'>\r\n        <div class='circle' id='circle-fill'></div>\r\n    </div>\r\n    <div id='header'>\r\n        <p>"
+  return "<div class='wrapper intro'>\n    <div id='circle-wrapper'>\n        <div class='circle' id='circle-fill'></div>\n    </div>\n    <div id='header'>\n        <p>"
     + alias4(((helper = (helper = lookupProperty(helpers,"header") || (depth0 != null ? lookupProperty(depth0,"header") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"header","hash":{},"data":data,"loc":{"start":{"line":6,"column":11},"end":{"line":6,"column":21}}}) : helper)))
-    + "</p>\r\n    </div>\r\n    <div class=\"container intro "
+    + "</p>\n    </div>\n    <div class=\"container intro "
     + alias4(((helper = (helper = lookupProperty(helpers,"viewtype") || (depth0 != null ? lookupProperty(depth0,"viewtype") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"viewtype","hash":{},"data":data,"loc":{"start":{"line":8,"column":32},"end":{"line":8,"column":44}}}) : helper)))
-    + "\">\r\n    Thank you for participating\r\n    </div>\r\n</div>\r\n";
+    + "\">\n    Thank you for participating\n    </div>\n</div>\n";
 },"useData":true});
 templates['slide_020_entry'] = template({"1":function(container,depth0,helpers,partials,data) {
     var helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -117,7 +117,7 @@ templates['video'] = template({"compiler":[8,">= 4.3.0"],"main":function(contain
         return undefined
     };
 
-  return "<div class='wrapper video'>\n    <div id='vidDiv'>\n        <iframe id='vidFrame' src=\""
+  return "<div class='wrapper video' style='overflow: hidden;'>\n    <div id='vidDiv'>\n        <iframe id='vidFrame' src=\""
     + alias4(((helper = (helper = lookupProperty(helpers,"src") || (depth0 != null ? lookupProperty(depth0,"src") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"src","hash":{},"data":data,"loc":{"start":{"line":3,"column":35},"end":{"line":3,"column":42}}}) : helper)))
     + "\" style=\"border: 0px; overflow: hidden;\" allowfullscreen allow=\"autoplay\" title='"
     + alias4(((helper = (helper = lookupProperty(helpers,"title") || (depth0 != null ? lookupProperty(depth0,"title") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data,"loc":{"start":{"line":3,"column":123},"end":{"line":3,"column":132}}}) : helper)))
