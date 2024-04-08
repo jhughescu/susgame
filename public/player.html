@@ -251,6 +251,8 @@
         const renderTemplate = (temp, targ, o) => {
             targ = '#' + targ;
             let ob = Object.assign({}, o);
+            console.log(`renderTemplate`);
+            console.log(ob);
             const compiledTemplate = Handlebars.templates[temp];
             const renderedHtml = compiledTemplate(ob);
             $(targ).html('');

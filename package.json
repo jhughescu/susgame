@@ -2,7 +2,6 @@
   "name": "multiplayer-game",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -15,6 +14,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
+    "nodemon": "^3.1.0",
     "socket.io": "^4.7.1"
   }
 }
